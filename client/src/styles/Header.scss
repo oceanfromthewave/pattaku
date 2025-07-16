@@ -1,0 +1,79 @@
+@use './main.scss' as *;
+
+.main-header {
+  width: 100vw;
+  background: #191e24;
+  border-bottom: 1.5px solid #232843;
+  box-shadow: 0 3px 16px #0002;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+
+  .header-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    height: 64px;
+    gap: 22px;
+  }
+
+  .header-home-link {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    text-decoration: none;
+    &:hover .header-title {
+      color: #ffb6b6;
+    }
+  }
+
+  .header-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: #fff;
+    object-fit: contain;
+    box-shadow: 0 1px 7px #0001;
+  }
+
+  .header-title {
+    font-size: 1.33em;
+    font-weight: 900;
+    color: $primary;
+    letter-spacing: -1.2px;
+    user-select: none;
+    transition: color 0.16s;
+  }
+
+  .main-nav {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+
+    a, .login-btn, .logout-btn {
+      color: #a9c3fd;
+      font-weight: 700;
+      background: none;
+      border: none;
+      border-radius: 7px;
+      padding: 0 10px;
+      height: 38px;
+      line-height: 38px; // 수직 정렬용 라인 높이
+      font-size: 1em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      transition: color 0.16s, background 0.17s;
+      margin: 0; // 기본 margin 제거
+      &:hover {
+        color: $primary;
+        background: #202436;
+      }
+    }
+  }
+}

@@ -1,0 +1,51 @@
+@use './main.scss' as *;
+
+.scheduleForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #20253a;
+  border-radius: $radius;
+  padding: 22px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px #0001;
+}
+.title {
+  color: $primary;
+  margin-bottom: 10px;
+  font-size: 1.13em;
+  font-weight: 700;
+}
+.input {
+  background: $bg;
+  color: $text;
+  border: 1px solid $border;
+  border-radius: $radius;
+  padding: 10px 12px;
+  font-size: 1em;
+  transition: border-color 0.2s;
+  &:focus {
+    border-color: $primary;
+    outline: none;
+  }
+}
+.button {
+  background: $primary;
+  color: #fff;
+  border: none;
+  border-radius: $radius;
+  padding: 10px 0;
+  font-weight: bold;
+  font-size: 1em;
+  margin-top: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:hover {
+    background: #1e318f;
+  }
+}
+.msg {
+  color: #e7c4fd;
+  font-size: 0.96em;
+  min-height: 1.2em;
+}

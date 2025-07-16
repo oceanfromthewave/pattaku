@@ -1,0 +1,54 @@
+@use './main.scss' as *;
+
+.scheduleList {
+  margin-top: 20px;
+  background: #202536;
+  border-radius: 15px;
+  padding: 20px 24px;
+  box-shadow: 0 3px 16px #0004;
+  max-width: 570px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.scheduleList h3 {
+  color: $primary;
+  font-weight: 800;
+  font-size: 1.35em;
+  margin-bottom: 14px;
+  user-select: none;
+}
+
+.scheduleItem {
+  padding: 12px 18px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background-color: #2a2f44;
+  box-shadow: inset 0 0 6px #0008;
+  transition: background-color 0.15s ease;
+  cursor: default;
+
+  &:hover {
+    background-color: #374163;
+  }
+}
+
+.title {
+  font-weight: 700;
+  font-size: 1.13em;
+  color: #b0c1ff;
+  margin-bottom: 4px;
+}
+
+.meta {
+  font-size: 0.95em;
+  color: #92a1c0;
+  margin-bottom: 6px;
+}
+
+.desc {
+  font-size: 1em;
+  color: #d1d9f7;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}

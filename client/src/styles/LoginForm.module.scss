@@ -1,0 +1,97 @@
+@use 'sass:color';
+@use './main.scss' as *;
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #2f3748;
+  border-radius: $radius;
+  padding: 28px 24px;
+  box-shadow: 0 6px 20px #0006;
+  margin-bottom: 24px;
+  max-width: 360px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.title {
+  margin: 0 0 14px 0;
+  color: $primary;
+  font-size: 1.5em;
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 8px $primary;
+}
+
+.input {
+  background: color.scale($bg, $lightness: -10%);
+  color: #eee;
+  border: 1.8px solid color.scale($border, $lightness: 15%);
+  border-radius: $radius;
+  padding: 14px 16px;
+  font-size: 1.1em;
+  transition: border-color 0.3s ease, background 0.3s ease;
+  outline-offset: 0;
+
+  &::placeholder {
+    color: #999;
+  }
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 12px $primary;
+    background: color.scale($bg, $lightness: -5%);
+    outline: none;
+    color: #fff;
+  }
+
+  &:disabled {
+    background: color.scale($bg, $lightness: -15%);
+    cursor: not-allowed;
+    color: #666;
+  }
+}
+
+.button {
+  background: $primary;
+  color: #fff;
+  border: none;
+  border-radius: $radius;
+  padding: 16px 0;
+  font-weight: 900;
+  font-size: 1.15em;
+  margin-top: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba($primary, 0.7);
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover:not(:disabled) {
+    background: color.scale($primary, $lightness: 10%);
+    box-shadow: 0 0 18px rgba($primary, 0.9);
+  }
+
+  &:disabled {
+    background: #5a6aaf;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+.msg {
+  margin-top: -6px;
+  font-size: 1em;
+  text-align: center;
+  min-height: 1.3em;
+  user-select: none;
+}
+
+.success {
+  color: #9fdb87;
+}
+
+.error {
+  color: #ff7b7b;
+}
