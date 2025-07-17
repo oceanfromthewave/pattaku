@@ -1,15 +1,18 @@
 // src/components/Schedule/ScheduleForm.jsx
 import { useState } from 'react';
-import styles from '../../styles/ScheduleForm.module.scss';
 import { notifySuccess, notifyError } from '../../utils/notify';
+import styles from '../../styles/ScheduleForm.module.scss';
 
 export default function ScheduleForm({ onAdd }) {
   const [form, setForm] = useState({ title: '', date: '', desc: '' });
-  const [files, setFiles] = useState([]);
+  const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleFileChange = (e) => setFiles([...e.target.files]);
+
+  const handleFileChange = (e) => {
+    setImages([...e.target.files]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,22 +23,23 @@ export default function ScheduleForm({ onAdd }) {
       setLoading(false);
       return;
     }
-    const formData = new FormData();
-    formData.append('title', form.title);
-    formData.append('date', form.date);
-    formData.append('desc', form.desc);
-    files.forEach(file => formData.append('images', file));
     try {
+      const fd = new FormData();
+      fd.append('title', form.title);
+      fd.append('date', form.date);
+      fd.append('desc', form.desc);
+      images.forEach(file => fd.append('images', file));
+
       const res = await fetch('/api/schedules', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+        body: fd,
       });
       const data = await res.json();
       if (res.ok) {
         notifySuccess('일정 등록 성공');
         setForm({ title: '', date: '', desc: '' });
-        setFiles([]);
+        setImages([]);
         if (onAdd) onAdd();
       } else {
         notifyError(data.error || '등록 실패');
@@ -49,14 +53,46 @@ export default function ScheduleForm({ onAdd }) {
   return (
     <form className={styles.scheduleForm} onSubmit={handleSubmit}>
       <h3 className={styles.title}>일정 등록</h3>
-      <input className={styles.input} name="title" placeholder="일정 제목" value={form.title} onChange={handleChange} required maxLength={50} disabled={loading} />
-      <input className={styles.input} type="date" name="date" value={form.date} onChange={handleChange} required disabled={loading} />
-      <input className={styles.input} name="desc" placeholder="설명" value={form.desc} onChange={handleChange} maxLength={100} disabled={loading} />
-      <input className={styles.input} type="file" name="images" accept="image/*" multiple onChange={handleFileChange} disabled={loading} />
-      {files.length > 0 && (
-        <div className={styles.imgPreviewWrap}>
-          {Array.from(files).map((file, idx) => (
-            <img key={idx} src={URL.createObjectURL(file)} alt="미리보기" className={styles.imgPreview} />
+      <input
+        className={styles.input}
+        name="title"
+        placeholder="일정 제목"
+        value={form.title}
+        onChange={handleChange}
+        required
+        maxLength={50}
+        disabled={loading}
+      />
+      <input
+        className={styles.input}
+        type="date"
+        name="date"
+        value={form.date}
+        onChange={handleChange}
+        required
+        disabled={loading}
+      />
+      <input
+        className={styles.input}
+        name="desc"
+        placeholder="설명"
+        value={form.desc}
+        onChange={handleChange}
+        maxLength={100}
+        disabled={loading}
+      />
+      <input
+        className={styles.input}
+        type="file"
+        multiple
+        accept="image/*"
+        onChange={handleFileChange}
+        disabled={loading}
+      />
+      {images.length > 0 && (
+        <div className={styles.preview}>
+          {Array.from(images).map((file, i) => (
+            <span key={i}>{file.name}</span>
           ))}
         </div>
       )}

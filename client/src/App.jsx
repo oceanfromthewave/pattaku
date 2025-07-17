@@ -1,4 +1,5 @@
 import './styles/main.scss';
+import './styles/theme.scss';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Header from './components/Header';
@@ -11,13 +12,14 @@ import PostDetail from './components/Posts/PostDetail';
 import ScheduleForm from './components/Schedule/ScheduleForm';
 import ScheduleList from './components/Schedule/ScheduleList';
 import ScheduleDetail from './components/Schedule/ScheduleDetail';
-import EditPostForm from './components/Posts/EditPostForm'
-import { useState } from 'react';
+import { useState, createContext, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// 테마(다크/라이트) context 생성
+export const ThemeContext = createContext();
 
 function FreeBoardPage({ isLogin, setIsLogin }) {
   const [showRegister, setShowRegister] = useState(false);
-  const [refreshCount, setRefreshCount] = useState(0);
   const handleRegisterSuccess = () => setShowRegister(false);
 
   return (
@@ -45,8 +47,8 @@ function FreeBoardPage({ isLogin, setIsLogin }) {
         )
       ) : (
         <>
-          <PostForm onPost={() => setRefreshCount(prev => prev + 1)} />
-          <PostList refreshCount={refreshCount} />
+          <PostForm onPost={() => window.location.reload()} />
+          <PostList />
         </>
       )}
     </div>
@@ -55,7 +57,6 @@ function FreeBoardPage({ isLogin, setIsLogin }) {
 
 function ScheduleBoardPage({ isLogin, setIsLogin }) {
   const [showRegister, setShowRegister] = useState(false);
-  const [refreshCount, setRefreshCount] = useState(0);
   const handleRegisterSuccess = () => setShowRegister(false);
 
   return (
@@ -84,8 +85,8 @@ function ScheduleBoardPage({ isLogin, setIsLogin }) {
         )
       ) : (
         <>
-          <ScheduleForm onAdd={() => setRefreshCount(prev => prev + 1)} />
-          <ScheduleList refreshCount={refreshCount} />
+          <ScheduleForm onAdd={() => window.location.reload()} />
+          <ScheduleList />
         </>
       )}
     </div>
@@ -94,22 +95,31 @@ function ScheduleBoardPage({ isLogin, setIsLogin }) {
 
 function App() {
   const [isLogin, setIsLogin] = useState(() => !!localStorage.getItem('token'));
+  // 다크모드 상태관리
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+
+  // 테마 변경 시 html/body 클래스 토글
+  useEffect(() => {
+    document.body.className = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   return (
-    <Router>
-      <Header isLogin={isLogin} setIsLogin={setIsLogin} />
-      <ToastContainer position="top-right" autoClose={3000} />
-      <div className="container">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/board/free" element={<FreeBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />} />
-          <Route path="/board/schedule" element={<ScheduleBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />} />
-          <Route path="/board/free/:postId" element={<PostDetail isLogin={isLogin} />} />
-          <Route path="/board/free/:postId/edit" element={<EditPostForm />} />
-          <Route path="/board/schedule/:id" element={<ScheduleDetail isLogin={isLogin} />} />
-        </Routes>
-      </div>
-    </Router>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      <Router>
+        <Header isLogin={isLogin} setIsLogin={setIsLogin} />
+        <ToastContainer position="top-right" autoClose={3000} />
+        <div className="container">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/board/free" element={<FreeBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />} />
+            <Route path="/board/schedule" element={<ScheduleBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />} />
+            <Route path="/board/free/:postId" element={<PostDetail isLogin={isLogin} />} />
+            <Route path="/board/schedule/:id" element={<ScheduleDetail isLogin={isLogin} />} />
+          </Routes>
+        </div>
+      </Router>
+    </ThemeContext.Provider>
   );
 }
 

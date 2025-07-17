@@ -28,34 +28,57 @@ export default function ScheduleDetail({ isLogin }) {
       .finally(() => setLoading(false));
   }, [id]);
 
+  // (작성자만 노출) 수정/삭제 기능
   const isAuthor = isLogin && schedule && schedule.author === username;
+
+  // 슬라이더 (좌/우 이동)
+  const [imgIdx, setImgIdx] = useState(0);
 
   if (loading) return <div className={styles['schedule-detail-wrap']}>불러오는 중...</div>;
   if (!schedule) return <div className={styles['schedule-detail-wrap']}>일정이 없습니다.</div>;
+
+  const images = schedule.images || [];
 
   return (
     <div className={styles['schedule-detail-wrap']}>
       <h2 className={styles['schedule-title']}>{schedule.title}</h2>
       <div className={styles['schedule-meta']}>
-        날짜: {schedule.date ? new Date(schedule.date).toLocaleDateString() : "알 수 없음"} / 작성자: <b>{schedule.author ?? "알 수 없음"}</b>
+        날짜: {schedule.date} / 작성자: <b>{schedule.author_nickname || schedule.author}</b>
       </div>
-      <div className={styles['schedule-desc']}>{schedule.desc}</div>
-      {/* 이미지 미리보기 */}
-      {schedule.images && schedule.images.length > 0 && (
-        <div className={styles.imgGroup}>
-          {schedule.images.map((img, idx) => (
-            <img key={idx} src={img} alt={`일정이미지${idx+1}`} className={styles.imgPreview} />
-          ))}
+
+      {/* 이미지슬라이더 */}
+      {images.length > 0 && (
+        <div className={styles['schedule-image-slider']}>
+          <button
+            disabled={imgIdx === 0}
+            onClick={() => setImgIdx(i => Math.max(i - 1, 0))}
+            className={styles['slider-btn']}
+            aria-label="이전"
+          >◀</button>
+          <img src={images[imgIdx]} alt="일정 이미지" className={styles['main-image']} />
+          <button
+            disabled={imgIdx === images.length - 1}
+            onClick={() => setImgIdx(i => Math.min(i + 1, images.length - 1))}
+            className={styles['slider-btn']}
+            aria-label="다음"
+          >▶</button>
         </div>
       )}
+
+      <div className={styles['schedule-desc']}>{schedule.desc}</div>
+
+      {/* 참여 여부 투표 + 투표자 리스트 */}
       <section className={styles['schedule-vote-section']}>
         <h3>참여 여부 투표</h3>
-        <ScheduleVoteBar scheduleId={id} />
+        <ScheduleVoteBar scheduleId={id} showVoterList={true} />
       </section>
+
+      {/* 댓글 */}
       <section className={styles['schedule-comments-section']}>
         <h3>댓글</h3>
-        <ScheduleCommentList scheduleId={id} isLogin={isLogin} currentUser={username} />
+        <ScheduleCommentList scheduleId={id} isLogin={isLogin} currentUser={username} type="schedule" />
       </section>
+
       {isAuthor && (
         <div className={styles['schedule-detail-buttons']}>
           <button className={styles['btn-edit']} onClick={() => navigate(`/board/schedule/${id}/edit`)}>수정</button>

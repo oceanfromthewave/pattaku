@@ -1,61 +1,108 @@
+@use './main.scss' as *;
+
 .post-detail-wrap {
-  padding: 20px;
-  background: #20253a;
-  border-radius: 12px;
-  color: #f2f4fa;
+  background: var(--post-bg, #fffef7);
+  border-radius: 18px;
+  box-shadow: 0 2px 20px #0002;
+  padding: 34px 30px 24px 30px;
+  max-width: 620px;
+  margin: 38px auto 0 auto;
+  font-size: 1.09em;
+  color: inherit;
+  transition: background 0.25s;
+}
+
+body.dark .post-detail-wrap {
+  background: #232833;
 }
 
 .post-detail-header {
-  margin-bottom: 20px;
+  border-bottom: 1.5px solid #ececec;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
 }
 
 .post-detail-title {
   font-size: 2em;
   font-weight: 900;
-  margin-bottom: 6px;
+  margin: 0 0 10px 0;
+  color: $primary;
+  text-shadow: 0 0 6px rgba($primary, 0.06);
 }
 
 .post-detail-meta {
-  color: #a0a8cc;
-  font-size: 0.9em;
+  font-size: 1.02em;
+  color: #888;
+  margin-bottom: 7px;
+}
+
+.post-detail-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 7px;
+}
+
+.like-btn {
+  background: #f6f2da;
+  color: #c67d00;
+  font-weight: 900;
+  border-radius: 7px;
+  border: none;
+  font-size: 1.08em;
+  padding: 6px 17px;
+  box-shadow: 0 1px 5px #ffd88e22;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover { background: #ffefd6; }
+  &.liked, &:active { background: #ffe0b5; color: #ce7200; }
+}
+body.dark .like-btn {
+  background: #38302a;
+  color: #ffc14d;
+  &:hover { background: #46340d; }
+  &.liked { background: #52411a; color: #ffe8b6; }
+}
+
+.edit-btn, .delete-btn {
+  background: #f2f6ff;
+  color: #3959df;
+  font-weight: 700;
+  border-radius: 6px;
+  border: none;
+  padding: 6px 14px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.19s;
+  margin-left: 3px;
+
+  &:hover { background: #dde8ff; }
+}
+body.dark .edit-btn, body.dark .delete-btn {
+  background: #2c3751;
+  color: #c5d7ff;
+  &:hover { background: #223157; }
+}
+.delete-btn {
+  color: #ff6161;
+  &:hover { background: #ffecec; }
+}
+body.dark .delete-btn {
+  color: #ff9f9f;
+  &:hover { background: #482d2d; }
 }
 
 .post-detail-body {
   font-size: 1.15em;
-  line-height: 1.6;
-  white-space: pre-wrap;
+  line-height: 1.7;
+  margin-bottom: 26px;
+  color: inherit;
+  word-break: break-all;
+  white-space: pre-line;
 }
 
-.post-detail-buttons {
-  margin-top: 10px;
-  display: flex;
-  gap: 10px;
-}
-
-.btn-edit,
-.btn-delete {
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
-  transition: background-color 0.3s ease;
-}
-
-.btn-edit {
-  background-color: #4968fd;
-  color: #fff;
-
-  &:hover {
-    background-color: #3350d8;
-  }
-}
-
-.btn-delete {
-  background-color: #ff6161;
-  color: #fff;
-
-  &:hover {
-    background-color: #d84444;
-  }
+.post-comment-divider {
+  border-top: 2px dashed #e7e7b6;
+  margin: 24px 0 18px 0;
 }
