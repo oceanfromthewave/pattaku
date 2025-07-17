@@ -1,0 +1,52 @@
+@use './main.scss' as *;
+@use "sass:color";
+
+.voteBar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 18px 0 8px 0;
+  flex-wrap: wrap;
+}
+
+.voteBtn {
+  background: $primary;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 1em;
+  padding: 9px 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px #1e265544;
+  transition: background 0.18s, box-shadow 0.18s;
+
+  &:hover:not(:disabled) {
+    background: color.adjust($primary, $lightness: 10%);
+  }
+  &:disabled {
+    background: #6a79a7;
+    cursor: not-allowed;
+    opacity: 0.66;
+  }
+}
+
+.selected {
+  background: #ffda89;
+  color: #252a41;
+  font-weight: 900;
+  border: 2.4px solid $primary;
+}
+
+.loginMsg {
+  font-size: 0.97em;
+  color: #ffcece;
+  margin-left: 14px;
+}
+.nicknameList {
+  margin-top: 4px;
+  font-size: 0.93em;
+  color: #b0beff;
+  min-height: 1.1em;
+  white-space: pre-line;
+}

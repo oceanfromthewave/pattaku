@@ -3,49 +3,67 @@
 .scheduleForm {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: #20253a;
+  gap: 14px;
+  background: #2f3748;
   border-radius: $radius;
-  padding: 22px 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px #0001;
+  padding: 28px 24px;
+  box-shadow: 0 6px 20px #0006;
+  margin-bottom: 24px;
+  max-width: 380px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
+
 .title {
-  color: $primary;
   margin-bottom: 10px;
-  font-size: 1.13em;
-  font-weight: 700;
+  color: $primary;
+  font-size: 1.3em;
+  font-weight: 900;
+  text-align: left;
 }
+
 .input {
   background: $bg;
   color: $text;
-  border: 1px solid $border;
+  border: 1.5px solid $border;
   border-radius: $radius;
-  padding: 10px 12px;
-  font-size: 1em;
-  transition: border-color 0.2s;
+  padding: 12px 14px;
+  font-size: 1.05em;
+  transition: border-color 0.25s;
+  margin-bottom: 2px;
+
   &:focus {
     border-color: $primary;
     outline: none;
   }
 }
+
 .button {
   background: $primary;
   color: #fff;
   border: none;
   border-radius: $radius;
-  padding: 10px 0;
-  font-weight: bold;
-  font-size: 1em;
-  margin-top: 4px;
+  padding: 14px 0;
+  font-weight: 800;
+  font-size: 1.08em;
+  margin-top: 10px;
   cursor: pointer;
-  transition: background 0.2s;
-  &:hover {
-    background: #1e318f;
-  }
+  transition: background 0.22s;
+  &:hover:not(:disabled) { background: #4968fd; }
+  &:disabled { background: #6a79a7; cursor: not-allowed; }
 }
-.msg {
-  color: #e7c4fd;
-  font-size: 0.96em;
-  min-height: 1.2em;
+
+.imgPreviewWrap {
+  display: flex;
+  gap: 7px;
+  margin: 7px 0 5px 0;
+}
+.imgPreview {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 7px;
+  background: #232943;
+  border: 1px solid #2a3050;
 }

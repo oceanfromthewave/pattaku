@@ -1,0 +1,83 @@
+@use './main.scss' as *;
+
+.schedule-detail-wrap {
+  background: #23283a;
+  padding: 36px 26px;
+  border-radius: $radius;
+  max-width: 520px;
+  margin: 36px auto 0 auto;
+  box-shadow: 0 8px 32px #0005;
+}
+
+.schedule-title {
+  color: $primary;
+  font-size: 2em;
+  font-weight: 900;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.schedule-meta {
+  font-size: 1.04em;
+  color: #b4bcff;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.schedule-desc {
+  background: #292e44;
+  border-radius: $radius;
+  padding: 18px 15px;
+  margin-bottom: 22px;
+  color: #eee;
+  font-size: 1.14em;
+  line-height: 1.7;
+}
+
+.imgGroup {
+  display: flex;
+  gap: 7px;
+  margin: 16px 0 24px 0;
+  justify-content: center;
+}
+.imgPreview {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 9px;
+  background: #171a24;
+  border: 1.5px solid #23273f;
+}
+
+.schedule-vote-section {
+  margin-bottom: 28px;
+}
+.schedule-comments-section {
+  margin-top: 22px;
+}
+
+.schedule-detail-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 18px;
+
+  .btn-edit, .btn-delete {
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 1em;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-edit {
+    background-color: $primary;
+    color: #fff;
+    &:hover { background-color: #3350d8; }
+  }
+  .btn-delete {
+    background-color: #ff6161;
+    color: #fff;
+    &:hover { background-color: #d84444; }
+  }
+}

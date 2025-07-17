@@ -1,38 +1,35 @@
-import '../styles/Header.scss';
-import logo from '../assets/pattaku-transparent.png';
-import { Link, useNavigate } from 'react-router-dom';
+// src/components/Header.jsx
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import DarkModeToggle from "./DarkModeToggle";
+import styles from "../styles/Header.module.scss";
+import logo from "../assets/pattaku-transparent.png";
 
 export default function Header({ isLogin, setIsLogin }) {
-  const navigate = useNavigate();
-
   function handleLogout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
+    localStorage.clear();
     setIsLogin(false);
-    navigate('/');
+    window.location.href = "/";
   }
-  function handleLogin() {
-    navigate('/board/free');
-  }
-
   return (
-    <header className="main-header">
-      <div className="header-content">
-        <Link to="/" className="header-home-link">
-          <img src={logo} alt="로고" className="header-logo" />
-          <span className="header-title">패타쿠 게시판</span>
+    <header className={styles.header}>
+      <div className={styles.inner}>
+        <Link to="/" className={styles.logoWrap}>
+          <img src={logo} alt="logo" className={styles.logo} />
+          <span className={styles.title}>패타쿠 게시판</span>
         </Link>
-        <nav className="main-nav">
+        <nav>
           {isLogin && (
             <>
               <Link to="/board/free">자유게시판</Link>
               <Link to="/board/schedule">일정공유</Link>
             </>
           )}
+          <DarkModeToggle />
           {!isLogin ? (
-            <button className="login-btn" onClick={handleLogin}>로그인</button>
+            <Link className={styles.loginBtn} to="/board/free">로그인</Link>
           ) : (
-            <button className="logout-btn" onClick={handleLogout}>로그아웃</button>
+            <button className={styles.logoutBtn} onClick={handleLogout}>로그아웃</button>
           )}
         </nav>
       </div>

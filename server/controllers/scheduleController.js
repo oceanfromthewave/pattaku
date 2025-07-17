@@ -40,3 +40,14 @@ exports.deleteSchedule = (req, res) => {
     res.json({ message: "일정 삭제 성공" });
   });
 };
+
+// 일정 상세 조회
+exports.getScheduleById = (req, res) => {
+  const id = req.params.id;
+  // models/scheduleModel.js의 getById 사용
+  require("../models/scheduleModel").getById(id, (err, schedule) => {
+    if (err) return res.status(500).json({ error: "일정 조회 실패" });
+    if (!schedule) return res.status(404).json({ error: "일정이 없음" });
+    res.json(schedule);
+  });
+};

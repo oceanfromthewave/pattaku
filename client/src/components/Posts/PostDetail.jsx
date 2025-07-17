@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import CommentList from './CommentList';
-import { notifyError } from '../../utils/notify';
+import { notifySuccess, notifyError } from '../../utils/notify';
 import styles from '../../styles/PostDetail.module.scss';
 
 export default function PostDetail({ isLogin }) {
@@ -9,7 +9,6 @@ export default function PostDetail({ isLogin }) {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const username = localStorage.getItem('username');
-  const nickname = localStorage.getItem('nickname');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +26,7 @@ export default function PostDetail({ isLogin }) {
       .finally(() => setLoading(false));
   }, [postId]);
 
+  // 게시글 삭제
   const handleDelete = async () => {
     if (!window.confirm('정말 게시글을 삭제하시겠습니까?')) return;
 
@@ -37,13 +37,13 @@ export default function PostDetail({ isLogin }) {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
-        alert('게시글이 삭제되었습니다.');
-        navigate('/board/free'); // 게시판 목록으로 이동
+        notifySuccess('게시글이 삭제되었습니다.');
+        navigate('/board/free');
       } else {
-        alert('삭제에 실패했습니다.');
+        notifyError('삭제에 실패했습니다.');
       }
     } catch {
-      alert('네트워크 오류가 발생했습니다.');
+      notifyError('네트워크 오류가 발생했습니다.');
     }
   };
 
@@ -59,7 +59,7 @@ export default function PostDetail({ isLogin }) {
           작성일: {new Date(post.created_at).toLocaleString()} &nbsp;|&nbsp;
           조회수: {post.views ?? 0}
         </div>
-        {isLogin && (post.author === username || post.author === nickname) && (
+        {isLogin && post.author === username && (
           <div className={styles['post-detail-buttons']}>
             <button
               className={styles['btn-edit']}
@@ -77,7 +77,7 @@ export default function PostDetail({ isLogin }) {
         )}
       </div>
       <div className={styles['post-detail-body']}>{post.content}</div>
-      <CommentList postId={post.id} isLogin={isLogin} currentUser={username || nickname} />
+      <CommentList postId={post.id} isLogin={isLogin} currentUser={username} />
     </div>
   );
 }

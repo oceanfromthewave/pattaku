@@ -1,54 +1,63 @@
 @use './main.scss' as *;
 
 .scheduleList {
-  margin-top: 20px;
-  background: #202536;
-  border-radius: 15px;
-  padding: 20px 24px;
-  box-shadow: 0 3px 16px #0004;
-  max-width: 570px;
-  margin-left: auto;
-  margin-right: auto;
+  background: #23283a;
+  border-radius: $radius;
+  padding: 26px 22px;
+  margin: 0 auto 30px auto;
+  max-width: 500px;
+  box-shadow: 0 8px 32px #0005;
 }
 
-.scheduleList h3 {
+h3 {
   color: $primary;
-  font-weight: 800;
-  font-size: 1.35em;
-  margin-bottom: 14px;
-  user-select: none;
+  font-size: 1.25em;
+  font-weight: 900;
+  margin-bottom: 16px;
 }
 
 .scheduleItem {
-  padding: 12px 18px;
-  margin-bottom: 14px;
-  border-radius: 12px;
-  background-color: #2a2f44;
-  box-shadow: inset 0 0 6px #0008;
-  transition: background-color 0.15s ease;
-  cursor: default;
+  display: flex;
+  flex-direction: column;
+  background: #22263a;
+  border-radius: $radius;
+  margin-bottom: 16px;
+  padding: 18px;
+  position: relative;
+  transition: box-shadow 0.13s;
+  cursor: pointer;
+  box-shadow: 0 2px 8px #181c3311;
 
   &:hover {
-    background-color: #374163;
+    box-shadow: 0 2px 18px #1b216611;
+    background: #262a3e;
   }
 }
 
+.thumb {
+  width: 74px;
+  height: 74px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 9px;
+  background: #191c25;
+}
+
 .title {
-  font-weight: 700;
-  font-size: 1.13em;
-  color: #b0c1ff;
-  margin-bottom: 4px;
+  font-size: 1.19em;
+  font-weight: bold;
+  color: #b4bcff;
+  margin-bottom: 3px;
 }
 
 .meta {
-  font-size: 0.95em;
-  color: #92a1c0;
+  font-size: 0.99em;
+  color: #c3c3e5;
   margin-bottom: 6px;
 }
 
 .desc {
-  font-size: 1em;
-  color: #d1d9f7;
-  line-height: 1.45;
-  white-space: pre-wrap;
+  color: #eeeeff;
+  font-size: 1.08em;
+  margin-top: 3px;
 }

@@ -10,6 +10,8 @@ import PostList from './components/Posts/PostList';
 import PostDetail from './components/Posts/PostDetail';
 import ScheduleForm from './components/Schedule/ScheduleForm';
 import ScheduleList from './components/Schedule/ScheduleList';
+import ScheduleDetail from './components/Schedule/ScheduleDetail';
+import EditPostForm from './components/Posts/EditPostForm'
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
@@ -103,6 +105,8 @@ function App() {
           <Route path="/board/free" element={<FreeBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />} />
           <Route path="/board/schedule" element={<ScheduleBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />} />
           <Route path="/board/free/:postId" element={<PostDetail isLogin={isLogin} />} />
+          <Route path="/board/free/:postId/edit" element={<EditPostForm />} />
+          <Route path="/board/schedule/:id" element={<ScheduleDetail isLogin={isLogin} />} />
         </Routes>
       </div>
     </Router>
