@@ -5,11 +5,13 @@ import { notifySuccess, notifyError } from '../../utils/notify';
 import classNames from 'classnames';
 import styles from '../../styles/PostDetail.module.scss';
 
+const API_SERVER = import.meta.env.VITE_API_SERVER || '';
+const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL || (API_SERVER + '/uploads');
+
 export default function PostDetail({ isLogin }) {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
-  const userId = Number(localStorage.getItem('userId')); // 숫자 변환 꼭 해주세요
   const navigate = useNavigate();
   const [likeCount, setLikeCount] = useState(0);
   const [dislikeCount, setDislikeCount] = useState(0);
@@ -18,12 +20,13 @@ export default function PostDetail({ isLogin }) {
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
 
-  // 게시글 데이터+히스토리 불러오기
+  const userId = localStorage.getItem('userId');
+
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch(`/api/posts/${postId}`),
-      fetch(`/api/posts/${postId}/history`)
+      fetch(`${API_SERVER}/api/posts/${postId}`),
+      fetch(`${API_SERVER}/api/posts/${postId}/history`)
     ])
       .then(async ([resPost, resHist]) => {
         if (!resPost.ok) throw new Error('게시글을 찾을 수 없습니다.');
@@ -42,12 +45,11 @@ export default function PostDetail({ isLogin }) {
       .finally(() => setLoading(false));
   }, [postId]);
 
-  // 게시글 삭제
   const handleDelete = async () => {
     if (!window.confirm('정말 게시글을 삭제하시겠습니까?')) return;
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`/api/posts/${postId}`, {
+      const res = await fetch(`${API_SERVER}/api/posts/${postId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -62,7 +64,6 @@ export default function PostDetail({ isLogin }) {
     }
   };
 
-  // 게시글 추천(Like)
   const handleLike = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -70,14 +71,13 @@ export default function PostDetail({ isLogin }) {
       return;
     }
     try {
-      const res = await fetch(`/api/posts/${postId}/like`, {
+      const res = await fetch(`${API_SERVER}/api/posts/${postId}/like`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('추천 처리 실패');
       setLikeCount(likeCount + (isLiked ? -1 : 1));
       setIsLiked(!isLiked);
-      // 동시 싫어요 취소
       if (isDisliked) {
         setDislikeCount(dislikeCount - 1);
         setIsDisliked(false);
@@ -88,7 +88,6 @@ export default function PostDetail({ isLogin }) {
     }
   };
 
-  // 게시글 싫어요(Dislike)
   const handleDislike = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -96,14 +95,13 @@ export default function PostDetail({ isLogin }) {
       return;
     }
     try {
-      const res = await fetch(`/api/posts/${postId}/dislike`, {
+      const res = await fetch(`${API_SERVER}/api/posts/${postId}/dislike`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error('처리 실패');
       setDislikeCount(dislikeCount + (isDisliked ? -1 : 1));
       setIsDisliked(!isDisliked);
-      // 동시 좋아요 취소
       if (isLiked) {
         setLikeCount(likeCount - 1);
         setIsLiked(false);
@@ -114,26 +112,26 @@ export default function PostDetail({ isLogin }) {
     }
   };
 
-  // 게시글 수정 내역 복구
   const handleRestoreHistory = (hist) => {
     if (!window.confirm('이전 내용으로 복구하시겠습니까?')) return;
     notifySuccess('수정화면에서 복구 가능합니다!');
     navigate(`/board/free/${postId}/edit`, { state: { restore: hist } });
   };
 
-  // 작성자 여부 판단 (post.user_id가 DB에서 넘어오는 작성자 id임)
-  const isAuthor = isLogin && post && post.user_id === Number(userId);
-
   // 첨부파일 미리보기
   const renderAttachments = () => {
     if (!post?.files || post.files.length === 0) return null;
     return (
       <div className={styles.attachments}>
-        {post.files.map((file, idx) =>
-          file.url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+        {post.files.map((file, idx) => {
+          // /uploads/로 오든, 파일명만 오든 확실히 절대경로로 만듦
+          const fileUrl = file.url.startsWith('http')
+            ? file.url
+            : `${UPLOADS_URL}/${file.url.replace(/^\/?uploads\//, '')}`;
+          return fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
             <img
               key={idx}
-              src={file.url}
+              src={fileUrl}
               alt={`첨부이미지${idx + 1}`}
               className={styles.attachmentImg}
               loading="lazy"
@@ -141,20 +139,22 @@ export default function PostDetail({ isLogin }) {
           ) : (
             <a
               key={idx}
-              href={file.url}
+              href={fileUrl}
               download
               className={styles.attachmentFile}
             >
               📎 {file.name || '첨부파일'}
             </a>
-          )
-        )}
+          );
+        })}
       </div>
     );
   };
 
   if (loading) return <div className={styles['post-detail-wrap']}>불러오는 중...</div>;
   if (!post) return <div className={styles['post-detail-wrap']}>게시글이 없습니다.</div>;
+
+  const isAuthor = isLogin && post && String(post.user_id) === String(userId);
 
   return (
     <div className={styles['post-detail-wrap']}>

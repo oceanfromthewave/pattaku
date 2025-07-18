@@ -8,6 +8,7 @@ import LoginForm from './components/Auth/LoginForm';
 import PostForm from './components/Posts/PostForm';
 import PostList from './components/Posts/PostList';
 import PostDetail from './components/Posts/PostDetail';
+import EditPostForm from './components/Posts/EditPostForm';
 import ScheduleForm from './components/Schedule/ScheduleForm';
 import ScheduleList from './components/Schedule/ScheduleList';
 import ScheduleDetail from './components/Schedule/ScheduleDetail';
@@ -99,10 +100,10 @@ function App() {
   // 다크모드 상태관리
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
-useEffect(() => {
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme);
-}, [theme]);
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
@@ -122,6 +123,11 @@ useEffect(() => {
           <Route path="/board/free/:postId" element={
             <div className="center-container"><PostDetail isLogin={isLogin} /></div>
           } />
+          {/* 🔽🔽🔽  edit 라우트 추가! */}
+          <Route path="/board/free/:postId/edit" element={
+            <div className="center-container"><EditPostForm /></div>
+          } />
+          {/* 🔼🔼🔼 */}
           <Route path="/board/schedule/:id" element={
             <div className="center-container"><ScheduleDetail isLogin={isLogin} /></div>
           } />

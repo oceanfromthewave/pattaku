@@ -20,14 +20,14 @@ export default function LoginForm({ onLogin }) {
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('username', data.username);
-        localStorage.setItem('nickname', data.nickname);
-        localStorage.setItem('userId', data.id); // 이 줄 추가
-        notifySuccess('로그인 성공!');
-        if (onLogin) onLogin();
-      } else {
+      if(res.ok) {
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('userId', data.userId); // userId도 응답에서 받아와야 함
+  localStorage.setItem('username', data.username);
+  localStorage.setItem('nickname', data.nickname);
+  notifySuccess('로그인 성공!');
+  if(onLogin) onLogin();
+} else {
         notifyError(data.error || '로그인 실패');
       }
     } catch {

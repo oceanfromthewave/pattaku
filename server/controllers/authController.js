@@ -35,7 +35,7 @@ exports.login = async (req, res) => {
   // id 포함하여 반환
   res.json({
     token,
-    id: user.id,
+    userId: user.id,
     username: user.username,
     nickname: user.nickname,
   });

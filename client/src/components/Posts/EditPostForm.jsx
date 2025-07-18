@@ -13,6 +13,8 @@ export default function EditPostForm() {
   const [history, setHistory] = useState([]);
   const fileInputRef = useRef();
   const navigate = useNavigate();
+  const API_SERVER = import.meta.env.VITE_API_SERVER || '';
+  const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL || (API_SERVER + '/uploads');
 
   // 게시글과 수정 내역 불러오기
   useEffect(() => {
@@ -65,22 +67,27 @@ export default function EditPostForm() {
     return <div className={styles.previewFile}>{file.name}</div>;
   };
 
-  const renderOriginFilePreview = (file, idx) => {
-    if (file.url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-      return (
-        <div className={styles.previewOriginBox} key={file.url}>
-          <img src={file.url} alt="첨부이미지" className={styles.previewImg} />
-          <button type="button" className={styles.delBtn} onClick={() => removeOriginFile(idx)}>×</button>
-        </div>
-      );
-    }
+  // 기존 첨부파일 Preview
+const renderOriginFilePreview = (file, idx) => {
+  // url이 http/https로 시작하지 않으면 절대경로로 보정
+  const fileUrl = file.url.startsWith('http')
+    ? file.url
+    : `${UPLOADS_URL}/${file.url.replace(/^\/?uploads\//, '')}`;
+  if (fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
     return (
       <div className={styles.previewOriginBox} key={file.url}>
-        <a href={file.url} download className={styles.previewFile}>{file.name || '첨부파일'}</a>
+        <img src={fileUrl} alt="첨부이미지" className={styles.previewImg} />
         <button type="button" className={styles.delBtn} onClick={() => removeOriginFile(idx)}>×</button>
       </div>
     );
-  };
+  }
+  return (
+    <div className={styles.previewOriginBox} key={file.url}>
+      <a href={fileUrl} download className={styles.previewFile}>{file.name || '첨부파일'}</a>
+      <button type="button" className={styles.delBtn} onClick={() => removeOriginFile(idx)}>×</button>
+    </div>
+  );
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

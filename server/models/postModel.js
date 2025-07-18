@@ -23,10 +23,10 @@ exports.getAllAsync = async () => {
 // 상세조회
 exports.getByIdAsync = async (id) => {
   const [rows] = await db.query(
-    `SELECT posts.*, users.nickname AS author_nickname 
-     FROM posts
-     LEFT JOIN users ON posts.user_id = users.id
-     WHERE posts.id = ?`,
+    `SELECT posts.*, users.nickname AS author_nickname
+    FROM posts
+    LEFT JOIN users ON posts.user_id = users.id
+    WHERE posts.id = ?`,
     [id]
   );
   return rows[0];

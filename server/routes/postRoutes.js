@@ -3,7 +3,7 @@ const router = express.Router();
 const postController = require("../controllers/postController");
 const authMiddleware = require("../middleware/authMiddleware");
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+const upload = require("../middleware/upload"); // 위에서 만든 upload.js
 
 router.get("/", postController.getAllPosts);
 router.get("/:id", postController.getPostById);
@@ -13,7 +13,6 @@ router.post(
   upload.array("files"),
   postController.createPost
 );
-router.put("/:id", authMiddleware, postController.updatePost);
 router.delete("/:id", authMiddleware, postController.deletePost);
 
 module.exports = router;

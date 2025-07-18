@@ -1,0 +1,176 @@
+@use './main.scss' as *;
+@use './variables' as *;
+
+.postForm {
+  background: var(--detail-bg);
+  border-radius: 18px;
+  box-shadow: var(--detail-shadow);
+  padding: 34px 30px 24px 30px;
+  max-width: 420px;
+  margin: 38px auto 0 auto;
+  font-size: 1.09em;
+  color: inherit;
+  transition: background 0.25s;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+h3 {
+  color: var(--detail-title);
+  font-size: 1.35em;
+  font-weight: 900;
+  margin-bottom: 15px;
+  margin-top: 0;
+}
+
+.labelWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.labelWrap > label {
+  font-weight: 700;
+  font-size: 1.08em;
+  color: var(--detail-title);
+  margin-bottom: 2px;
+}
+
+.input, .textarea {
+  color: #222 !important;
+  background: #fff !important;
+  border: 1.5px solid #ccc;
+  border-radius: 7px;
+  padding: 10px 13px;
+  font-size: 1.09em;
+  outline: none;
+  transition: border 0.2s;
+}
+.input:focus, .textarea:focus {
+  border-color: var(--detail-title);
+}
+.input::placeholder, .textarea::placeholder {
+  color: #999 !important;
+  opacity: 1;
+}
+
+body.dark .input, body.dark .textarea {
+  background: #232833 !important;
+  color: #fff !important;
+  border: 1.5px solid #555;
+}
+body.dark .input::placeholder, body.dark .textarea::placeholder {
+  color: #aaa !important;
+}
+
+.attachWrap {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fileInput {
+  margin-top: 2px;
+}
+
+.previewWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 7px;
+}
+.previewImg {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 7px;
+  border: 1.2px solid #e7e7b6;
+  background: #fffdf7;
+  box-shadow: 0 1px 6px #e9deba35;
+}
+body.dark .previewImg {
+  border: 1.2px solid #393b60;
+  background: #232833;
+  box-shadow: 0 1px 6px #2228;
+}
+.previewFile {
+  color: #776121;
+  font-size: 0.98em;
+  background: #fff8e5;
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-weight: 600;
+}
+body.dark .previewFile {
+  color: #ffd18b;
+  background: #293349;
+}
+.delBtn {
+  background: #ffeded;
+  color: #b4462d;
+  border: none;
+  border-radius: 7px;
+  font-size: 1.1em;
+  margin-left: 5px;
+  padding: 2px 9px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.delBtn:hover {
+  background: #ffd5c5;
+  color: #c42809;
+}
+
+.button {
+  width: 100%;
+  background: #3a60fa;
+  color: #fff;
+  font-size: 1.15em;
+  font-weight: 900;
+  border: none;
+  border-radius: 10px;
+  padding: 16px 0 13px 0;
+  box-shadow: 0 2px 8px #3a60fa25;
+  cursor: pointer;
+  margin-top: 18px;
+  margin-bottom: 0;
+  transition: background 0.17s;
+}
+.button:disabled {
+  background: #8ca2ec;
+}
+
+.historyBox {
+  background: #f6f9ff;
+  color: #4260b4;
+  border-radius: 11px;
+  padding: 13px 11px;
+  margin-top: 13px;
+  font-size: 0.99em;
+  box-shadow: 0 1px 7px #bbc89125;
+  ul { margin: 0; padding: 0; list-style: none; }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+}
+.restoreBtn {
+  background: #e3d3b0;
+  color: #674a0c;
+  border: none;
+  border-radius: 5px;
+  font-weight: 700;
+  font-size: 0.97em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.13s;
+  margin-left: 7px;
+}
+.restoreBtn:hover {
+  background: #ffeab6;
+  color: #dd8417;
+}

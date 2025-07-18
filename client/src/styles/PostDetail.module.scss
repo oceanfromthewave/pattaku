@@ -92,6 +92,10 @@ body.dark {
 }
 body.dark .post-detail-header { border-bottom: 1.5px solid #33374a; }
 
+body.dark .post-detail-body {
+  color: #f2f2f2; // 다크모드에서 밝게
+}
+
 .post-detail-title {
   font-size: 2em;
   font-weight: 900;
@@ -193,7 +197,7 @@ body.dark .post-detail-header { border-bottom: 1.5px solid #33374a; }
   font-size: 1.15em;
   line-height: 1.7;
   margin-bottom: 26px;
-  color: inherit;
+  color: #232323; // 혹은 #222, #333 처럼 진하게!
   word-break: break-all;
   white-space: pre-line;
   .attachments {

@@ -53,11 +53,12 @@ export default function PostForm({ onPost }) {
       return;
     }
     try {
-      // 이미지 압축/리사이즈
+      // *** 여기서 압축한 Blob → File로 이름 보존 ***
       const compressedFiles = await Promise.all(
         files.map(file =>
           file.type?.startsWith('image/')
             ? imageCompression(file, { maxSizeMB: 0.7, maxWidthOrHeight: 1400, useWebWorker: true })
+                .then(blob => new File([blob], file.name, { type: blob.type }))
             : file
         )
       );
