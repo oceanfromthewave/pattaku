@@ -1,12 +1,9 @@
-@use 'sass:color';
-@use './main.scss' as *;
-
 .loginForm {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  background: #2f3748;
-  border-radius: $radius;
+  background: var(--login-bg, #2f3748);
+  border-radius: var(--radius, 12px);
   padding: 28px 24px;
   box-shadow: 0 6px 20px #0006;
   margin-bottom: 24px;
@@ -14,63 +11,81 @@
   width: 100%;
   margin-left: auto;
   margin-right: auto;
+  transition: background 0.3s;
+}
+[data-theme="dark"] .loginForm {
+  --login-bg: #23273a;
 }
 
 .title {
   margin: 0 0 14px 0;
-  color: $primary;
+  color: var(--primary, #3a60fa);
   font-size: 1.5em;
   font-weight: 900;
   text-align: center;
   letter-spacing: -0.02em;
-  text-shadow: 0 0 8px $primary;
+  text-shadow: 0 0 8px var(--primary, #3a60fa);
 }
 
 .input {
-  background: color.scale($bg, $lightness: -10%);
-  color: #eee;
-  border: 1.8px solid color.scale($border, $lightness: 15%);
-  border-radius: $radius;
+  background: var(--login-input-bg, #24273a);
+  color: var(--login-input-color, #eee);
+  border: 1.8px solid var(--login-input-border, #313858);
+  border-radius: var(--radius, 12px);
   padding: 14px 16px;
   font-size: 1.1em;
-  transition: border-color 0.3s ease, background 0.3s ease;
+  transition: border-color 0.3s, background 0.3s;
   outline-offset: 0;
 
   &::placeholder {
     color: #999;
+    opacity: 1;
   }
 
   &:focus {
-    border-color: $primary;
-    box-shadow: 0 0 12px $primary;
-    background: color.scale($bg, $lightness: -5%);
+    border-color: var(--primary, #3a60fa);
+    box-shadow: 0 0 12px var(--primary, #3a60fa);
+    background: var(--login-input-bg-focus, #23273a);
     outline: none;
     color: #fff;
   }
 
   &:disabled {
-    background: color.scale($bg, $lightness: -15%);
+    background: var(--login-input-bg-disabled, #232232);
     cursor: not-allowed;
     color: #666;
   }
 }
+[data-theme="dark"] .input {
+  --login-input-bg: #1e2233;
+  --login-input-border: #444a6c;
+  --login-input-bg-focus: #25273e;
+  --login-input-bg-disabled: #1a1c24;
+}
+[data-theme="light"] .input {
+  --login-input-bg: #f9faff;
+  --login-input-border: #d3dbf3;
+  --login-input-bg-focus: #eaf0fb;
+  --login-input-bg-disabled: #f0f0f0;
+  color: #2c3150;
+}
 
 .button {
-  background: $primary;
+  background: var(--primary, #3a60fa);
   color: #fff;
   border: none;
-  border-radius: $radius;
+  border-radius: var(--radius, 12px);
   padding: 16px 0;
   font-weight: 900;
   font-size: 1.15em;
   margin-top: 8px;
   cursor: pointer;
-  box-shadow: 0 0 10px rgba($primary, 0.7);
-  transition: background 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 0 10px rgba(58, 96, 250, 0.35);
+  transition: background 0.25s, box-shadow 0.25s;
 
   &:hover:not(:disabled) {
-    background: color.scale($primary, $lightness: 10%);
-    box-shadow: 0 0 18px rgba($primary, 0.9);
+    background: #527fff;
+    box-shadow: 0 0 18px rgba(58, 96, 250, 0.49);
   }
 
   &:disabled {
@@ -88,10 +103,5 @@
   user-select: none;
 }
 
-.success {
-  color: #9fdb87;
-}
-
-.error {
-  color: #ff7b7b;
-}
+.success { color: #9fdb87; }
+.error { color: #ff7b7b; }

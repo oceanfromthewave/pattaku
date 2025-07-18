@@ -3,7 +3,8 @@ const jwt = require("jsonwebtoken");
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: "토큰 없음" });
-  const token = authHeader.split(" ")[1];
+  let token = authHeader;
+  if (token.startsWith("Bearer ")) token = token.split(" ")[1];
   try {
     const decoded = jwt.verify(
       token,

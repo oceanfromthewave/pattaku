@@ -1,4 +1,5 @@
-const mysql = require("mysql2");
+// server/config/db.js
+const mysql = require("mysql2"); // 여기 반드시 mysql2!
 require("dotenv").config();
 
 const db = mysql.createPool({
@@ -11,4 +12,4 @@ const db = mysql.createPool({
   queueLimit: 0,
 });
 
-module.exports = db;
+module.exports = db.promise(); // 반드시 promise()로 내보내기!

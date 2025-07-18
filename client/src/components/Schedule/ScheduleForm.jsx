@@ -1,19 +1,36 @@
-// src/components/Schedule/ScheduleForm.jsx
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { notifySuccess, notifyError } from '../../utils/notify';
+import imageCompression from 'browser-image-compression';
+import classNames from 'classnames';
 import styles from '../../styles/ScheduleForm.module.scss';
 
 export default function ScheduleForm({ onAdd }) {
   const [form, setForm] = useState({ title: '', date: '', desc: '' });
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const fileRef = useRef();
 
+  // 입력값 처리
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  // 파일 선택/추가
   const handleFileChange = (e) => {
-    setImages([...e.target.files]);
+    const selected = Array.from(e.target.files);
+    setImages((prev) => [...prev, ...selected]);
+    if (fileRef.current) fileRef.current.value = '';
   };
 
+  // 이미지 삭제
+  const removeImg = (idx) => setImages(images.filter((_, i) => i !== idx));
+
+  // 이미지 미리보기
+  const renderPreview = (file, i) =>
+    <div key={i} className={styles.imgPreviewBox}>
+      <img src={URL.createObjectURL(file)} alt={`미리보기${i+1}`} className={styles.imgPreview} onLoad={e => URL.revokeObjectURL(e.target.src)} />
+      <button type="button" className={styles.imgDelBtn} onClick={() => removeImg(i)} aria-label="이미지 삭제">×</button>
+    </div>;
+
+  // 폼 제출
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -24,11 +41,20 @@ export default function ScheduleForm({ onAdd }) {
       return;
     }
     try {
+      // 이미지 압축/리사이즈
+      const compressed = await Promise.all(
+        images.map(file => imageCompression(file, {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 1400,
+          useWebWorker: true,
+        }))
+      );
+
       const fd = new FormData();
       fd.append('title', form.title);
       fd.append('date', form.date);
       fd.append('desc', form.desc);
-      images.forEach(file => fd.append('images', file));
+      compressed.forEach(f => fd.append('images', f));
 
       const res = await fetch('/api/schedules', {
         method: 'POST',
@@ -40,6 +66,7 @@ export default function ScheduleForm({ onAdd }) {
         notifySuccess('일정 등록 성공');
         setForm({ title: '', date: '', desc: '' });
         setImages([]);
+        if (fileRef.current) fileRef.current.value = '';
         if (onAdd) onAdd();
       } else {
         notifyError(data.error || '등록 실패');
@@ -51,7 +78,7 @@ export default function ScheduleForm({ onAdd }) {
   };
 
   return (
-    <form className={styles.scheduleForm} onSubmit={handleSubmit}>
+    <form className={classNames(styles.scheduleForm, 'scheduleForm')} onSubmit={handleSubmit}>
       <h3 className={styles.title}>일정 등록</h3>
       <input
         className={styles.input}
@@ -81,19 +108,20 @@ export default function ScheduleForm({ onAdd }) {
         maxLength={100}
         disabled={loading}
       />
-      <input
-        className={styles.input}
-        type="file"
-        multiple
-        accept="image/*"
-        onChange={handleFileChange}
-        disabled={loading}
-      />
+      <div className={styles.fileInputWrap}>
+        <input
+          className={styles.fileInput}
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={handleFileChange}
+          ref={fileRef}
+          disabled={loading}
+        />
+      </div>
       {images.length > 0 && (
-        <div className={styles.preview}>
-          {Array.from(images).map((file, i) => (
-            <span key={i}>{file.name}</span>
-          ))}
+        <div className={styles.imgPreviewWrap}>
+          {images.map(renderPreview)}
         </div>
       )}
       <button className={styles.button} type="submit" disabled={loading}>

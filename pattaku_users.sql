@@ -16,38 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `comments`
+-- Table structure for table `users`
 --
 
-DROP TABLE IF EXISTS `comments`;
+DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `comments` (
+CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `post_id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `parent_id` int DEFAULT NULL,
-  `author` varchar(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '익명',
-  `content` text COLLATE utf8mb4_general_ci NOT NULL,
+  `username` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `nickname` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `post_id` (`post_id`),
-  KEY `parent_id` (`parent_id`),
-  KEY `fk_comments_user` (`user_id`),
-  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `comments`
+-- Dumping data for table `users`
 --
 
-LOCK TABLES `comments` WRITE;
-/*!40000 ALTER TABLE `comments` DISABLE KEYS */;
-INSERT INTO `comments` VALUES (3,7,2,NULL,'익명','asd','2025-07-16 15:20:17'),(4,7,2,3,'익명','asd','2025-07-16 15:20:20'),(5,7,3,3,'익명','asdasd','2025-07-16 15:21:00'),(6,7,2,3,'어드민','할로\n','2025-07-16 15:21:54'),(7,7,2,3,'어드민','asdasd','2025-07-16 15:28:50'),(11,8,2,NULL,'어드민','댓글','2025-07-17 09:38:08'),(12,8,2,11,'어드민','답글','2025-07-17 09:38:11'),(13,12,2,NULL,'어드민','ㅁㄴㅇ','2025-07-17 10:56:34'),(14,12,2,13,'어드민','ㄴㅇㄴㅇ','2025-07-17 10:56:36');
-/*!40000 ALTER TABLE `comments` ENABLE KEYS */;
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` VALUES (2,'admin','$2b$10$sgzYgaHpx2kZKMGHNKR7kup7VIMyEGDoJcJPkthc9vGSXXR1ejtAC','admin@admin.com','2025-07-16 14:53:34','어드민'),(3,'test','$2b$10$0LIsprNYj2XhhWDLTUvvEOsRwbG8xH4d4Azb4ZXYyjI0GuuatrH.O','test@test.com','2025-07-16 15:20:53','테스트'),(4,'tester','$2b$10$vxSfCCHzKljYYfcLPXrmm.Nf3DyvDFyx1VNJ4ZTjdQCww.IFsCdBW','tester@tester.com','2025-07-16 15:47:09','테스터'),(5,'pattaku','$2b$10$IRvKCI6g.xJBYwnlqCdk5.5TPjd96wjzCZSa70uz/dyjPYAMaXna2','pattaku@pattaku.com','2025-07-16 16:08:29','패타쿠'),(7,'kyukyu','$2b$10$xDCCeBhwI4PtU8E1GD7L9eRFJcvWG9hUy5RB8HTTc329f12GlW5Se','kyukyu@kyukyu.com','2025-07-16 16:24:23','규짱');
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -59,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-17 11:18:41
+-- Dump completed on 2025-07-18 13:12:48

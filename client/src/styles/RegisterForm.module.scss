@@ -1,11 +1,10 @@
-@use './main.scss' as *;
-
+// RegisterForm.module.scss
 .registerForm {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  background: #20253a;
-  border-radius: $radius;
+  background: var(--register-bg, #20253a);
+  border-radius: var(--radius, 12px);
   padding: 28px 24px;
   margin-bottom: 24px;
   box-shadow: 0 3px 12px #0002;
@@ -13,10 +12,14 @@
   width: 100%;
   margin-left: auto;
   margin-right: auto;
+  transition: background 0.3s;
+}
+body.dark .registerForm {
+  --register-bg: #181b2e;
 }
 
 .title {
-  color: $primary;
+  color: var(--primary, #3a60fa);
   margin-bottom: 14px;
   font-size: 1.3em;
   font-weight: 700;
@@ -24,32 +27,53 @@
 }
 
 .input {
-  background: $bg;
-  color: $text;
-  border: 1.5px solid $border;
-  border-radius: $radius;
+  background: var(--register-input-bg, #f8f9fe);
+  color: var(--register-input-color, #2c3150);
+  border: 1.5px solid var(--register-input-border, #c9d1e6);
+  border-radius: var(--radius, 12px);
   padding: 12px 14px;
   font-size: 1.05em;
-  transition: border-color 0.25s ease;
+  transition: border-color 0.25s, background 0.25s;
 
   &:focus {
-    border-color: $primary;
-    box-shadow: 0 0 8px $primary;
+    border-color: var(--primary, #3a60fa);
+    box-shadow: 0 0 8px var(--primary, #3a60fa);
     outline: none;
+    background: var(--register-input-bg-focus, #eaefff);
   }
+
+  &:disabled {
+    background: var(--register-input-bg-disabled, #f0f1f4);
+    color: #bbb;
+    cursor: not-allowed;
+  }
+}
+body.dark .input {
+  --register-input-bg: #212431;
+  --register-input-color: #eee;
+  --register-input-border: #293056;
+  --register-input-bg-focus: #23273a;
+  --register-input-bg-disabled: #161a27;
+}
+body:not(.dark) .input {
+  --register-input-bg: #f8f9fe;
+  --register-input-color: #2c3150;
+  --register-input-border: #c9d1e6;
+  --register-input-bg-focus: #eaefff;
+  --register-input-bg-disabled: #f0f1f4;
 }
 
 .button {
-  background: $primary;
+  background: var(--primary, #3a60fa);
   color: #fff;
   border: none;
-  border-radius: $radius;
+  border-radius: var(--radius, 12px);
   padding: 14px 0;
   font-weight: 800;
   font-size: 1.1em;
   margin-top: 6px;
   cursor: pointer;
-  transition: background 0.22s ease;
+  transition: background 0.22s;
 
   &:hover:not(:disabled) {
     background: #1e318f;
@@ -67,11 +91,5 @@
   min-height: 1.2em;
   user-select: none;
 }
-
-.success {
-  color: #92d400;
-}
-
-.error {
-  color: #ff6161;
-}
+.success { color: #92d400; }
+.error { color: #ff6161; }

@@ -4,16 +4,18 @@ const auth = require("../middleware/authMiddleware");
 const scheduleController = require("../controllers/scheduleController");
 const router = express.Router();
 
-const upload = multer({ dest: "uploads/" }); // uploads 폴더에 저장
+const upload = multer({ dest: "uploads/" });
+
+router.get("/", scheduleController.getSchedules);
+router.get("/:id", scheduleController.getScheduleDetail);
 
 router.post(
   "/",
   auth,
-  upload.array("images", 5), // 최대 5장
+  upload.array("images", 5),
   scheduleController.createScheduleWithImages
 );
-
-router.get("/", scheduleController.getSchedules);
-router.get("/:id", scheduleController.getScheduleDetail);
+router.put("/:id", auth, scheduleController.updateSchedule);
+router.delete("/:id", auth, scheduleController.deleteSchedule);
 
 module.exports = router;

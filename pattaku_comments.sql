@@ -16,31 +16,38 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `schedule_comments`
+-- Table structure for table `comments`
 --
 
-DROP TABLE IF EXISTS `schedule_comments`;
+DROP TABLE IF EXISTS `comments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `schedule_comments` (
+CREATE TABLE `comments` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `schedule_id` int NOT NULL,
+  `post_id` int NOT NULL,
   `user_id` int NOT NULL,
-  `content` text COLLATE utf8mb4_general_ci NOT NULL,
   `parent_id` int DEFAULT NULL,
+  `author` varchar(50) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '익명',
+  `content` text COLLATE utf8mb4_general_ci NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  PRIMARY KEY (`id`),
+  KEY `post_id` (`post_id`),
+  KEY `parent_id` (`parent_id`),
+  KEY `fk_comments_user` (`user_id`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_comments_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `schedule_comments`
+-- Dumping data for table `comments`
 --
 
-LOCK TABLES `schedule_comments` WRITE;
-/*!40000 ALTER TABLE `schedule_comments` DISABLE KEYS */;
-INSERT INTO `schedule_comments` VALUES (1,2,2,'asd',NULL,'2025-07-17 10:52:40'),(2,1,2,'ㅁㄴㅇ',NULL,'2025-07-17 10:56:20'),(3,1,2,'ㅎㅎ',NULL,'2025-07-17 10:56:22'),(4,1,2,'ㅁㄴㅇㅁㄴㅇ',NULL,'2025-07-17 10:56:30'),(5,1,2,'ㅁㄴㅇ',NULL,'2025-07-17 10:59:50');
-/*!40000 ALTER TABLE `schedule_comments` ENABLE KEYS */;
+LOCK TABLES `comments` WRITE;
+/*!40000 ALTER TABLE `comments` DISABLE KEYS */;
+INSERT INTO `comments` VALUES (3,7,2,NULL,'익명','asd','2025-07-16 15:20:17'),(4,7,2,3,'익명','asd','2025-07-16 15:20:20'),(5,7,3,3,'익명','asdasd','2025-07-16 15:21:00'),(6,7,2,3,'어드민','할로\n','2025-07-16 15:21:54'),(7,7,2,3,'어드민','asdasd','2025-07-16 15:28:50'),(11,8,2,NULL,'어드민','댓글','2025-07-17 09:38:08'),(12,8,2,11,'어드민','답글','2025-07-17 09:38:11'),(13,12,2,NULL,'어드민','ㅁㄴㅇ','2025-07-17 10:56:34'),(14,12,2,13,'어드민','ㄴㅇㄴㅇ','2025-07-17 10:56:36');
+/*!40000 ALTER TABLE `comments` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -52,4 +59,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-17 11:18:40
+-- Dump completed on 2025-07-18 13:12:48

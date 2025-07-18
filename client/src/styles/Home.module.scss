@@ -4,21 +4,23 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  background: transparent;
-  padding-top: 60px;
+  background: var(--home-bg, linear-gradient(120deg, #faf6e8 50%, #f0e5c1 100%));
+  padding-top: 80px;
+  transition: background 0.3s;
 }
 
 .home-wrap {
-  background: rgba(27,30,39,0.96);
+  background: var(--home-card-bg, rgba(255,255,255,0.92));
   border-radius: 20px;
-  box-shadow: 0 6px 32px #0004, 0 1px 10px #2237;
+  box-shadow: 0 6px 32px #b19d7e26, 0 1px 10px #e6cb8726;
   padding: 48px 32px 40px 32px;
-  min-width: 370px;
-  max-width: 420px;
+  min-width: 320px;
+  max-width: 410px;
   margin: 0 auto;
   text-align: center;
   position: relative;
-  animation: fadein 1s cubic-bezier(.33,.44,.56,1.06);
+  animation: fadein 0.9s cubic-bezier(.33,.44,.56,1.06);
+  transition: background 0.3s;
 }
 
 @keyframes fadein {
@@ -36,31 +38,32 @@
   background: #fff;
 }
 
-.home-wrap h2 {
-  color: #6291ff;
-  font-size: 1.65em;
+.home-title {
+  color: var(--home-title-color, #6b82c7);
+  font-size: 1.7em;
   font-weight: 900;
   letter-spacing: -0.5px;
   margin-bottom: 15px;
 }
 
 .home-wrap p {
-  color: #b5c3ef;
+  color: var(--home-p-color, #877b63);
   margin-bottom: 32px;
   line-height: 1.7;
   font-size: 1.16em;
+  font-weight: 500;
 }
 
 .home-strong {
-  color: #8bafff;
+  color: var(--home-strong-color, #a0843b);
   font-weight: 700;
   font-size: 1.08em;
   letter-spacing: -0.3px;
 }
 
 .home-highlight {
-  background: #23396a;
-  color: #fff;
+  background: var(--home-highlight-bg, #ffe8b8);
+  color: var(--home-highlight-color, #714f04);
   border-radius: 6px;
   padding: 2px 9px 2px 8px;
   font-size: 1em;
@@ -69,12 +72,19 @@
 
 .home-desc {
   margin-top: 22px;
-  color: #ffecb1;
-  font-size: 1em;
+  color: var(--home-desc-color, #b88900);
+  font-size: 1.07em;
   font-weight: 700;
-  background: #1a1f26;
+  background: var(--home-desc-bg, #fff5db);
   border-radius: 8px;
   padding: 14px 6px;
   letter-spacing: -0.07px;
-  box-shadow: 0 1.5px 8px #0015;
+  box-shadow: 0 1.5px 8px #ffeab944;
+}
+
+@media (max-width: 520px) {
+  .home-root { padding-top: 40px; }
+  .home-wrap { padding: 28px 8vw 26px 8vw; min-width: 0; max-width: 97vw;}
+  .home-logo { width: 44px; height: 44px;}
+  .home-title { font-size: 1.1em; }
 }

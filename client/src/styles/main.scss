@@ -1,27 +1,44 @@
-@use './variables' as *;
-$primary: #3a60fa;
-$bg: #181c26;
-$text: #f6f6f9;
-$radius: 12px;
-$border: #293056;
+// main.scss
+:root {
+  --primary: #3a60fa;
+  --bg: #FDF6E3;
+  --text: #222;
+  --container-bg: rgba(29, 32, 39, 0.96);
+  --post-bg: #fcf8e8;
+  --postform-bg: #fdfbe7;
+  --postform-title: #463b25;
+  --postform-input-bg: #fffef4;
+  --postform-input-color: #21231c;
+  --postform-input-border: #ede6b9;
+  --radius: 12px;
+  --border: #293056;
+  --accent-color: #3a60fa;
+  --header-bg: #191e24;
+}
+
+[data-theme="dark"] {
+  --bg: #232833;
+  --text: #f3f3f3;
+  --accent-color: #8aa0ff;
+  --header-bg: #232833;
+}
 
 body {
   font-family: 'Segoe UI', 'Pretendard', Arial, sans-serif;
   margin: 0;
-  background: #FDF6E3; // 기본 아이보리
-  color: #222;
+  background: var(--bg);
+  color: var(--text);
   letter-spacing: -0.1px;
   transition: background 0.2s, color 0.2s;
-}
-
-body.dark {
-  background: #232833; // 다크모드
-  color: #f3f3f3;
+  min-height: 100vh;
+  width: 100vw;
+  box-sizing: border-box;
+  padding-top: 64px; // 헤더가 fixed인 경우
 }
 
 h2, h3 {
   margin: 1.2rem 0 0.7rem 0;
-  color: $accent-color;
+  color: var(--accent-color);
   font-weight: 800;
   letter-spacing: -0.5px;
 }
@@ -32,7 +49,7 @@ h2, h3 {
   margin: 96px auto 0 auto;
   padding: 32px 24px 36px 24px;
   background: rgba(29, 32, 39, 0.96);
-  border-radius: $radius;
+  border-radius: var(--radius);
   box-shadow: 0 8px 36px #0006;
   display: flex;
   flex-direction: column;
@@ -42,7 +59,7 @@ h2, h3 {
 }
 
 .app-title {
-  color: $primary;
+  color: var(--primary);
   font-weight: 900;
   margin: 0 0 24px 0;
   text-align: center;
@@ -57,7 +74,7 @@ h2, h3 {
   background: #23396a;
   color: #f2f4fa;
   border: none;
-  border-radius: $radius;
+  border-radius: var(--radius);
   font-size: 1.2em;
   font-weight: 700;
   padding: 22px 0;
@@ -71,14 +88,13 @@ h2, h3 {
 
   &:hover,
   &:focus-visible {
-    background: $primary;
+    background: var(--primary);
     color: #fff7e1;
     transform: translateY(-3px) scale(1.05);
     outline: none;
   }
 }
 
-/* 로그인 / 회원가입 안내, 로그아웃 버튼 */
 .to-register, .to-login {
   text-align: right;
   margin: -10px 0 12px 0;
@@ -110,7 +126,7 @@ h2, h3 {
   background: #233;
   color: #fff;
   border: none;
-  border-radius: $radius;
+  border-radius: var(--radius);
   padding: 8px 20px;
   font-weight: 700;
   font-size: 1.05em;
@@ -122,5 +138,26 @@ h2, h3 {
   &:focus-visible {
     background: #334;
     outline: none;
+  }
+}
+.center-container {
+  min-height: calc(100vh - 64px);
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  background: var(--bg, #FDF6E3);
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+body.dark .center-container {
+  background: var(--bg, #232833);
+}
+
+@media (max-width: 700px) {
+  .center-container {
+    padding-top: 30px;
+    align-items: flex-start;
   }
 }

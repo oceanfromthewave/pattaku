@@ -1,20 +1,35 @@
 @use './main.scss' as *;
+@use './variables' as *;
 
 .main-header {
   width: 100vw;
-  background: #191e24;
-  border-bottom: 1.5px solid #232843;
-  box-shadow: 0 3px 16px #0002;
+  background: var(--header-bg, #fcf6e7);
+  border-bottom: 1.5px solid var(--header-border, #eddcb5);
+  box-shadow: 0 3px 16px #bfae7c23;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 100;
+  min-height: 60px;
+  transition: background 0.22s, border 0.18s;
+}
+body.dark .main-header {
+  background: #191e24;
+  border-bottom: 1.5px solid #232843;
+  box-shadow: 0 3px 16px #0002;
+}
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 1150px;
+  margin: 0 auto;
+  height: 60px;
+  padding: 0 18px;
+  min-height: 60px;
 }
+
 .theme-toggle-btn {
   background: none;
   border: none;
@@ -25,60 +40,93 @@
   transition: color 0.2s;
 }
 
+/* DarkModeToggle 컴포넌트가 들어가는 곳 */
+.main-nav > .toggle {
+  margin-left: 7px;
+  margin-right: 7px;
+  min-width: 36px;
+  min-height: 36px;
+  outline: none;
+}
 
-  .header-home-link {
-    display: flex;
-    align-items: center;
-    gap: 13px;
-    text-decoration: none;
-    &:hover .header-title {
-      color: #ffb6b6;
-    }
+.header-home-link {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  text-decoration: none;
+  &:hover .header-title {
+    color: #ffb6b6;
   }
+}
 
-  .header-logo {
-    width: 38px;
+.header-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #fff;
+  object-fit: contain;
+  box-shadow: 0 1px 7px #0001;
+}
+
+.header-title {
+  font-size: 1.33em;
+  font-weight: 900;
+  color: $primary;
+  letter-spacing: -1.2px;
+  user-select: none;
+  transition: color 0.16s;
+}
+body.dark .header-title { color: #fee091; }
+
+.main-nav {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+
+  a, .login-btn, .logout-btn {
+    color: #977f45;
+    font-weight: 700;
+    background: none;
+    border: none;
+    border-radius: 7px;
+    padding: 0 10px;
     height: 38px;
-    border-radius: 8px;
-    background: #fff;
-    object-fit: contain;
-    box-shadow: 0 1px 7px #0001;
-  }
-
-  .header-title {
-    font-size: 1.33em;
-    font-weight: 900;
-    color: $primary;
-    letter-spacing: -1.2px;
-    user-select: none;
-    transition: color 0.16s;
-  }
-
-  .main-nav {
+    line-height: 38px;
+    font-size: 1em;
+    cursor: pointer;
     display: flex;
-    gap: 28px;
     align-items: center;
-
-    a, .login-btn, .logout-btn {
-      color: #a9c3fd;
-      font-weight: 700;
-      background: none;
-      border: none;
-      border-radius: 7px;
-      padding: 0 10px;
-      height: 38px;
-      line-height: 38px; // 수직 정렬용 라인 높이
-      font-size: 1em;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      transition: color 0.16s, background 0.17s;
-      margin: 0; // 기본 margin 제거
-      &:hover {
-        color: $primary;
-        background: #202436;
-      }
+    text-decoration: none;
+    transition: color 0.16s, background 0.17s;
+    margin: 0;
+    &:hover {
+      color: $primary;
+      background: #faefca;
     }
   }
+}
+body.dark .main-nav a,
+body.dark .main-nav .login-btn,
+body.dark .main-nav .logout-btn {
+  color: #a9c3fd;
+  &:hover {
+    color: $primary;
+    background: #202436;
+  }
+}
+
+/* 고정헤더용 spacer */
+.header-spacer {
+  height: 60px;
+  width: 100vw;
+  pointer-events: none;
+}
+
+/* 반응형: 모바일 */
+@media (max-width: 600px) {
+  .header-content { padding: 0 6vw; }
+  .main-nav { gap: 10px; }
+  .header-logo { width: 30px; height: 30px; }
+  .header-title { font-size: 1em; }
+  .header-spacer { height: 48px; }
 }

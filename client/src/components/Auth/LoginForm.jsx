@@ -23,7 +23,8 @@ export default function LoginForm({ onLogin }) {
       if (res.ok) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('username', data.username);
-        localStorage.setItem('nickname', data.nickname); // 닉네임 저장
+        localStorage.setItem('nickname', data.nickname);
+        localStorage.setItem('userId', data.id); // 이 줄 추가
         notifySuccess('로그인 성공!');
         if (onLogin) onLogin();
       } else {

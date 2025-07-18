@@ -1,16 +1,29 @@
 const db = require("../config/db");
 
-// 게시글별 댓글/대댓글 목록 (닉네임 조인)
+// 댓글 목록(닉네임/유저 id 반환, 필요시 Join)
 exports.getByPostIdAsync = async (postId) => {
-  const [rows] = await db
-    .promise()
-    .query(`SELECT * FROM comments WHERE post_id = ? ORDER BY created_at ASC`, [
-      postId,
-    ]);
+  const [rows] = await db.query(
+    `
+      SELECT c.*, u.nickname as author_nickname
+      FROM comments c
+      LEFT JOIN users u ON c.user_id = u.id
+      WHERE c.post_id = ?
+      ORDER BY c.created_at ASC
+    `,
+    [postId]
+  );
   return rows;
 };
 
-// 댓글/대댓글 등록 (user_id 기반!)
+// findById (삭제 권한 확인용)
+exports.findByIdAsync = async (id) => {
+  const [rows] = await db.query("SELECT * FROM comments WHERE id = ? LIMIT 1", [
+    id,
+  ]);
+  return rows[0];
+};
+
+// 등록
 exports.createAsync = async ({
   postId,
   parentId,
@@ -18,16 +31,14 @@ exports.createAsync = async ({
   author,
   content,
 }) => {
-  const [result] = await db
-    .promise()
-    .query(
-      "INSERT INTO comments (post_id, parent_id, user_id, author, content) VALUES (?, ?, ?, ?, ?)",
-      [postId, parentId || null, user_id, author, content]
-    );
+  const [result] = await db.query(
+    "INSERT INTO comments (post_id, parent_id, user_id, author, content) VALUES (?, ?, ?, ?, ?)",
+    [postId, parentId || null, user_id, author, content]
+  );
   return result;
 };
 
-// 댓글/대댓글 삭제
+// 삭제
 exports.deleteAsync = async (id) => {
-  await db.promise().query("DELETE FROM comments WHERE id = ?", [id]);
+  await db.query("DELETE FROM comments WHERE id = ?", [id]);
 };

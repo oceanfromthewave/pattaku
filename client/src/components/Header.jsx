@@ -1,12 +1,10 @@
 import '../styles/Header.scss';
 import logo from '../assets/pattaku-transparent.png';
 import { Link, useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
-import { ThemeContext } from '../App';
+import DarkModeToggle from './DarkModeToggle';
 
 export default function Header({ isLogin, setIsLogin }) {
   const navigate = useNavigate();
-  const { theme, setTheme } = useContext(ThemeContext);
 
   function handleLogout() {
     localStorage.removeItem('token');
@@ -19,28 +17,21 @@ export default function Header({ isLogin, setIsLogin }) {
     navigate('/board/free');
   }
 
-  // 토글버튼(아이콘 or 텍스트)
   return (
-    <header className="main-header">
+    <header className="main-header" role="banner">
       <div className="header-content">
-        <Link to="/" className="header-home-link">
+        <Link to="/" className="header-home-link" tabIndex={0}>
           <img src={logo} alt="로고" className="header-logo" />
           <span className="header-title">패타쿠 게시판</span>
         </Link>
-        <nav className="main-nav">
+        <nav className="main-nav" role="navigation" aria-label="메인 메뉴">
           {isLogin && (
             <>
               <Link to="/board/free">자유게시판</Link>
               <Link to="/board/schedule">일정공유</Link>
             </>
           )}
-          <button
-            className="theme-toggle-btn"
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            title={theme === "light" ? "다크모드" : "라이트모드"}
-          >
-            {theme === "light" ? "🌙" : "🌞"}
-          </button>
+          <DarkModeToggle />
           {!isLogin ? (
             <button className="login-btn" onClick={handleLogin}>로그인</button>
           ) : (
@@ -48,6 +39,8 @@ export default function Header({ isLogin, setIsLogin }) {
           )}
         </nav>
       </div>
+      {/* header가 fixed일 때 아래 컨텐츠 안 가리도록 여백용 */}
+      <div className="header-spacer" aria-hidden />
     </header>
   );
 }

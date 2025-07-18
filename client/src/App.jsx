@@ -1,5 +1,4 @@
 import './styles/main.scss';
-import './styles/theme.scss';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Header from './components/Header';
@@ -23,7 +22,7 @@ function FreeBoardPage({ isLogin, setIsLogin }) {
   const handleRegisterSuccess = () => setShowRegister(false);
 
   return (
-    <div>
+    <div className="center-container">
       {!isLogin ? (
         !showRegister ? (
           <>
@@ -60,29 +59,31 @@ function ScheduleBoardPage({ isLogin, setIsLogin }) {
   const handleRegisterSuccess = () => setShowRegister(false);
 
   return (
-    <div>
-      <h2 className="app-title">일정공유</h2>
+    <div className="center-container">
       {!isLogin ? (
-        !showRegister ? (
-          <>
-            <LoginForm onLogin={() => setIsLogin(true)} />
-            <div className="to-register">
-              아이디가 없으신가요?{' '}
-              <button className="link-btn" onClick={() => setShowRegister(true)}>
-                회원가입
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <RegisterForm onSuccess={handleRegisterSuccess} />
-            <div className="to-login">
-              <button className="link-btn" onClick={() => setShowRegister(false)}>
-                로그인 화면으로 돌아가기
-              </button>
-            </div>
-          </>
-        )
+        <div>
+          <h2 className="app-title">일정공유</h2>
+          {!showRegister ? (
+            <>
+              <LoginForm onLogin={() => setIsLogin(true)} />
+              <div className="to-register">
+                아이디가 없으신가요?{' '}
+                <button className="link-btn" onClick={() => setShowRegister(true)}>
+                  회원가입
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <RegisterForm onSuccess={handleRegisterSuccess} />
+              <div className="to-login">
+                <button className="link-btn" onClick={() => setShowRegister(false)}>
+                  로그인 화면으로 돌아가기
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       ) : (
         <>
           <ScheduleForm onAdd={() => window.location.reload()} />
@@ -98,26 +99,33 @@ function App() {
   // 다크모드 상태관리
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
-  // 테마 변경 시 html/body 클래스 토글
-  useEffect(() => {
-    document.body.className = theme;
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+useEffect(() => {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+}, [theme]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <Router>
         <Header isLogin={isLogin} setIsLogin={setIsLogin} />
         <ToastContainer position="top-right" autoClose={3000} />
-        <div className="container">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/board/free" element={<FreeBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />} />
-            <Route path="/board/schedule" element={<ScheduleBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />} />
-            <Route path="/board/free/:postId" element={<PostDetail isLogin={isLogin} />} />
-            <Route path="/board/schedule/:id" element={<ScheduleDetail isLogin={isLogin} />} />
-          </Routes>
-        </div>
+        <Routes>
+          <Route path="/" element={
+            <div className="center-container"><Home /></div>
+          } />
+          <Route path="/board/free" element={
+            <FreeBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />
+          } />
+          <Route path="/board/schedule" element={
+            <ScheduleBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />
+          } />
+          <Route path="/board/free/:postId" element={
+            <div className="center-container"><PostDetail isLogin={isLogin} /></div>
+          } />
+          <Route path="/board/schedule/:id" element={
+            <div className="center-container"><ScheduleDetail isLogin={isLogin} /></div>
+          } />
+        </Routes>
       </Router>
     </ThemeContext.Provider>
   );
