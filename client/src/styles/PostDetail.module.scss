@@ -37,7 +37,7 @@
   --body-attachment-file-color: #776121;
   --divider: #e7e7b6;
 }
-body.dark {
+[data-theme="dark"] {
   --detail-bg: #232833;
   --detail-title: #ffeab2;
   --detail-title-shadow: 0 0 7px #ffeab211;
@@ -90,9 +90,9 @@ body.dark {
   padding-bottom: 16px;
   margin-bottom: 16px;
 }
-body.dark .post-detail-header { border-bottom: 1.5px solid #33374a; }
+[data-theme="dark"] .post-detail-header { border-bottom: 1.5px solid #33374a; }
 
-body.dark .post-detail-body {
+[data-theme="dark"] .post-detail-body {
   color: #f2f2f2; // 다크모드에서 밝게
 }
 

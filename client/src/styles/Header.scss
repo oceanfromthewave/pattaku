@@ -13,10 +13,11 @@
   min-height: 60px;
   transition: background 0.22s, border 0.18s;
 }
-body.dark .main-header {
-  background: #191e24;
-  border-bottom: 1.5px solid #232843;
-  box-shadow: 0 3px 16px #0002;
+
+[data-theme="dark"] .main-header {
+  background: var(--header-bg, #1a1b20);
+  border-bottom: 1.5px solid var(--header-border, #23242a);
+  box-shadow: 0 3px 16px #0008;
 }
 
 .header-content {
@@ -40,7 +41,6 @@ body.dark .main-header {
   transition: color 0.2s;
 }
 
-/* DarkModeToggle 컴포넌트가 들어가는 곳 */
 .main-nav > .toggle {
   margin-left: 7px;
   margin-right: 7px;
@@ -71,13 +71,14 @@ body.dark .main-header {
 .header-title {
   font-size: 1.33em;
   font-weight: 900;
-  color: $primary;
+  color: var(--primary, #3a60fa);
   letter-spacing: -1.2px;
   user-select: none;
   transition: color 0.16s;
 }
-body.dark .header-title { color: #fee091; }
+[data-theme="dark"] .header-title { color: #ffe091; }
 
+/* 네비게이션 버튼/링크 */
 .main-nav {
   display: flex;
   gap: 18px;
@@ -100,18 +101,18 @@ body.dark .header-title { color: #fee091; }
     transition: color 0.16s, background 0.17s;
     margin: 0;
     &:hover {
-      color: $primary;
+      color: var(--primary, #3a60fa);
       background: #faefca;
     }
   }
 }
-body.dark .main-nav a,
-body.dark .main-nav .login-btn,
-body.dark .main-nav .logout-btn {
+[data-theme="dark"] .main-nav a,
+[data-theme="dark"] .main-nav .login-btn,
+[data-theme="dark"] .main-nav .logout-btn {
   color: #a9c3fd;
   &:hover {
-    color: $primary;
-    background: #202436;
+    color: var(--primary, #4076fa);
+    background: #232942;
   }
 }
 

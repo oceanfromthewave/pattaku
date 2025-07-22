@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { notifySuccess, notifyError } from "../../utils/notify";
 import classNames from "classnames";
 import styles from "../../styles/ScheduleVoteBar.module.scss";
+import authFetch from "../../utils/authFetch";
+
 
 // 투표 상태별 라벨
 const STATUS_LABELS = {
@@ -24,7 +26,7 @@ export default function ScheduleVoteBar({ scheduleId, isLogin }) {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/schedules/${scheduleId}/votes`, {
+      const res = await authFetch(`/api/schedules/${scheduleId}/votes`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("투표 현황 조회 실패");
@@ -61,7 +63,7 @@ export default function ScheduleVoteBar({ scheduleId, isLogin }) {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`/api/schedules/${scheduleId}/vote`, {
+      const res = await authFetch(`/api/schedules/${scheduleId}/vote`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -101,7 +103,7 @@ export default function ScheduleVoteBar({ scheduleId, isLogin }) {
           )}
         </div>
       ))}
-      {!isLogin && <span className={styles.loginMsg}>로그인 후 투표</span>}
+      {!isLogin && <span className={styles.loginMsg}></span>}
     </div>
   );
 }

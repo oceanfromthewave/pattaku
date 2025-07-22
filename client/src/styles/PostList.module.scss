@@ -14,7 +14,7 @@
   margin-right: auto;
   transition: background 0.21s, color 0.21s;
 }
-body.dark .postList {
+[data-theme="dark"] .postList {
   --post-bg: #181a25;
   --post-text: #e8e6e2;
 }
@@ -54,17 +54,17 @@ body.dark .postList {
     &:hover { background: #ffeeb1; color: #2428ad; }
   }
 }
-body.dark .searchBar .searchInput {
+[data-theme="dark"] .searchBar .searchInput {
   --post-input-bg: #23273b;
   --post-input-color: #f2f2f2;
   --post-input-border: #444869;
 }
-body.dark .searchBar .searchBtn,
-body.dark .searchBar .sortBtn {
+[data-theme="dark"] .searchBar .searchBtn,
+[data-theme="dark"] .searchBar .sortBtn {
   background: #4155d7;
   color: #fff;
 }
-body.dark .searchBar .sortBtn {
+[data-theme="dark"] .searchBar .sortBtn {
   --post-sort-bg: #353949;
   --post-sort-color: #fbeeb7;
 }
@@ -75,7 +75,7 @@ body.dark .searchBar .sortBtn {
   padding: 14px 0;
   text-align: center;
 }
-body.dark .noPost { --post-empty: #ffeab2; }
+[data-theme="dark"] .noPost { --post-empty: #ffeab2; }
 
 .postListUl {
   list-style: none;
@@ -108,7 +108,7 @@ body.dark .noPost { --post-empty: #ffeab2; }
     background: #f7edd0;
   }
 }
-body.dark .postTitleLink {
+[data-theme="dark"] .postTitleLink {
   --post-title: #b3d7ff;
   &:hover { color: #d3eaff; }
   &:focus { background: #283266; border-bottom: 2px solid #93baff; }
@@ -120,7 +120,7 @@ body.dark .postTitleLink {
   margin-left: 8px;
   .postAuthor { color: #496ec6; font-weight: 600; }
 }
-body.dark .postMeta {
+[data-theme="dark"] .postMeta {
   --post-meta: #cac8b8;
   .postAuthor { color: #ffeab2; }
 }

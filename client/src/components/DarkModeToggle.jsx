@@ -1,24 +1,8 @@
-import { useEffect, useState } from "react";
+import useDarkMode from "../utils/useDarkMode";
 import styles from "../styles/DarkModeToggle.module.scss";
 
 export default function DarkModeToggle() {
-  const [dark, setDark] = useState(() => {
-    // prefers-color-scheme 지원시 시스템 다크모드 적용
-    const theme = localStorage.getItem("theme");
-    if (theme) return theme === "dark";
-    if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) return true;
-    return false;
-  });
-
-  useEffect(() => {
-    if (dark) {
-      document.body.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.body.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [dark]);
+  const [dark, setDark] = useDarkMode();
 
   return (
     <button
@@ -36,7 +20,6 @@ export default function DarkModeToggle() {
 }
 
 function SunIcon() {
-  // SVG로 훨씬 더 예쁘게(아이콘 폰트대신)
   return (
     <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
       <circle cx="12" cy="12" r="5.2"/>

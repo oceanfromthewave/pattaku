@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { notifySuccess, notifyError } from '../../utils/notify';
 import styles from '../../styles/LoginForm.module.scss';
+import authFetch from '../../utils/authFetch';
+
 
 export default function LoginForm({ onLogin }) {
   const [form, setForm] = useState({ username: '', password: '' });
@@ -14,7 +16,7 @@ export default function LoginForm({ onLogin }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await authFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -25,6 +27,7 @@ export default function LoginForm({ onLogin }) {
   localStorage.setItem('userId', data.userId); // userId도 응답에서 받아와야 함
   localStorage.setItem('username', data.username);
   localStorage.setItem('nickname', data.nickname);
+  localStorage.setItem('loginTime',Date.now());
   notifySuccess('로그인 성공!');
   if(onLogin) onLogin();
 } else {

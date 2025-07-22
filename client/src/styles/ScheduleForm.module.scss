@@ -16,7 +16,7 @@
   margin-right: auto;
   transition: background 0.22s;
 }
-body.dark .scheduleForm {
+[data-theme="dark"] .scheduleForm {
   background: #2f3748;
   box-shadow: 0 6px 20px #0006;
 }
@@ -28,7 +28,7 @@ body.dark .scheduleForm {
   font-weight: 900;
   text-align: left;
 }
-body.dark .title { color: $primary; }
+[data-theme="dark"] .title { color: $primary; }
 
 .input {
   background: #fffef4;
@@ -46,7 +46,7 @@ body.dark .title { color: $primary; }
     background: #f6f2da;
   }
 }
-body.dark .input {
+[data-theme="dark"] .input {
   background: #232431;
   color: #f2f2f2;
   border: 1.5px solid #3d4668;
@@ -81,7 +81,7 @@ body.dark .input {
     color: #433100;
   }
 }
-body.dark .fileInput {
+[data-theme="dark"] .fileInput {
   color: #ffe2ad;
   &::-webkit-file-upload-button {
     background: #393a4b;
@@ -107,7 +107,7 @@ body.dark .fileInput {
   background: #f8f6ee;
   border: 1px solid #e2d7ac;
 }
-body.dark .imgPreview { background: #232943; border: 1px solid #2a3050; }
+[data-theme="dark"] .imgPreview { background: #232943; border: 1px solid #2a3050; }
 .imgDelBtn {
   position: absolute;
   top: 0; right: 0;
@@ -125,7 +125,7 @@ body.dark .imgPreview { background: #232943; border: 1px solid #2a3050; }
   transition: background 0.17s, color 0.15s;
   &:hover { background: #ff4949; color: #fff; }
 }
-body.dark .imgDelBtn { background: #474e68; color: #fff; }
+[data-theme="dark"] .imgDelBtn { background: #474e68; color: #fff; }
 .button {
   background: $primary;
   color: #fff;

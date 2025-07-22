@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { notifySuccess, notifyError } from "../../utils/notify";
 import styles from "../../styles/RegisterForm.module.scss";
+import authFetch from "../../utils/authFetch";
 
 export default function RegisterForm({ onSuccess }) {
   const [form, setForm] = useState({ username: "", password: "", email: "", nickname: "" });
@@ -12,7 +13,7 @@ export default function RegisterForm({ onSuccess }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("/api/users", {
+      const res = await authFetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

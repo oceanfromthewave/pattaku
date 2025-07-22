@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 require("dotenv").config();
 
 const userRoutes = require("./routes/userRoutes");
@@ -16,7 +17,8 @@ app.use(cors());
 app.use(express.json());
 
 // 이미지 업로드 폴더 정적 제공
-app.use("/uploads", express.static("uploads"));
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);

@@ -3,20 +3,24 @@ import { useNavigate, useParams } from 'react-router-dom';
 import imageCompression from 'browser-image-compression';
 import styles from '../../styles/EditPostForm.module.scss';
 import { notifySuccess, notifyError } from '../../utils/notify';
+import authFetch from '../../utils/authFetch';
+
+
 
 export default function EditPostForm() {
   const { postId } = useParams();
   const [form, setForm] = useState({ title: '', content: '' });
-  const [files, setFiles] = useState([]); // 새로 추가된 파일들
-  const [originFiles, setOriginFiles] = useState([]); // 기존 첨부파일
+  const [files, setFiles] = useState([]);
+  const [originFiles, setOriginFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState([]);
   const fileInputRef = useRef();
   const navigate = useNavigate();
+
+  // 환경변수
   const API_SERVER = import.meta.env.VITE_API_SERVER || '';
   const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL || (API_SERVER + '/uploads');
 
-  // 게시글과 수정 내역 불러오기
   useEffect(() => {
     setLoading(true);
     Promise.all([
@@ -51,7 +55,28 @@ export default function EditPostForm() {
   const removeFile = (idx) => setFiles(files.filter((_, i) => i !== idx));
   const removeOriginFile = (idx) => setOriginFiles(originFiles.filter((_, i) => i !== idx));
 
-  // 이미지 및 파일 미리보기
+  // 미리보기: 기존 파일
+  const renderOriginFilePreview = (file, idx) => {
+    const fileUrl = file.url.startsWith('http')
+      ? file.url
+      : `${UPLOADS_URL}/${file.url.replace(/^\/?uploads\//, '')}`;
+    if (fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+      return (
+        <div className={styles.previewOriginBox} key={file.url}>
+          <img src={fileUrl} alt="첨부이미지" className={styles.previewImg} />
+          <button type="button" className={styles.delBtn} onClick={() => removeOriginFile(idx)}>×</button>
+        </div>
+      );
+    }
+    return (
+      <div className={styles.previewOriginBox} key={file.url}>
+        <a href={fileUrl} download className={styles.previewFile}>{file.name || '첨부파일'}</a>
+        <button type="button" className={styles.delBtn} onClick={() => removeOriginFile(idx)}>×</button>
+      </div>
+    );
+  };
+
+  // 미리보기: 새로 추가된 파일
   const renderFilePreview = (file) => {
     if (!file) return null;
     if (file.type && file.type.startsWith('image/')) {
@@ -67,35 +92,12 @@ export default function EditPostForm() {
     return <div className={styles.previewFile}>{file.name}</div>;
   };
 
-  // 기존 첨부파일 Preview
-const renderOriginFilePreview = (file, idx) => {
-  // url이 http/https로 시작하지 않으면 절대경로로 보정
-  const fileUrl = file.url.startsWith('http')
-    ? file.url
-    : `${UPLOADS_URL}/${file.url.replace(/^\/?uploads\//, '')}`;
-  if (fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-    return (
-      <div className={styles.previewOriginBox} key={file.url}>
-        <img src={fileUrl} alt="첨부이미지" className={styles.previewImg} />
-        <button type="button" className={styles.delBtn} onClick={() => removeOriginFile(idx)}>×</button>
-      </div>
-    );
-  }
-  return (
-    <div className={styles.previewOriginBox} key={file.url}>
-      <a href={fileUrl} download className={styles.previewFile}>{file.name || '첨부파일'}</a>
-      <button type="button" className={styles.delBtn} onClick={() => removeOriginFile(idx)}>×</button>
-    </div>
-  );
-};
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     const token = localStorage.getItem('token');
 
     try {
-      // 이미지 압축
       const compressedFiles = await Promise.all(
         files.map(file =>
           file.type?.startsWith('image/')
@@ -109,9 +111,10 @@ const renderOriginFilePreview = (file, idx) => {
       formData.append('content', form.content);
 
       compressedFiles.forEach(f => formData.append('files', f));
+      // 남아있는 파일은 원본파일의 'name' 값(=originalname)으로
       formData.append('remain_files', JSON.stringify(originFiles.map(f => f.name)));
 
-      const res = await fetch(`/api/posts/${postId}`, {
+      const res = await authFetch(`/api/posts/${postId}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -130,7 +133,6 @@ const renderOriginFilePreview = (file, idx) => {
     setLoading(false);
   };
 
-  // 수정 내역 복구
   const handleRestoreHistory = (hist) => {
     if (!window.confirm('이전 내용으로 복구하시겠습니까?')) return;
     setForm({ title: hist.title, content: hist.content });

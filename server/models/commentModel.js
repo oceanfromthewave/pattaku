@@ -42,3 +42,8 @@ exports.createAsync = async ({
 exports.deleteAsync = async (id) => {
   await db.query("DELETE FROM comments WHERE id = ?", [id]);
 };
+
+// 수정
+exports.updateAsync = async (id, content) => {
+  await db.query("UPDATE comments SET content = ? WHERE id = ?", [content, id]);
+};

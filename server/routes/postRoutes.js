@@ -14,5 +14,13 @@ router.post(
   postController.createPost
 );
 router.delete("/:id", authMiddleware, postController.deletePost);
+router.put(
+  "/:id",
+  authMiddleware,
+  upload.array("files"),
+  postController.updatePost
+);
+router.post("/:id/like", authMiddleware, postController.likePost);
+router.post("/:id/dislike", authMiddleware, postController.dislikePost);
 
 module.exports = router;

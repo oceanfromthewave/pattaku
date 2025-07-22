@@ -1,3 +1,4 @@
+// models/scheduleModel.js
 const db = require("../config/db");
 
 // 전체 일정 조회(작성자 닉네임 포함)
@@ -22,12 +23,12 @@ exports.getByIdAsync = async (id) => {
   );
   const schedule = rows[0];
   if (!schedule) return null;
-  // 이미지 배열
+  // 이미지 배열 (컬럼명 꼭 image_url!!)
   const [imgs] = await db.query(
-    `SELECT url FROM schedule_images WHERE schedule_id = ?`,
+    `SELECT image_url FROM schedule_images WHERE schedule_id = ?`,
     [id]
   );
-  schedule.images = imgs.map((i) => i.url);
+  schedule.images = imgs.map((i) => i.image_url);
   return schedule;
 };
 
@@ -39,9 +40,10 @@ exports.createAsync = async ({ user_id, title, date, desc, imageUrls }) => {
   );
   const scheduleId = result.insertId;
   if (imageUrls && imageUrls.length > 0) {
-    await db.query("INSERT INTO schedule_images (schedule_id, url) VALUES ?", [
-      imageUrls.map((url) => [scheduleId, url]),
-    ]);
+    await db.query(
+      "INSERT INTO schedule_images (schedule_id, image_url) VALUES ?",
+      [imageUrls.map((image_url) => [scheduleId, image_url])]
+    );
   }
   return scheduleId;
 };

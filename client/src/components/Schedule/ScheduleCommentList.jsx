@@ -3,6 +3,7 @@ import { notifySuccess, notifyError } from "../../utils/notify";
 import imageCompression from "browser-image-compression";
 import classNames from "classnames";
 import styles from "../../styles/ScheduleCommentList.module.scss";
+import { formatDate } from "../../utils/data";
 
 // 좋아요/싫어요 상수
 const VOTE = { LIKE: "like", DISLIKE: "dislike" };
@@ -73,7 +74,7 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
       formData.append("parentId", "");
       if (fileData) formData.append("file", fileData);
 
-      await fetch(`/api/schedules/${scheduleId}/comments`, {
+      await authFetch(`/api/schedules/${scheduleId}/comments`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -103,7 +104,7 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
       formData.append("parentId", parent);
       if (fileData) formData.append("file", fileData);
 
-      await fetch(`/api/schedules/${scheduleId}/comments`, {
+      await authFetch(`/api/schedules/${scheduleId}/comments`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -125,7 +126,7 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
     if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
     setLoading(true);
     try {
-      await fetch(`/api/schedules/${scheduleId}/comments/${commentId}`, {
+      await authFetch(`/api/schedules/${scheduleId}/comments/${commentId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -145,7 +146,7 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
       return;
     }
     try {
-      const res = await fetch(`/api/schedules/${scheduleId}/comments/${commentId}/${type}`, {
+      const res = await authFetch(`/api/schedules/${scheduleId}/comments/${commentId}/${type}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -204,26 +205,17 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
       <h3>일정 댓글</h3>
       {isLogin ? (
         <form className={styles["comment-form"]} onSubmit={handleSubmit}>
-          <textarea
-            placeholder="댓글을 입력하세요"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            rows={2}
-            className={styles.textarea}
-            maxLength={400}
-            disabled={loading}
-          />
-          <input
-            type="file"
-            accept="image/*, .pdf,.xlsx,.xls,.doc,.docx,.hwp,.txt"
-            className={styles.fileInput}
-            ref={fileInputRef}
-            onChange={e => setFile(e.target.files[0])}
-            disabled={loading}
-          />
-          {renderFilePreview(file)}
-          <button type="submit" className={styles.button} disabled={loading}>등록</button>
-        </form>
+  <textarea
+    placeholder="댓글을 입력하세요"
+    value={input}
+    onChange={e => setInput(e.target.value)}
+    rows={2}
+    className={styles.textarea}
+    maxLength={400}
+    disabled={loading}
+  />
+  <button type="submit" className={styles.button} disabled={loading}>등록</button>
+</form>
       ) : (
         <div className={styles["comment-login-ask"]}>로그인 후 댓글 작성 가능</div>
       )}
@@ -232,7 +224,7 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
           <li key={comment.id} className={styles["comment-item"]}>
             <div className={styles["comment-head"]}>
               <b>{comment.author_nickname || comment.author}</b>
-              <span className={styles["comment-date"]}>{new Date(comment.created_at).toLocaleString()}</span>
+              <span className={styles["comment-date"]}>{formatDate(comment.created_at)}</span>
               <button
                 className={classNames(
                   styles['comment-like-btn'],
@@ -284,13 +276,6 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
                   maxLength={400}
                   disabled={loading}
                 />
-                <input
-                  type="file"
-                  accept="image/*, .pdf,.xlsx,.xls,.doc,.docx,.hwp,.txt"
-                  className={styles.fileInput}
-                  onChange={e => setReplyFile(prev => ({ ...prev, [comment.id]: e.target.files[0] }))}
-                  disabled={loading}
-                />
                 {renderFilePreview(replyFile[comment.id])}
                 <button
                   className={styles.button}
@@ -307,7 +292,7 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
                 <li key={reply.id} className={classNames(styles["comment-item"], styles["comment-reply"])}>
                   <div className={styles["comment-head"]}>
                     <b>{reply.author_nickname || reply.author}</b>
-                    <span className={styles["comment-date"]}>{new Date(reply.created_at).toLocaleString()}</span>
+                    <span className={styles["comment-date"]}>{formatDate(comment.created_at)}</span>
                     <button
                       className={classNames(
                         styles['comment-like-btn'],

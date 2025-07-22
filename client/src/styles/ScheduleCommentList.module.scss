@@ -9,7 +9,7 @@
   box-shadow: 0 2px 10px #b7a26822;
   transition: background 0.25s;
 }
-body.dark .comment-list-wrap { background: #22283b; }
+[data-theme="dark"] .comment-list-wrap { background: #22283b; }
 
 h3 {
   font-size: 1.13em;
@@ -17,7 +17,7 @@ h3 {
   color: #684c14;
   margin-bottom: 13px;
 }
-body.dark h3 { color: #e6c374; }
+[data-theme="dark"] h3 { color: #e6c374; }
 
 .comment-form {
   display: flex;
@@ -81,10 +81,10 @@ body.dark h3 { color: #e6c374; }
     &:disabled { background: #bbb; }
   }
 }
-body.dark .comment-form textarea { background: #24273a; color: #f2f2f2; }
-body.dark .comment-form button { background: #4170fc; }
-body.dark .comment-form .previewImg { background: #222943; border: 1px solid #2e3456; }
-body.dark .comment-form .previewFile { background: #223; color: #b6b9c8; }
+[data-theme="dark"] .comment-form textarea { background: #24273a; color: #f2f2f2; }
+[data-theme="dark"] .comment-form button { background: #4170fc; }
+[data-theme="dark"] .comment-form .previewImg { background: #222943; border: 1px solid #2e3456; }
+[data-theme="dark"] .comment-form .previewFile { background: #223; color: #b6b9c8; }
 
 .comment-list {
   margin: 0;
@@ -107,8 +107,8 @@ body.dark .comment-form .previewFile { background: #223; color: #b6b9c8; }
     border: 1.2px solid #ebdcc2;
   }
 }
-body.dark .comment-item { border-bottom: 1.5px solid #24304c; }
-body.dark .comment-item.comment-reply {
+[data-theme="dark"] .comment-item { border-bottom: 1.5px solid #24304c; }
+[data-theme="dark"] .comment-item.comment-reply {
   background: #182034;
   border: 1.2px solid #223265;
 }
@@ -145,14 +145,14 @@ body.dark .comment-item.comment-reply {
   background: #ffecec;
   color: #d2513c;
 }
-body.dark .comment-like-btn, body.dark .comment-dislike-btn {
+[data-theme="dark"] .comment-like-btn, [data-theme="dark"] .comment-dislike-btn {
   background: #292420;
   color: #ffd990;
   &:hover { background: #46340d; }
   &.liked { background: #52411a; color: #ffe8b6; }
   &.disliked { background: #42363a; color: #ffa090; }
 }
-body.dark .comment-dislike-btn { background: #342327; color: #ffa090; }
+[data-theme="dark"] .comment-dislike-btn { background: #342327; color: #ffa090; }
 
 .comment-del,
 .comment-reply-btn {
@@ -197,9 +197,9 @@ body.dark .comment-dislike-btn { background: #342327; color: #ffa090; }
     width: fit-content;
   }
 }
-body.dark .comment-content { color: #f2f4ff; }
-body.dark .commentImg { box-shadow: 0 2px 6px #000a; background: #232833; border: 1px solid #353d50; }
-body.dark .commentFileLink { color: #ffd18b; background: #293349; }
+[data-theme="dark"] .comment-content { color: #f2f4ff; }
+[data-theme="dark"] .commentImg { box-shadow: 0 2px 6px #000a; background: #232833; border: 1px solid #353d50; }
+[data-theme="dark"] .commentFileLink { color: #ffd18b; background: #293349; }
 
 .comment-reply-form {
   display: flex;
@@ -251,10 +251,10 @@ body.dark .commentFileLink { color: #ffd18b; background: #293349; }
     &:disabled { background: #b2b2b2; }
   }
 }
-body.dark .comment-reply-form textarea { background: #20294a; color: #f2f2f2; }
-body.dark .comment-reply-form .previewImg { background: #181f33; border: 1px solid #2d3456; }
-body.dark .comment-reply-form .previewFile { background: #23253c; color: #d6d9f3; }
-body.dark .comment-reply-form button { background: #4170fc; }
+[data-theme="dark"] .comment-reply-form textarea { background: #20294a; color: #f2f2f2; }
+[data-theme="dark"] .comment-reply-form .previewImg { background: #181f33; border: 1px solid #2d3456; }
+[data-theme="dark"] .comment-reply-form .previewFile { background: #23253c; color: #d6d9f3; }
+[data-theme="dark"] .comment-reply-form button { background: #4170fc; }
 
 .comment-replies {
   margin: 6px 0 0 18px;
@@ -268,7 +268,7 @@ body.dark .comment-reply-form button { background: #4170fc; }
   margin-bottom: 5px;
   border: 1.2px solid #ebdcc2;
 }
-body.dark .comment-reply {
+[data-theme="dark"] .comment-reply {
   background: #182034;
   border: 1.2px solid #223265;
 }
@@ -282,7 +282,7 @@ body.dark .comment-reply {
   margin-bottom: 17px;
   font-weight: 600;
 }
-body.dark .comment-login-ask {
+[data-theme="dark"] .comment-login-ask {
   color: #ffc;
   background: #2d2e3b;
 }

@@ -3,6 +3,8 @@ import styles from '../../styles/PostForm.module.scss';
 import imageCompression from 'browser-image-compression';
 import classNames from 'classnames';
 import { notifySuccess, notifyError } from '../../utils/notify';
+import authFetch from '../../utils/authFetch';
+
 
 export default function PostForm({ onPost }) {
   const [form, setForm] = useState({ title: '', content: '' });
@@ -68,7 +70,7 @@ export default function PostForm({ onPost }) {
       formData.append('content', form.content);
       compressedFiles.forEach((f) => formData.append('files', f));
 
-      const res = await fetch('/api/posts', {
+      const res = await authFetch('/api/posts', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -119,23 +121,38 @@ export default function PostForm({ onPost }) {
       </div>
       <div className={styles.attachWrap}>
         <label>첨부파일</label>
-        <input
-          type="file"
-          multiple
-          accept="image/*, .pdf,.xlsx,.xls,.doc,.docx,.hwp,.txt"
-          onChange={handleFiles}
-          ref={fileInputRef}
-          disabled={loading}
-          className={styles.fileInput}
-        />
-        <div className={styles.previewWrap}>
-          {files.map((f, idx) => (
-            <div key={idx} className={styles.previewBox}>
-              {renderFilePreview(f, idx)}
-              <button type="button" className={styles.delBtn} onClick={() => removeFile(idx)}>×</button>
-            </div>
-          ))}
+        <div className={styles.fileRow}>
+          <label className={styles.fileInputBtn} tabIndex={0}>
+            파일 선택
+            <input
+              type="file"
+              multiple
+              accept="image/*, .pdf,.xlsx,.xls,.doc,.docx,.hwp,.txt"
+              onChange={handleFiles}
+              ref={fileInputRef}
+              disabled={loading}
+              className={styles.fileInput}
+              tabIndex={-1}
+            />
+          </label>
+          <div className={styles.fileNameBox}>
+            {files.length === 0
+              ? "선택된 파일 없음"
+              : files.length === 1
+                ? files[0].name
+                : `${files[0].name} 외 ${files.length - 1}개`}
+          </div>
         </div>
+        {files.length > 0 && (
+          <div className={styles.previewWrap}>
+            {files.map((f, idx) => (
+              <div key={idx} className={styles.previewBox}>
+                {renderFilePreview(f, idx)}
+                <button type="button" className={styles.delBtn} onClick={() => removeFile(idx)}>×</button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <button className={styles.button} type="submit" disabled={loading}>
         {loading ? '로딩 중...' : '등록'}

@@ -17,7 +17,7 @@ exports.getScheduleDetail = async (req, res) => {
   try {
     const schedule = await scheduleModel.getByIdAsync(req.params.id);
     if (!schedule) return res.status(404).json({ error: "일정이 없음" });
-    res.json(schedule);
+    res.json(schedule); // images는 모델에서 자동 포함
   } catch (err) {
     res.status(500).json({ error: "일정 조회 실패" });
   }
@@ -30,7 +30,7 @@ exports.createScheduleWithImages = async (req, res) => {
   if (!title || !date) {
     return res.status(400).json({ error: "제목과 날짜는 필수입니다." });
   }
-  // 업로드된 이미지 파일 URL 배열 추출 (uploads/xxx.jpg)
+  // 업로드된 이미지 파일 URL 배열 추출 (확장자까지)
   const imageUrls = (req.files || []).map(
     (file) => `/uploads/${path.basename(file.path)}`
   );

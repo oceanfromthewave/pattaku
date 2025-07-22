@@ -13,16 +13,28 @@
   --radius: 12px;
   --border: #293056;
   --accent-color: #3a60fa;
-  --header-bg: #191e24;
+  --header-bg: #fcf6e7;
+  --header-border: #eddcb5;
 }
 
 [data-theme="dark"] {
-  --bg: #232833;
-  --text: #f3f3f3;
-  --accent-color: #8aa0ff;
-  --header-bg: #232833;
+  --bg: #18191c;               // 메인 배경 (블랙에 가까움)
+  --container-bg: #22232a;     // 카드, 폼 등 컨테이너
+  --post-bg: #23242a;          // 카드, 글 배경
+  --postform-bg: #22232a;
+  --postform-title: #e6e6e6;   // 카드 타이틀
+  --postform-input-bg: #23242a;// input/textarea bg
+  --postform-input-color: #f3f3f3;
+  --postform-input-border: #343844;
+  --radius: 13px;
+  --text: #e6e6e6;            // 본문 텍스트
+  --accent-color: #79a7fa;    // 포인트(블루)
+  --primary: #4171e7;         // 버튼 등 주요 블루
+  --header-bg: #1a1b20;       // 헤더
+  --header-border: #23242a;
 }
 
+/* 기본 스타일 */
 body {
   font-family: 'Segoe UI', 'Pretendard', Arial, sans-serif;
   margin: 0;
@@ -33,7 +45,7 @@ body {
   min-height: 100vh;
   width: 100vw;
   box-sizing: border-box;
-  padding-top: 64px; // 헤더가 fixed인 경우
+  padding-top: 64px;
 }
 
 h2, h3 {
@@ -151,8 +163,10 @@ h2, h3 {
   padding-top: 60px;
   padding-bottom: 60px;
 }
-body.dark .center-container {
-  background: var(--bg, #232833);
+
+
+[data-theme="dark"] .center-container {
+  background: var(--bg, #18191c);
 }
 
 @media (max-width: 700px) {

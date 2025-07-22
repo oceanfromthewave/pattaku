@@ -48,3 +48,17 @@ exports.remove = async (req, res) => {
     res.status(500).json({ error: "댓글 삭제 실패" });
   }
 };
+
+exports.like = async (req, res) => {
+  // schedule_id: req.params.id, comment_id: req.params.commentId, user_id: req.user.id
+  // 1. 중복 허용 안하려면 comment_likes 테이블 필요 (user_id, comment_id, type: like/dislike)
+  // 2. insert 또는 toggle 처리, 이미 있으면 삭제, 없으면 추가 등
+  // 3. 최종 like/dislike count 반환
+  // 기본 구현 예시 (추가 설명 가능)
+  res.json({ ok: true });
+};
+
+exports.dislike = async (req, res) => {
+  // 나중에 실제로 DB 처리 넣어도 되고, 일단 기본 응답만~
+  res.json({ ok: true });
+};

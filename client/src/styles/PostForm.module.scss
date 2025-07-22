@@ -1,135 +1,203 @@
-// PostForm.module.scss
-
 .postForm {
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 22px;
   background: var(--postform-bg, #fdfbe7);
-  border-radius: var(--radius, 12px);
-  padding: 28px 23px 20px 23px;
-  margin-bottom: 22px;
-  box-shadow: 0 2px 14px #dfc27333;
+  border-radius: 20px;
+  padding: 36px 30px 28px 30px;
+  margin-bottom: 32px;
+  box-shadow: 0 3px 36px #10101a1f;
   max-width: 540px;
   margin-left: auto; margin-right: auto;
-  transition: background 0.22s;
+  transition: background 0.23s;
 }
-body.dark .postForm {
-  --postform-bg: #212431;
-  box-shadow: 0 2px 16px #0114;
+[data-theme="dark"] .postForm {
+  background: var(--container-bg, #1a1b22);
+  box-shadow: 0 3px 28px #050511e0;
 }
 
 h3 {
   font-size: 1.22em;
   font-weight: 900;
-  color: var(--postform-title, #463b25);
-  margin-bottom: 7px;
+  color: #476ee5;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
 }
-body.dark h3 { --postform-title: #ffeab2; }
+[data-theme="dark"] .postForm h3 { color: #76a4ff; }
 
 .labelWrap {
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  .input, .textarea {
-    background: var(--postform-input-bg, #fffef4);
-    color: var(--postform-input-color, #21231c);
-    border: 1.5px solid var(--postform-input-border, #ede6b9);
-    border-radius: 11px;
-    padding: 9px 14px;
-    font-size: 1em;
-    transition: border-color 0.18s, background 0.18s;
-    &:focus { border-color: var(--primary, #3a60fa); background: #f6f2da; }
-    &:disabled { background: #f2f2f2; color: #888; }
-  }
-}
-body.dark .labelWrap .input,
-body.dark .labelWrap .textarea {
-  --postform-input-bg: #232431;
-  --postform-input-color: #f2f2f2;
-  --postform-input-border: #3d4668;
+  gap: 9px;
+  width: 100%;
 }
 
+.input, .textarea {
+  width: 100%;
+  background: var(--postform-input-bg, #fffef4);
+  color: var(--postform-input-color, #23231b);
+  border: 1.5px solid var(--postform-input-border, #ede6b9);
+  border-radius: 11px;
+  padding: 13px 17px;
+  font-size: 1.08em;
+  font-family: inherit;
+  transition: border-color 0.18s, background 0.18s;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  resize: none;
+  &:focus {
+    border-color: var(--primary, #3976fa);
+    background: #f6f2da;
+    outline: none;
+  }
+  &:disabled {
+    background: #f2f2f2;
+    color: #999;
+  }
+}
+[data-theme="dark"] .postForm .input,
+[data-theme="dark"] .postForm .textarea {
+  background: #23242a;
+  color: #f7f7f7;
+  border: 1.5px solid #343844;
+  &:focus { background: #24252e; border-color: #4076fa; }
+}
+
+.input { height: 44px; min-height: 44px; }
+.textarea { min-height: 150px; max-height: 380px; }
+
+/* --- 첨부파일 영역 --- */
 .attachWrap {
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  label {
-    font-weight: 700;
-    color: var(--postform-label, #a08738);
-    font-size: 1.05em;
-    margin-bottom: 3px;
-  }
-  .fileInput {
-    font-size: 0.98em;
-    color: #594405;
-    border: none;
-    background: none;
-    cursor: pointer;
-    margin-top: 2px;
-  }
-  .previewWrap {
-    display: flex;
-    gap: 9px;
-    flex-wrap: wrap;
-    margin-top: 7px;
-  }
-  .previewBox {
-    display: flex; align-items: center;
-    background: var(--postform-preview-bg, #fffef2);
-    border-radius: 7px;
-    box-shadow: 0 1px 5px #eddc9a33;
-    padding: 4px 7px 4px 4px;
-    position: relative;
-    .previewImg {
-      width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid #e8deaa;
-    }
-    .previewFile {
-      font-size: 0.99em;
-      color: #856b1c;
-      padding: 1px 7px;
-      margin-right: 3px;
-      background: #fff6e1;
-      border-radius: 4px;
-    }
-    .delBtn {
-      margin-left: 6px;
-      color: #d47b2a;
-      font-weight: 800;
-      background: none;
-      border: none;
-      font-size: 1.3em;
-      cursor: pointer;
-      transition: color 0.16s;
-      &:hover { color: #ff4c1a; }
-    }
-  }
+  gap: 9px;
+  margin-bottom: 2px;
+  width: 100%;
 }
-body.dark .attachWrap label { --postform-label: #ffeab2; }
-body.dark .attachWrap .fileInput { color: #eed37a; }
-body.dark .attachWrap .previewBox {
-  --postform-preview-bg: #2a3552;
-  box-shadow: 0 1px 8px #0126;
-  .previewFile { background: #27355c; color: #e9c374; }
+.attachWrap label {
+  font-weight: 900;
+  color: #c39742;
+  font-size: 1.09em;
+  margin-bottom: 2px;
+  letter-spacing: -0.5px;
+}
+[data-theme="dark"] .attachWrap label { color: #ffe091; }
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #23273c;
+  border-radius: 12px;
+  padding: 0 0 0 10px;
+  min-height: 54px;
+  box-shadow: 0 1px 8px #19182a0f;
+  border: 1.5px solid #23273c;
+  gap: 0;
+  position: relative;
+  margin-bottom: 2px;
+  overflow: hidden;
+}
+
+.fileInputBtn {
+  background: #476ee5;
+  color: #fff;
+  border: none;
+  border-radius: 8px 0 0 8px;
+  font-weight: 700;
+  font-size: 1.06em;
+  padding: 0 26px;
+  height: 54px;
+  cursor: pointer;
+  transition: background 0.16s;
+  outline: none;
+  display: flex;
+  align-items: center;
+  &:hover, &:focus { background: #3a55ac; }
+}
+[data-theme="dark"] .fileInputBtn { background: #27365b; }
+[data-theme="dark"] .fileInputBtn:hover,
+[data-theme="dark"] .fileInputBtn:focus { background: #1d2942; }
+
+.fileInput {
+  display: none;
+}
+
+.fileNameBox {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  height: 54px;
+  background: none;
+  color: #323238;
+  font-size: 1.09em;
+  font-weight: 600;
+  padding-left: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+[data-theme="dark"] .fileNameBox {
+  color: #ffeab2;
+  background: none;
+}
+
+/* 첨부파일 미리보기 */
+.previewWrap {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.previewBox {
+  display: flex; align-items: center;
+  background: var(--postform-preview-bg, #fffef2);
+  border-radius: 7px;
+  box-shadow: 0 1px 5px #eddc9a33;
+  padding: 4px 7px 4px 4px;
+  position: relative;
+}
+[data-theme="dark"] .previewBox {
+  background: #23242a;
+  box-shadow: 0 1px 8px #0005;
+}
+.previewImg {
+  width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e8deaa;
+}
+[data-theme="dark"] .previewImg { border: 1px solid #444859; }
+.previewFile {
+  font-size: 0.98em;
+  color: #856b1c;
+  padding: 1px 7px;
+  margin-right: 3px;
+  background: #fff6e1;
+  border-radius: 4px;
+}
+[data-theme="dark"] .previewFile { background: #27355c; color: #e9c374; }
+.delBtn {
+  margin-left: 6px;
+  color: #d47b2a;
+  font-weight: 900;
+  background: none;
+  border: none;
+  font-size: 1.4em;
+  cursor: pointer;
+  transition: color 0.14s;
+  &:hover { color: #ff4c1a; }
 }
 
 .button {
-  background: var(--primary, #3a60fa);
+  background: var(--primary, #4979fa);
   color: #fff;
   border: none;
-  border-radius: 11px;
-  padding: 11px 0;
-  font-weight: bold;
-  font-size: 1.09em;
-  margin-top: 6px;
+  border-radius: 12px;
+  padding: 15px 0;
+  font-weight: 800;
+  font-size: 1.12em;
+  margin-top: 11px;
   cursor: pointer;
-  transition: background 0.22s;
-  &:hover { background: #2d46c6; }
-  &:disabled { background: #a0a0a0; }
-}
-
-.msg {
-  color: #f3c7b7;
-  font-size: 0.95em;
-  margin-top: 6px;
-  min-height: 20px;
+  box-shadow: 0 2px 10px #10205022;
+  transition: background 0.20s;
+  &:hover { background: #3c62c2; }
+  &:disabled { background: #44464d; color: #ddd; }
 }

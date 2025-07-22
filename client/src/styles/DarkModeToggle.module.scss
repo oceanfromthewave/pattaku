@@ -20,7 +20,7 @@
     border: 2px solid #f7eaa9;
   }
 }
-body.dark .toggle {
+[data-theme="dark"] .toggle {
   background: #212944;
   box-shadow: 0 2px 12px #3c476f44;
   &:hover, &:focus {
@@ -37,7 +37,7 @@ body.dark .toggle {
   font-size: 1.5em;
   transition: color 0.2s;
 }
-body.dark .iconWrap { color: #9dd5fe; }
+[data-theme="dark"] .iconWrap { color: #9dd5fe; }
 @keyframes bounceIn {
   0% { transform: scale(0.3); opacity: 0.2; }
   65% { transform: scale(1.14); }

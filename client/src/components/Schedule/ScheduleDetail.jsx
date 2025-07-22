@@ -5,6 +5,9 @@ import ScheduleVoteBar from './ScheduleVoteBar';
 import ScheduleCommentList from './ScheduleCommentList';
 import styles from '../../styles/ScheduleDetail.module.scss';
 import classNames from 'classnames';
+import { formatDate } from '../../utils/data';
+
+const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL || 'http://localhost:5000/uploads';
 
 export default function ScheduleDetail({ isLogin }) {
   const { id } = useParams();
@@ -35,6 +38,12 @@ export default function ScheduleDetail({ isLogin }) {
   const [imgIdx, setImgIdx] = useState(0);
   const images = schedule?.images || [];
 
+  // 이미지 URL을 절대주소로 변환 (이미 http로 시작하면 그대로 사용)
+  const getImageUrl = (img) => {
+    if (!img) return '';
+    return img.startsWith('http') ? img : `${UPLOADS_URL}/${img.replace(/^\/?uploads\/?/, '')}`;
+  };
+
   // 썸네일 클릭 시 메인 변경
   const handleThumbClick = (idx) => setImgIdx(idx);
 
@@ -45,7 +54,7 @@ export default function ScheduleDetail({ isLogin }) {
     <div className={classNames(styles['schedule-detail-wrap'], 'schedule-detail-wrap')}>
       <h2 className={styles['schedule-title']}>{schedule.title}</h2>
       <div className={styles['schedule-meta']}>
-        날짜: {schedule.date}
+        &nbsp;&nbsp;날짜: {formatDate(schedule.created_at)}
         &nbsp;/&nbsp;작성자: <b>{schedule.author_nickname || schedule.author}</b>
       </div>
 
@@ -59,7 +68,7 @@ export default function ScheduleDetail({ isLogin }) {
             aria-label="이전"
           >◀</button>
           <img
-            src={images[imgIdx]}
+            src={getImageUrl(images[imgIdx])}
             alt="일정 이미지"
             className={styles['main-image']}
           />
@@ -73,7 +82,7 @@ export default function ScheduleDetail({ isLogin }) {
             {images.map((img, idx) => (
               <img
                 key={idx}
-                src={img}
+                src={getImageUrl(img)}
                 alt={`썸네일${idx + 1}`}
                 className={classNames(styles['thumb-img'], { [styles.selected]: idx === imgIdx })}
                 onClick={() => handleThumbClick(idx)}
@@ -90,7 +99,7 @@ export default function ScheduleDetail({ isLogin }) {
       {/* 참여 여부 투표 + 투표자 리스트 */}
       <section className={styles['schedule-vote-section']}>
         <h3>참여 여부 투표</h3>
-        <ScheduleVoteBar scheduleId={id} showVoterList={true} />
+        <ScheduleVoteBar scheduleId={id} isLogin={isLogin} showVoterList={true} />
       </section>
 
       {/* 댓글 */}

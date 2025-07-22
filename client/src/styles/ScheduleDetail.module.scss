@@ -10,7 +10,7 @@
   box-shadow: 0 8px 32px #c9b27325;
   transition: background 0.21s;
 }
-body.dark .schedule-detail-wrap {
+[data-theme="dark"] .schedule-detail-wrap {
   background: #23283a;
   box-shadow: 0 8px 32px #0005;
 }
@@ -22,7 +22,7 @@ body.dark .schedule-detail-wrap {
   margin-bottom: 10px;
   text-align: center;
 }
-body.dark .schedule-title { color: #ffeab2; }
+[data-theme="dark"] .schedule-title { color: #ffeab2; }
 
 .schedule-meta {
   font-size: 1.06em;
@@ -30,7 +30,7 @@ body.dark .schedule-title { color: #ffeab2; }
   margin-bottom: 18px;
   text-align: center;
 }
-body.dark .schedule-meta { color: #b4bcff; }
+[data-theme="dark"] .schedule-meta { color: #b4bcff; }
 
 .schedule-image-slider {
   display: flex;
@@ -87,9 +87,9 @@ body.dark .schedule-meta { color: #b4bcff; }
     }
   }
 }
-body.dark .schedule-image-slider .main-image { background: #232833; border: 1.5px solid #353d50; }
-body.dark .schedule-image-slider .thumb-img { background: #23283a; border: 2px solid #556690; }
-body.dark .schedule-image-slider .thumb-img.selected { border: 2.5px solid #aec9ff; }
+[data-theme="dark"] .schedule-image-slider .main-image { background: #232833; border: 1.5px solid #353d50; }
+[data-theme="dark"] .schedule-image-slider .thumb-img { background: #23283a; border: 2px solid #556690; }
+[data-theme="dark"] .schedule-image-slider .thumb-img.selected { border: 2.5px solid #aec9ff; }
 
 .schedule-desc {
   background: #f7f1d2;
@@ -100,7 +100,7 @@ body.dark .schedule-image-slider .thumb-img.selected { border: 2.5px solid #aec9
   font-size: 1.14em;
   line-height: 1.7;
 }
-body.dark .schedule-desc {
+[data-theme="dark"] .schedule-desc {
   background: #292e44;
   color: #eee;
 }
@@ -114,7 +114,7 @@ body.dark .schedule-desc {
     font-weight: 800;
   }
 }
-body.dark .schedule-vote-section h3 { color: #e2cd97; }
+[data-theme="dark"] .schedule-vote-section h3 { color: #e2cd97; }
 .schedule-comments-section {
   margin-top: 22px;
   h3 {
@@ -124,7 +124,7 @@ body.dark .schedule-vote-section h3 { color: #e2cd97; }
     margin-bottom: 8px;
   }
 }
-body.dark .schedule-comments-section h3 { color: #b6c8ff; }
+[data-theme="dark"] .schedule-comments-section h3 { color: #b6c8ff; }
 
 .schedule-detail-buttons {
   display: flex;

@@ -1,6 +1,5 @@
 const db = require("../config/db");
 
-// 등록
 exports.createAsync = async ({ user_id, title, content }) => {
   const [result] = await db.query(
     "INSERT INTO posts (user_id, title, content) VALUES (?, ?, ?)",
@@ -9,7 +8,6 @@ exports.createAsync = async ({ user_id, title, content }) => {
   return result;
 };
 
-// 전체목록
 exports.getAllAsync = async () => {
   const [rows] = await db.query(
     `SELECT posts.*, users.nickname AS author_nickname 
@@ -20,7 +18,6 @@ exports.getAllAsync = async () => {
   return rows;
 };
 
-// 상세조회
 exports.getByIdAsync = async (id) => {
   const [rows] = await db.query(
     `SELECT posts.*, users.nickname AS author_nickname
@@ -32,7 +29,6 @@ exports.getByIdAsync = async (id) => {
   return rows[0];
 };
 
-// 수정
 exports.updateAsync = async (id, title, content) => {
   await db.query("UPDATE posts SET title=?, content=? WHERE id=?", [
     title,
@@ -41,12 +37,10 @@ exports.updateAsync = async (id, title, content) => {
   ]);
 };
 
-// 삭제
 exports.deleteAsync = async (id) => {
   await db.query("DELETE FROM posts WHERE id=?", [id]);
 };
 
-// 파일 저장
 exports.addFilesAsync = async (postId, files) => {
   if (!files || files.length === 0) return;
   const vals = files.map((f) => [postId, f.filename, f.originalname]);
@@ -56,11 +50,51 @@ exports.addFilesAsync = async (postId, files) => {
   );
 };
 
-// 파일 목록 조회
 exports.getFilesAsync = async (postId) => {
   const [rows] = await db.query(
     "SELECT filename, originalname FROM post_files WHERE post_id = ?",
     [postId]
   );
   return rows;
+};
+
+exports.deleteFileAsync = async (postId, filename) => {
+  await db.query("DELETE FROM post_files WHERE post_id = ? AND filename = ?", [
+    postId,
+    filename,
+  ]);
+};
+
+// 추천/싫어요 추가
+exports.addPostLike = async (postId, userId, type) => {
+  await db.query(
+    "INSERT INTO post_likes (user_id, post_id, type) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE created_at=NOW()",
+    [userId, postId, type]
+  );
+};
+
+// 추천/싫어요 여부 확인
+exports.checkPostLike = async (postId, userId, type) => {
+  const [rows] = await db.query(
+    "SELECT id FROM post_likes WHERE user_id=? AND post_id=? AND type=?",
+    [userId, postId, type]
+  );
+  return rows.length > 0;
+};
+
+// 추천/싫어요 취소 (삭제)
+exports.deletePostLike = async (postId, userId, type) => {
+  await db.query(
+    "DELETE FROM post_likes WHERE user_id=? AND post_id=? AND type=?",
+    [userId, postId, type]
+  );
+};
+
+// 추천/싫어요 개수
+exports.getLikeCount = async (postId, type) => {
+  const [rows] = await db.query(
+    "SELECT COUNT(*) AS cnt FROM post_likes WHERE post_id=? AND type=?",
+    [postId, type]
+  );
+  return rows[0].cnt;
 };

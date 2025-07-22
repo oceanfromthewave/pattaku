@@ -14,36 +14,40 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 80px;
+  min-width: 90px;
+  margin-right: 8px;
 }
 
 .voteBtn {
-  background: $primary;
+  background: #4479f8;
   color: #fff;
   border: none;
   border-radius: 9px;
-  font-weight: 700;
-  font-size: 1em;
-  padding: 9px 20px;
+  font-weight: 800;
+  font-size: 1.07em;
+  padding: 12px 26px;
+  margin-bottom: 3px;
   cursor: pointer;
-  box-shadow: 0 2px 10px #1e265544;
-  transition: background 0.18s, box-shadow 0.18s;
+  box-shadow: 0 2px 14px #1e265577;
+  transition: background 0.18s, box-shadow 0.18s, color 0.18s, border 0.18s;
+  letter-spacing: 0.02em;
 
   &:hover:not(:disabled) {
-    background: color.adjust($primary, $lightness: 10%);
+    background: #2957ca;
   }
   &:disabled {
-    background: #6a79a7;
+    background: #b8c6e6;
+    color: #fff;
     cursor: not-allowed;
-    opacity: 0.66;
+    opacity: 0.62;
   }
 }
 
 .selected {
   background: #ffda89 !important;
-  color: #252a41 !important;
+  color: #234 !important;
   font-weight: 900;
-  border: 2.4px solid $primary;
+  border: 2.6px solid #365dff;
 }
 .loginMsg {
   font-size: 0.97em;
@@ -53,10 +57,30 @@
 }
 .nicknameList {
   margin-top: 4px;
-  font-size: 0.93em;
-  color: #b0beff;
+  font-size: 0.99em;
+  color: #365dff;
+  background: #e7f1ff;
+  padding: 2px 7px;
+  border-radius: 6px;
   min-height: 1.1em;
   text-align: center;
   word-break: break-all;
   white-space: pre-line;
+  box-shadow: 0 1px 5px #1e63ff11;
+}
+[data-theme="dark"] .voteBtn {
+  background: #3d4f78;
+  color: #fff1cc;
+  &:hover:not(:disabled) { background: #5e7be0; }
+  &:disabled { background: #363c5a; color: #aaa; }
+}
+[data-theme="dark"] .selected {
+  background: #ffd466 !important;
+  color: #222 !important;
+  border: 2.6px solid #4170fc;
+}
+[data-theme="dark"] .nicknameList {
+  color: #8bb6ff;
+  background: #182a43;
+  box-shadow: 0 1px 8px #19317044;
 }

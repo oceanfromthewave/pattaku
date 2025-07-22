@@ -17,7 +17,6 @@ export default function PostList({ refreshCount }) {
     if (filter.keyword) query.push(`q=${encodeURIComponent(filter.keyword)}`);
     if (filter.author) query.push(`author=${encodeURIComponent(filter.author)}`);
     if (filter.sort) query.push(`sort=${filter.sort}`);
-    // 페이지네이션 등 추가 가능
     fetch(`/api/posts?${query.join('&')}`)
       .then(res => res.json())
       .then(data => {
@@ -61,7 +60,11 @@ export default function PostList({ refreshCount }) {
           className={styles.searchInput}
         />
         <button type="submit" className={styles.searchBtn}>검색</button>
-        <button type="button" className={styles.sortBtn} onClick={toggleSort}>
+        <button
+          type="button"
+          className={styles.sortBtn}
+          onClick={toggleSort}
+        >
           {filter.sort === 'recent' ? '최신순' : '인기순'}
         </button>
       </form>
@@ -92,7 +95,6 @@ export default function PostList({ refreshCount }) {
           </li>
         ))}
       </ul>
-      {/* 페이지네이션 자리: 추후 확장시 */}
     </div>
   );
 }

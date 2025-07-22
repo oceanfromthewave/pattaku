@@ -45,3 +45,30 @@ exports.findByIdAsync = async (id) => {
   );
   return rows[0];
 };
+
+// scheduleCommentController.js
+exports.create = async (req, res) => {
+  const schedule_id = req.params.id;
+  const user_id = req.user.id;
+  const { content, parentId } = req.body;
+  let file_url = null,
+    file_name = null;
+  if (req.file) {
+    file_url = `/uploads/${req.file.filename}`;
+    file_name = req.file.originalname;
+  }
+  // createAsync에 file_url, file_name 전달 (모델도 수정!)
+  try {
+    await scheduleCommentModel.createAsync(
+      schedule_id,
+      user_id,
+      content,
+      parentId || null,
+      file_url,
+      file_name
+    );
+    res.json({ message: "등록됨" });
+  } catch (err) {
+    res.status(500).json({ error: "댓글 등록 실패" });
+  }
+};

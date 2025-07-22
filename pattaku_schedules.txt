@@ -25,12 +25,13 @@ DROP TABLE IF EXISTS `schedules`;
 CREATE TABLE `schedules` (
   `id` int NOT NULL AUTO_INCREMENT,
   `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `date` date NOT NULL,
+  `date` datetime NOT NULL,
   `desc` text COLLATE utf8mb4_general_ci,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `user_id` int DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,7 +40,7 @@ CREATE TABLE `schedules` (
 
 LOCK TABLES `schedules` WRITE;
 /*!40000 ALTER TABLE `schedules` DISABLE KEYS */;
-INSERT INTO `schedules` VALUES (1,'홍대 팝업스토어','2025-07-27','팝업스토어 구경 및 산남동 회식','2025-07-16 16:02:07','2025-07-16 16:02:07'),(2,'일정 제목','2025-07-24','설명 테스트','2025-07-17 10:28:15','2025-07-17 10:28:15');
+INSERT INTO `schedules` VALUES (17,'새 일정 테스트','2025-07-30 00:00:00','설명 테스트','2025-07-21 17:49:22','2025-07-21 17:49:22',2),(18,'ㅁㄴㅇ','2025-07-22 00:00:00','ㅁㄴㅇ','2025-07-21 17:54:16','2025-07-21 17:54:16',2),(19,'ㅁㄴㅇ','2025-08-07 00:00:00','ㅁㄴㅇㅁㄴㅇ','2025-07-21 17:55:54','2025-07-21 17:55:54',2),(20,'asdasdasdzxczxc','2025-07-24 00:00:00','asdzxczxc','2025-07-21 17:56:42','2025-07-21 17:56:42',2),(21,'asdasd','2025-08-06 00:00:00','asdas','2025-07-21 17:58:46','2025-07-21 17:58:46',3),(22,'zzzzzzz','2025-07-31 00:00:00','zzzzzzz','2025-07-21 17:58:54','2025-07-21 17:58:54',3);
 /*!40000 ALTER TABLE `schedules` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -52,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-18 13:12:48
+-- Dump completed on 2025-07-22  9:19:57

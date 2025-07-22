@@ -57,3 +57,21 @@ exports.deleteComment = async (req, res) => {
     res.status(500).json({ error: "DB 에러" });
   }
 };
+
+exports.updateComment = async (req, res) => {
+  const { id } = req.params;
+  const { content } = req.body;
+  const user_id = req.user?.id;
+  if (!user_id) return res.status(401).json({ error: "로그인 필요" });
+  try {
+    const comment = await commentModel.findByIdAsync(id);
+    if (!comment) return res.status(404).json({ error: "댓글 없음" });
+    if (comment.user_id !== user_id)
+      return res.status(403).json({ error: "수정 권한 없음" });
+    await commentModel.updateAsync(id, content);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("댓글 수정 에러:", err);
+    res.status(500).json({ error: "DB 에러" });
+  }
+};

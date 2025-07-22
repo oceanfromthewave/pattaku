@@ -55,12 +55,12 @@ h3 {
   opacity: 1;
 }
 
-body.dark .input, body.dark .textarea {
+[data-theme="dark"] .input, [data-theme="dark"] .textarea {
   background: #232833 !important;
   color: #fff !important;
   border: 1.5px solid #555;
 }
-body.dark .input::placeholder, body.dark .textarea::placeholder {
+[data-theme="dark"] .input::placeholder, [data-theme="dark"] .textarea::placeholder {
   color: #aaa !important;
 }
 
@@ -90,7 +90,7 @@ body.dark .input::placeholder, body.dark .textarea::placeholder {
   background: #fffdf7;
   box-shadow: 0 1px 6px #e9deba35;
 }
-body.dark .previewImg {
+[data-theme="dark"] .previewImg {
   border: 1.2px solid #393b60;
   background: #232833;
   box-shadow: 0 1px 6px #2228;
@@ -103,7 +103,7 @@ body.dark .previewImg {
   padding: 5px 10px;
   font-weight: 600;
 }
-body.dark .previewFile {
+[data-theme="dark"] .previewFile {
   color: #ffd18b;
   background: #293349;
 }

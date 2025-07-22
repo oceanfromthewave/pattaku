@@ -4,6 +4,8 @@ import CommentList from './CommentList';
 import { notifySuccess, notifyError } from '../../utils/notify';
 import classNames from 'classnames';
 import styles from '../../styles/PostDetail.module.scss';
+import authFetch from '../../utils/authFetch';
+
 
 const API_SERVER = import.meta.env.VITE_API_SERVER || '';
 const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL || (API_SERVER + '/uploads');
@@ -25,8 +27,8 @@ export default function PostDetail({ isLogin }) {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch(`${API_SERVER}/api/posts/${postId}`),
-      fetch(`${API_SERVER}/api/posts/${postId}/history`)
+      authFetch(`${API_SERVER}/api/posts/${postId}`),
+      authFetch(`${API_SERVER}/api/posts/${postId}/history`)
     ])
       .then(async ([resPost, resHist]) => {
         if (!resPost.ok) throw new Error('게시글을 찾을 수 없습니다.');
@@ -49,7 +51,7 @@ export default function PostDetail({ isLogin }) {
     if (!window.confirm('정말 게시글을 삭제하시겠습니까?')) return;
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`${API_SERVER}/api/posts/${postId}`, {
+      const res = await authFetch(`${API_SERVER}/api/posts/${postId}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -64,53 +66,57 @@ export default function PostDetail({ isLogin }) {
     }
   };
 
-  const handleLike = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      notifyError('로그인 후 추천할 수 있습니다.');
-      return;
-    }
-    try {
-      const res = await fetch(`${API_SERVER}/api/posts/${postId}/like`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error('추천 처리 실패');
-      setLikeCount(likeCount + (isLiked ? -1 : 1));
-      setIsLiked(!isLiked);
-      if (isDisliked) {
-        setDislikeCount(dislikeCount - 1);
-        setIsDisliked(false);
-      }
-      notifySuccess(isLiked ? '추천 취소됨' : '추천되었습니다!');
-    } catch {
-      notifyError('추천 처리 중 오류');
-    }
-  };
+const handleLike = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    notifyError('로그인 후 좋아요/싫어요 할 수 있습니다.');
+    return;
+  }
+  try {
+    const res = await authFetch(`${API_SERVER}/api/posts/${postId}/like`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '좋아요 처리 실패');
 
-  const handleDislike = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      notifyError('로그인 후 이용 가능합니다.');
-      return;
-    }
-    try {
-      const res = await fetch(`${API_SERVER}/api/posts/${postId}/dislike`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error('처리 실패');
-      setDislikeCount(dislikeCount + (isDisliked ? -1 : 1));
-      setIsDisliked(!isDisliked);
-      if (isLiked) {
-        setLikeCount(likeCount - 1);
-        setIsLiked(false);
-      }
-      notifySuccess(isDisliked ? '싫어요 취소됨' : '싫어요 처리됨');
-    } catch {
-      notifyError('싫어요 처리 중 오류');
-    }
-  };
+    setLikeCount(data.likes);
+    setDislikeCount(data.dislikes);
+    setIsLiked(data.liked);
+    setIsDisliked(data.disliked);
+
+    if (data.liked) notifySuccess('좋아요 처리됨!');
+    else notifySuccess('좋아요 취소됨');
+  } catch (err) {
+    notifyError('좋아요 처리 중 오류');
+  }
+};
+
+const handleDislike = async () => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    notifyError('로그인 후 이용 가능합니다.');
+    return;
+  }
+  try {
+    const res = await authFetch(`${API_SERVER}/api/posts/${postId}/dislike`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || '싫어요 처리 실패');
+
+    setLikeCount(data.likes);
+    setDislikeCount(data.dislikes);
+    setIsLiked(data.liked);
+    setIsDisliked(data.disliked);
+
+    if (data.disliked) notifySuccess('싫어요 처리됨!');
+    else notifySuccess('싫어요 취소됨');
+  } catch (err) {
+    notifyError('싫어요 처리 중 오류');
+  }
+};
 
   const handleRestoreHistory = (hist) => {
     if (!window.confirm('이전 내용으로 복구하시겠습니까?')) return;
@@ -174,7 +180,7 @@ export default function PostDetail({ isLogin }) {
             onClick={handleLike}
             aria-pressed={isLiked}
           >
-            👍 추천 {likeCount}
+            👍 좋아요 {likeCount}
           </button>
           <button
             type="button"

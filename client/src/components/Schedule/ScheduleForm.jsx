@@ -3,6 +3,8 @@ import { notifySuccess, notifyError } from '../../utils/notify';
 import imageCompression from 'browser-image-compression';
 import classNames from 'classnames';
 import styles from '../../styles/ScheduleForm.module.scss';
+import authFetch from '../../utils/authFetch';
+
 
 export default function ScheduleForm({ onAdd }) {
   const [form, setForm] = useState({ title: '', date: '', desc: '' });
@@ -42,13 +44,19 @@ export default function ScheduleForm({ onAdd }) {
     }
     try {
       // 이미지 압축/리사이즈
-      const compressed = await Promise.all(
-        images.map(file => imageCompression(file, {
-          maxSizeMB: 0.5,
-          maxWidthOrHeight: 1400,
-          useWebWorker: true,
-        }))
-      );
+        const compressed = await Promise.all(
+        images.map(async (file) => {
+        const blob = await imageCompression(file, {
+        maxSizeMB: 0.5,
+        maxWidthOrHeight: 1400,
+        useWebWorker: true,
+        });
+        // File로 변환 (name, type 유지!)
+        const ext = file.name.split('.').pop();
+        const filename = file.name; // 또는 원하는 규칙 적용 가능
+        return new File([blob], filename, { type: blob.type });
+        })
+        );
 
       const fd = new FormData();
       fd.append('title', form.title);
@@ -56,7 +64,7 @@ export default function ScheduleForm({ onAdd }) {
       fd.append('desc', form.desc);
       compressed.forEach(f => fd.append('images', f));
 
-      const res = await fetch('/api/schedules', {
+      const res = await authFetch('/api/schedules', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: fd,

@@ -14,7 +14,7 @@
   margin-right: auto;
   transition: background 0.3s;
 }
-body.dark .registerForm {
+[data-theme="dark"] .registerForm {
   --register-bg: #181b2e;
 }
 
@@ -48,7 +48,7 @@ body.dark .registerForm {
     cursor: not-allowed;
   }
 }
-body.dark .input {
+[data-theme="dark"] .input {
   --register-input-bg: #212431;
   --register-input-color: #eee;
   --register-input-border: #293056;

@@ -10,7 +10,7 @@
   box-shadow: 0 8px 32px #c9b27322;
   transition: background 0.21s;
 }
-body.dark .scheduleList {
+[data-theme="dark"] .scheduleList {
   background: #23283a;
   box-shadow: 0 8px 32px #0005;
 }
@@ -29,7 +29,7 @@ h3 {
   font-weight: 900;
   margin: 0;
 }
-body.dark h3 { color: $primary; }
+[data-theme="dark"] h3 { color: $primary; }
 .filterBar {
   display: flex;
   gap: 7px;
@@ -57,12 +57,12 @@ body.dark h3 { color: $primary; }
     &:hover { background: #ffeecf; color: #2342a8; }
   }
 }
-body.dark .filterBar .searchInput {
+[data-theme="dark"] .filterBar .searchInput {
   background: #262d44;
   color: #f6eedd;
   border: 1.2px solid #393d5e;
 }
-body.dark .filterBar .sortBtn { background: #353949; color: #fbeeb7; }
+[data-theme="dark"] .filterBar .sortBtn { background: #353949; color: #fbeeb7; }
 
 .scheduleUl {
   list-style: none;
@@ -87,7 +87,7 @@ body.dark .filterBar .sortBtn { background: #353949; color: #fbeeb7; }
     outline: 2px solid #b6cffb77;
   }
 }
-body.dark .scheduleItem {
+[data-theme="dark"] .scheduleItem {
   background: #22263a;
   box-shadow: 0 2px 8px #181c3311;
   &:hover, &:focus {
@@ -112,7 +112,7 @@ body.dark .scheduleItem {
   border: 1.5px solid #e7d8b3;
   box-shadow: 0 1px 8px #e5d5ac33;
 }
-body.dark .imgThumb { background: #191c25; border: 1.5px solid #3b4162; }
+[data-theme="dark"] .imgThumb { background: #191c25; border: 1.5px solid #3b4162; }
 
 .infoWrap {
   flex: 1;
@@ -129,21 +129,21 @@ body.dark .imgThumb { background: #191c25; border: 1.5px solid #3b4162; }
   word-break: break-all;
   line-height: 1.2;
 }
-body.dark .title { color: #b4bcff; }
+[data-theme="dark"] .title { color: #b4bcff; }
 
 .meta {
   font-size: 0.98em;
   color: #b39b5c;
   margin-bottom: 3px;
 }
-body.dark .meta { color: #c3c3e5; }
+[data-theme="dark"] .meta { color: #c3c3e5; }
 .desc {
   color: #3b3529;
   font-size: 1.05em;
   margin-top: 3px;
   word-break: break-all;
 }
-body.dark .desc { color: #eeeeff; }
+[data-theme="dark"] .desc { color: #eeeeff; }
 .noData {
   text-align: center;
   color: #b9a357;

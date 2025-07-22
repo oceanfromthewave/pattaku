@@ -1,0 +1,53 @@
+.overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(28, 32, 48, 0.42);
+  display: flex; align-items: center; justify-content: center;
+  animation: modal-fade-in 0.3s;
+}
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.modal {
+  background: #fff;
+  color: #1a1a1a;
+  padding: 2.4rem 2rem 2rem 2rem;
+  border-radius: 18px;
+  min-width: 320px; max-width: 94vw;
+  box-shadow: 0 10px 40px #2223, 0 1.5px 4px #8882;
+  text-align: center;
+  font-size: 1.15em;
+  animation: modal-slide-in 0.23s cubic-bezier(.53,.16,.37,1.26);
+}
+@keyframes modal-slide-in {
+  from { transform: translateY(60px) scale(0.98); opacity: 0; }
+  to   { transform: none; }
+}
+.message {
+  margin-bottom: 26px;
+  font-size: 1.1em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.button {
+  background: linear-gradient(90deg, #386aff 40%, #5d9bff 100%);
+  color: #fff;
+  border: none;
+  padding: 10px 34px;
+  border-radius: 10px;
+  font-size: 1.08em;
+  font-weight: 700;
+  box-shadow: 0 2px 8px #0002;
+  cursor: pointer;
+  transition: 0.14s background, 0.18s box-shadow, 0.16s transform;
+  margin-top: 4px;
+}
+.button:hover, .button:focus {
+  background: linear-gradient(90deg, #2342c3 30%, #6197ea 100%);
+  box-shadow: 0 6px 22px #386aff40;
+  transform: translateY(-2px) scale(1.03);
+}
+@media (max-width: 500px) {
+  .modal { min-width: 70vw; padding: 1.2rem 1rem 1rem 1rem; }
+  .button { padding: 9px 22px; font-size: 1em; }
+}

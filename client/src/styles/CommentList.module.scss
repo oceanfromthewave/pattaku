@@ -10,7 +10,7 @@
   margin-top: 36px;
   transition: background 0.25s;
 }
-body.dark .comment-list-wrap { background: #181d2c; }
+[data-theme="dark"] .comment-list-wrap { background: #181d2c; }
 
 .comment-list-inner {
   max-width: 540px;

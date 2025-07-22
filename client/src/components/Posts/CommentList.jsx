@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { notifySuccess, notifyError } from '../../utils/notify';
 import styles from '../../styles/CommentList.module.scss';
+import authFetch from '../../utils/authFetch';
+
 
 const VOTE = { LIKE: 'like', DISLIKE: 'dislike' };
 
@@ -47,7 +49,7 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
     if (!input.trim()) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/comments`, {
+      const res = await authFetch(`/api/comments`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -76,7 +78,7 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
     if (!replyInput[parentId]) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/comments`, {
+      const res = await authFetch(`/api/comments`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -112,7 +114,7 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
     if (!editInput.trim()) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/comments/${commentId}`, {
+      const res = await authFetch(`/api/comments/${commentId}`, {
         method: 'PUT',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -139,10 +141,11 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
     setLoading(true);
     try {
-      await fetch(`/api/comments/${commentId}`, {
+      const res = await authFetch(`/api/comments/${commentId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (!res.ok) throw new Error();
       setRefresh(v => v + 1);
       notifySuccess('삭제되었습니다.');
     } catch {
@@ -159,7 +162,7 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
       return;
     }
     try {
-      const res = await fetch(`/api/comments/${commentId}/${type}`, {
+      const res = await authFetch(`/api/comments/${commentId}/${type}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -184,6 +187,10 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
   const rootComments = comments.filter(c => !c.parent_id);
   const replies = comments.filter(c => c.parent_id);
   const getReplies = (parentId) => replies.filter(r => r.parent_id === parentId);
+
+  // **user_id 정수/문자열 비교 모두 OK하게 보정**
+  const isMyComment = (comment) =>
+    isLogin && String(comment.user_id) === String(currentUser);
 
   return (
     <div className={classNames(styles['comment-list-wrap'], 'comment-list-wrap')}>
@@ -241,7 +248,7 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
                     </button>
                   </>
                 )}
-                {isLogin && comment.author === currentUser && (
+                {isMyComment(comment) && (
                   <>
                     <button className={styles['comment-edit']} onClick={() => handleEdit(comment)}>
                       수정
@@ -349,7 +356,7 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
                           </button>
                         </>
                       )}
-                      {isLogin && reply.author === currentUser && (
+                      {isMyComment(reply) && (
                         <>
                           <button className={styles['comment-edit']} onClick={() => handleEdit(reply)}>
                             수정

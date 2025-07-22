@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
+import { formatDate } from './../../utils/data';
 import styles from '../../styles/ScheduleList.module.scss';
 
 export default function ScheduleList({ refreshCount }) {
@@ -15,7 +16,6 @@ export default function ScheduleList({ refreshCount }) {
       .then(setSchedules);
   }, [refreshCount]);
 
-  // 검색·정렬
   const filtered = schedules
     .filter(s =>
       (!search || s.title.includes(search) || (s.desc && s.desc.includes(search)))
@@ -66,7 +66,7 @@ export default function ScheduleList({ refreshCount }) {
             <div className={styles.infoWrap}>
               <div className={styles.title}>{s.title}</div>
               <div className={styles.meta}>
-                날짜: {s.date}
+                날짜: {formatDate(s.created_at)}
                 &nbsp;/&nbsp;작성자: <b>{s.author_nickname || s.author}</b>
               </div>
               <div className={styles.desc}>{s.desc?.length > 60 ? s.desc.slice(0, 60) + '…' : s.desc}</div>
