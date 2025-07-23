@@ -16,14 +16,19 @@
   box-shadow: 0 3px 28px #050511e0;
 }
 
-h3 {
+.h3 {
   font-size: 1.22em;
   font-weight: 900;
-  color: #476ee5;
   margin-bottom: 10px;
   letter-spacing: -0.5px;
+  color: #977f45;
+  text-shadow: 0 1.5px 0 #fff2, 0 2.5px 7px #ffe2ad33;
 }
-[data-theme="dark"] .postForm h3 { color: #76a4ff; }
+[data-theme="dark"] .h3{
+  color: #a9c3fd;
+}
+
+
 
 .labelWrap {
   display: flex;
@@ -68,40 +73,44 @@ h3 {
 
 /* --- 첨부파일 영역 --- */
 .attachWrap {
-  display: flex;
-  flex-direction: column;
+ display: flex;
+  align-items: center;
   gap: 9px;
-  margin-bottom: 2px;
-  width: 100%;
 }
 .attachWrap label {
   font-weight: 900;
-  color: #c39742;
+  color: #856111;
   font-size: 1.09em;
   margin-bottom: 2px;
   letter-spacing: -0.5px;
 }
-[data-theme="dark"] .attachWrap label { color: #ffe091; }
+[data-theme="dark"] .attachWrap label { color:#4979fa }
 
+/* 파일 업로드 줄 */
 .fileRow {
   display: flex;
   align-items: center;
   width: 100%;
-  background: #23273c;
+  background: #f8f7ec;      /* 라이트모드 배경 일정등록과 동일! */
   border-radius: 12px;
   padding: 0 0 0 10px;
   min-height: 54px;
   box-shadow: 0 1px 8px #19182a0f;
-  border: 1.5px solid #23273c;
+  border: 1.5px solid #f8f7ec;
   gap: 0;
   position: relative;
   margin-bottom: 2px;
   overflow: hidden;
 }
+[data-theme="dark"] .fileRow {
+  background: #23273c;
+  border: 1.5px solid #23273c;
+}
 
+/* 파일 선택 버튼 */
 .fileInputBtn {
-  background: #476ee5;
-  color: #fff;
+  background: #ffe2ad;
+  color: #856111;
   border: none;
   border-radius: 8px 0 0 8px;
   font-weight: 700;
@@ -109,36 +118,70 @@ h3 {
   padding: 0 26px;
   height: 54px;
   cursor: pointer;
-  transition: background 0.16s;
+  transition: background 0.16s, color 0.16s;
   outline: none;
   display: flex;
   align-items: center;
-  &:hover, &:focus { background: #3a55ac; }
+  &:hover, &:focus {
+    background: #ffeebb;
+    color: #a07c1b;
+  }
 }
-[data-theme="dark"] .fileInputBtn { background: #27365b; }
+[data-theme="dark"] .fileInputBtn {
+  background: #27365b;
+  color: #ffe2ad;
+  &:hover, &:focus {
+    background: #1d2942;
+    color: #ffeebb;
+  }
+}
 [data-theme="dark"] .fileInputBtn:hover,
 [data-theme="dark"] .fileInputBtn:focus { background: #1d2942; }
 
 .fileInput {
   display: none;
+  &::-webkit-file-upload-button {
+    background: #ffe2ad;
+    border: none;
+    border-radius: 7px;
+    color: #694504;
+    font-weight: 700;
+    font-size: 1em;
+    padding: 6px 13px;
+    cursor: pointer;
+    transition: background 0.16s;
+  }
+  &::-webkit-file-upload-button:hover {
+    background: #ffeebb;
+    color: #433100;
+  }
+}
+[data-theme="dark"] .fileInput {
+  color: #ffe2ad;
+  &::-webkit-file-upload-button {
+    background: #393a4b;
+    color: #e4cf95;
+  }
 }
 
+/* 파일명 영역 */
 .fileNameBox {
   display: flex;
   align-items: center;
   flex: 1;
   height: 54px;
-  background: none;
-  color: #323238;
+  background: #fdfbe7;      /* 일정등록과 동일! */
+  color: #ba9d63;           /* 일정등록과 동일! */
   font-size: 1.09em;
   font-weight: 600;
   padding-left: 14px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  border-radius: 0 8px 8px 0;
 }
 [data-theme="dark"] .fileNameBox {
-  color: #ffeab2;
+  color:#4979fa;
   background: none;
 }
 
@@ -187,8 +230,8 @@ h3 {
 }
 
 .button {
-  background: var(--primary, #4979fa);
-  color: #fff;
+  background: #ffe2ad;
+  color: #856111;         // <- 파일선택 버튼과 동일하게!
   border: none;
   border-radius: 12px;
   padding: 15px 0;
@@ -197,7 +240,27 @@ h3 {
   margin-top: 11px;
   cursor: pointer;
   box-shadow: 0 2px 10px #10205022;
-  transition: background 0.20s;
-  &:hover { background: #3c62c2; }
-  &:disabled { background: #44464d; color: #ddd; }
+  transition: background 0.18s, color 0.18s;
+  &:hover:not(:disabled) {
+    background: #ffeebb; // 파일선택 hover와 동일
+    color: #a07c1b;      // 살짝 더 진한 갈색으로 강조
+  }
+  &:disabled {
+    background: #f2e4c6; // 비활성화는 연한 베이지
+    color: #b3a179;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+[data-theme="dark"] .button {
+  background: #27365b;
+  color: #ffe2ad;
+  &:hover:not(:disabled) {
+    background: #1d2942;
+    color: #ffeebb;
+  }
+  &:disabled {
+    background: #23242a;
+    color: #b3a179;
+  }
 }

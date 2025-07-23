@@ -19,18 +19,15 @@ export default function PostDetail({ isLogin }) {
   const [dislikeCount, setDislikeCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
-  const [history, setHistory] = useState([]);
-  const [showHistory, setShowHistory] = useState(false);
 
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      authFetch(`${API_SERVER}/api/posts/${postId}`),
-      authFetch(`${API_SERVER}/api/posts/${postId}/history`)
+      authFetch(`${API_SERVER}/api/posts/${postId}`)
     ])
-      .then(async ([resPost, resHist]) => {
+      .then(async ([resPost]) => {
         if (!resPost.ok) throw new Error('게시글을 찾을 수 없습니다.');
         const data = await resPost.json();
         setPost(data);
@@ -38,7 +35,6 @@ export default function PostDetail({ isLogin }) {
         setDislikeCount(data.dislikes || 0);
         setIsLiked(data.isLiked || false);
         setIsDisliked(data.isDisliked || false);
-        setHistory(resHist.ok ? await resHist.json() : []);
       })
       .catch(err => {
         notifyError(err.message);
@@ -118,11 +114,6 @@ const handleDislike = async () => {
   }
 };
 
-  const handleRestoreHistory = (hist) => {
-    if (!window.confirm('이전 내용으로 복구하시겠습니까?')) return;
-    notifySuccess('수정화면에서 복구 가능합니다!');
-    navigate(`/board/free/${postId}/edit`, { state: { restore: hist } });
-  };
 
   // 첨부파일 미리보기
   const renderAttachments = () => {
@@ -190,14 +181,6 @@ const handleDislike = async () => {
           >
             👎 싫어요 {dislikeCount}
           </button>
-          <button
-            type="button"
-            className={styles['history-btn']}
-            onClick={() => setShowHistory(v => !v)}
-            aria-expanded={showHistory}
-          >
-            📝 수정내역
-          </button>
           {isAuthor && (
             <span>
               <button
@@ -212,22 +195,6 @@ const handleDislike = async () => {
             </span>
           )}
         </div>
-        {showHistory && history.length > 0 && (
-          <div className={styles['history-box']}>
-            <ul>
-              {history.map(hist => (
-                <li key={hist.id}>
-                  <span>[{new Date(hist.updated_at).toLocaleString()}] {hist.editor_nickname || hist.editor}</span>
-                  <button
-                    type="button"
-                    className={styles['restore-btn']}
-                    onClick={() => handleRestoreHistory(hist)}
-                  >복구</button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
       <div className={styles['post-detail-body']}>
         {post.content}

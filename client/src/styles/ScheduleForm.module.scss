@@ -57,6 +57,9 @@
   align-items: center;
   gap: 7px;
 }
+
+
+
 .fileInput {
   font-size: 1em;
   background: none;
@@ -87,6 +90,27 @@
     background: #393a4b;
     color: #e4cf95;
   }
+}
+
+/* 파일명 영역 */
+.fileNameBox {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  height: 54px;
+  background: #fdfbe7;      /* 일정등록과 동일! */
+  color: #ba9d63;           /* 일정등록과 동일! */
+  font-size: 1.09em;
+  font-weight: 600;
+  padding-left: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-radius: 0 8px 8px 0;
+}
+[data-theme="dark"] .fileNameBox {
+  color: #ffeab2;
+  background: none;
 }
 
 .imgPreviewWrap {

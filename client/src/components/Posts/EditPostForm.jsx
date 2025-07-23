@@ -101,8 +101,11 @@ export default function EditPostForm() {
       const compressedFiles = await Promise.all(
         files.map(file =>
           file.type?.startsWith('image/')
-            ? imageCompression(file, { maxSizeMB: 0.7, maxWidthOrHeight: 1400, useWebWorker: true })
-            : file
+          ? imageCompression(file, {maxSizeMB: 0.7, maxWidthOrHeight: 1400, useWebWorker: true})
+          .then(compressed =>
+            new File([compressed], file.name, {type: compressed.type})
+          )
+          :file
         )
       );
 

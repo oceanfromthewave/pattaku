@@ -111,13 +111,16 @@ h2, h3 {
   text-align: right;
   margin: -10px 0 12px 0;
   font-size: 1em;
-  color: #90aaff;
+  color: #ba9d63;
   user-select: none;
+}
+[data-theme="dark"] .to-register{
+    color: var(--primary, #4076fa);
 }
 .link-btn {
   background: none;
   border: none;
-  color: #6290ff;
+  color:  #b39353;
   cursor: pointer;
   text-decoration: underline;
   font-weight: 600;
@@ -130,6 +133,9 @@ h2, h3 {
     color: #aaccff;
     outline: none;
   }
+}
+[data-theme="dark"] .link-btn{
+    color: var(--primary, #2d65f5);
 }
 
 .logout-btn {

@@ -93,7 +93,7 @@ export default function PostForm({ onPost }) {
 
   return (
     <form className={classNames(styles.postForm, 'postForm')} onSubmit={handleSubmit}>
-      <h3>글 작성</h3>
+      <h3 className={styles.h3}>글 작성</h3>
       <div className={styles.labelWrap}>
         <input
           className={styles.input}
@@ -120,8 +120,6 @@ export default function PostForm({ onPost }) {
         />
       </div>
       <div className={styles.attachWrap}>
-        <label>첨부파일</label>
-        <div className={styles.fileRow}>
           <label className={styles.fileInputBtn} tabIndex={0}>
             파일 선택
             <input
@@ -142,7 +140,6 @@ export default function PostForm({ onPost }) {
                 ? files[0].name
                 : `${files[0].name} 외 ${files.length - 1}개`}
           </div>
-        </div>
         {files.length > 0 && (
           <div className={styles.previewWrap}>
             {files.map((f, idx) => (

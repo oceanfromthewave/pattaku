@@ -250,9 +250,6 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
                 )}
                 {isMyComment(comment) && (
                   <>
-                    <button className={styles['comment-edit']} onClick={() => handleEdit(comment)}>
-                      수정
-                    </button>
                     <button className={styles['comment-del']} onClick={() => handleDelete(comment.id)}>
                       삭제
                     </button>
@@ -358,9 +355,6 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
                       )}
                       {isMyComment(reply) && (
                         <>
-                          <button className={styles['comment-edit']} onClick={() => handleEdit(reply)}>
-                            수정
-                          </button>
                           <button className={styles['comment-del']} onClick={() => handleDelete(reply.id)}>
                             삭제
                           </button>

@@ -71,12 +71,19 @@
 .header-title {
   font-size: 1.33em;
   font-weight: 900;
-  color: var(--primary, #3a60fa);
+  color:  #977f45;
   letter-spacing: -1.2px;
   user-select: none;
   transition: color 0.16s;
 }
-[data-theme="dark"] .header-title { color: #ffe091; }
+[data-theme="dark"] .header-title{
+    color: #a9c3fd;
+  &:hover {
+    color: var(--primary, #4076fa);
+    background: #232942;
+  }
+}
+
 
 /* 네비게이션 버튼/링크 */
 .main-nav {
@@ -101,8 +108,7 @@
     transition: color 0.16s, background 0.17s;
     margin: 0;
     &:hover {
-      color: var(--primary, #3a60fa);
-      background: #faefca;
+      color: #ffb6b6;
     }
   }
 }
