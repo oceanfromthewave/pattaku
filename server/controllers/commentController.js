@@ -51,7 +51,7 @@ exports.createComment = async (req, res) => {
 
     // 게시글 소유자에게 알림 전송
     if (notificationService) {
-      const post = await postModel.getPostById(postId); // 게시글 정보 가져오기
+      const post = await postModel.getByIdAsync(postId); // 게시글 정보 가져오기
       if (post && post.user_id !== user_id) { // 자신의 게시글에 댓글 다는 경우 제외
         await notificationService.createCommentNotification(
           post.user_id, 
@@ -138,7 +138,7 @@ exports.likeComment = async (req, res) => {
     if (notificationService && result.userVote === 'like') { // 좋아요가 성공적으로 적용되었을 때만 알림
       const comment = await commentModel.findByIdAsync(id); // 댓글 정보 가져오기
       if (comment && comment.user_id !== user_id) { // 자신의 댓글에 좋아요 누르는 경우 제외
-        const post = await postModel.getPostById(comment.postId); // 게시글 정보 가져오기
+        const post = await postModel.getByIdAsync(comment.postId); // 게시글 정보 가져오기
         await notificationService.createLikeNotification(
           comment.user_id, 
           user_id, 

@@ -1,3 +1,4 @@
+// ...existing code...
 import './styles/main.scss';
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -139,6 +140,13 @@ function App() {
           theme="colored"
         />
         <Routes>
+          <Route path="/posts/:postId" element={
+            <div className="center-container">
+              <ErrorBoundary>
+                <PostDetail isLogin={isLogin} />
+              </ErrorBoundary>
+            </div>
+          } />
           <Route path="/" element={
             <div className="center-container">
               <ErrorBoundary>

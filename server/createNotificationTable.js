@@ -1,9 +1,8 @@
--- 알림 테이블 생성 스크립트
-const db = require('./config/db');
+const db = require("./config/db");
 
 async function createNotificationTable() {
   try {
-    console.log('🔔 알림 테이블 생성 중...');
+    console.log("🔔 알림 테이블 생성 중...");
 
     // 알림 테이블 생성
     await db.query(`
@@ -28,10 +27,9 @@ async function createNotificationTable() {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
 
-    console.log('✅ notifications 테이블 생성 완료');
-    
+    console.log("✅ notifications 테이블 생성 완료");
   } catch (error) {
-    console.error('❌ 알림 테이블 생성 중 오류:', error);
+    console.error("❌ 알림 테이블 생성 중 오류:", error);
   } finally {
     process.exit(0);
   }

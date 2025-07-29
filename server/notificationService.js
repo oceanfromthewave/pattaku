@@ -1,9 +1,21 @@
 // notificationService.js
 const notificationModel = require('./models/notificationModel');
 
+const wsMap = require('./wsNotificationMap');
+
 class NotificationService {
   constructor(socketHandler) {
     this.socketHandler = socketHandler;
+  }
+
+  // ws(WebSocket)로 알림 전송
+  sendWsNotification(userId, notification) {
+    const ws = wsMap.get(String(userId));
+    if (ws && ws.readyState === 1) {
+      ws.send(JSON.stringify(notification));
+      return true;
+    }
+    return false;
   }
 
   // 댓글 알림 생성
@@ -34,6 +46,7 @@ class NotificationService {
     };
 
     this.socketHandler.sendNotificationToUser(postOwnerId, realTimeNotification);
+    this.sendWsNotification(postOwnerId, realTimeNotification);
     
     return notificationId;
   }
@@ -66,6 +79,7 @@ class NotificationService {
     };
 
     this.socketHandler.sendNotificationToUser(commentOwnerId, realTimeNotification);
+    this.sendWsNotification(commentOwnerId, realTimeNotification);
     
     return notificationId;
   }
@@ -99,6 +113,7 @@ class NotificationService {
     };
 
     this.socketHandler.sendNotificationToUser(targetOwnerId, realTimeNotification);
+    this.sendWsNotification(targetOwnerId, realTimeNotification);
     
     return notificationId;
   }
@@ -119,10 +134,9 @@ class NotificationService {
     
     if (success) {
       // 실시간으로 읽음 상태 업데이트
-      this.socketHandler.sendNotificationToUser(userId, {
-        type: 'notification_read',
-        notificationId: notificationId
-      });
+      const msg = { type: 'notification_read', notificationId };
+      this.socketHandler.sendNotificationToUser(userId, msg);
+      this.sendWsNotification(userId, msg);
     }
     
     return success;
@@ -134,9 +148,9 @@ class NotificationService {
     
     if (updatedCount > 0) {
       // 실시간으로 모든 알림 읽음 상태 업데이트
-      this.socketHandler.sendNotificationToUser(userId, {
-        type: 'all_notifications_read'
-      });
+      const msg = { type: 'all_notifications_read' };
+      this.socketHandler.sendNotificationToUser(userId, msg);
+      this.sendWsNotification(userId, msg);
     }
     
     return updatedCount;
@@ -148,10 +162,9 @@ class NotificationService {
     
     if (success) {
       // 실시간으로 알림 삭제 알림
-      this.socketHandler.sendNotificationToUser(userId, {
-        type: 'notification_deleted',
-        notificationId: notificationId
-      });
+      const msg = { type: 'notification_deleted', notificationId };
+      this.socketHandler.sendNotificationToUser(userId, msg);
+      this.sendWsNotification(userId, msg);
     }
     
     return success;

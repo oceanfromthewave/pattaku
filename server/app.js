@@ -49,6 +49,7 @@ app.use("/api/notifications", notificationRoutes); // 알림 라우트 사용
 
 // --- WebSocket(ws) 서버 추가 ---
 const WebSocket = require('ws');
+const wsMap = require('./wsNotificationMap');
 const wss = new WebSocket.Server({ server });
 wss.on('connection', (ws, req) => {
   // 쿼리스트링에서 userId 추출
@@ -57,19 +58,12 @@ wss.on('connection', (ws, req) => {
   try {
     userId = new URL('ws://localhost' + url).searchParams.get('userId');
   } catch (e) {}
-  console.log('WS 연결:', userId);
-
-  // 연결 확인 메시지(테스트)
-  ws.send(JSON.stringify({
-    title: '테스트 알림',
-    message: `userId ${userId}님, WebSocket 연결 성공!`,
-    id: Date.now(),
-    createdAt: new Date().toISOString(),
-    read: false,
-    sourceUser: { name: '시스템', avatar: '/api/placeholder/32/32' }
-  }));
-
+  if (userId) {
+    wsMap.set(userId, ws);
+    console.log('WS 연결:', userId);
+  }
   ws.on('close', () => {
+    if (userId) wsMap.delete(userId);
     console.log('WS 연결 종료:', userId);
   });
 });
