@@ -2,8 +2,12 @@ import '../styles/Header.scss';
 import logo from '../assets/pattaku-transparent.png';
 import { Link, useNavigate } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
+import { useState, useEffect } from 'react';
+
+import NotificationSystem from './Notifications/NotificationSystem';
 
 export default function Header({ isLogin, setIsLogin }) {
+
   const navigate = useNavigate();
 
   function handleLogout() {
@@ -16,6 +20,8 @@ export default function Header({ isLogin, setIsLogin }) {
   function handleLogin() {
     navigate('/board/free');
   }
+
+
 
   return (
     <header className="main-header" role="banner">
@@ -30,6 +36,10 @@ export default function Header({ isLogin, setIsLogin }) {
               <Link to="/board/free">자유게시판</Link>
               <Link to="/board/schedule">일정공유</Link>
               <Link to="/mypage">마이페이지</Link>
+              {/* 실시간 알림 시스템 드롭다운 */}
+              <div className="notification-icon-wrapper">
+                <NotificationSystem userId={localStorage.getItem('userId') || 'guest'} />
+              </div>
             </>
           )}
           <DarkModeToggle />

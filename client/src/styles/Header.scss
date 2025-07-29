@@ -122,6 +122,60 @@
   }
 }
 
+/* 알림 아이콘 */
+.notification-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 38px; /* Link, button과 높이 맞추기 */
+}
+
+.notification-icon {
+  background: none;
+  border: none;
+  font-size: 1.4em;
+  cursor: pointer;
+  color: #977f45; /* 기본 색상 */
+  transition: color 0.2s;
+  padding: 0 10px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+
+  &:hover {
+    color: #ffb6b6; /* 호버 색상 */
+  }
+}
+
+[data-theme="dark"] .notification-icon {
+  color: #a9c3fd;
+  &:hover {
+    color: var(--primary, #4076fa);
+    background: #232942;
+  }
+}
+
+.notification-badge {
+  position: absolute;
+  top: 5px; /* 아이콘 상단에 위치 */
+  right: 5px; /* 아이콘 오른쪽에 위치 */
+  background-color: #ff4d4d; /* 빨간색 뱃지 */
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.7em;
+  font-weight: bold;
+  min-width: 18px; /* 최소 너비 */
+  height: 18px; /* 높이 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transform: translate(50%, -50%); /* 아이콘 기준으로 중앙 정렬 */
+}
+
 /* 고정헤더용 spacer */
 .header-spacer {
   height: 60px;

@@ -1,6 +1,22 @@
 const postModel = require("../models/postModel");
 const fs = require("fs");
 const path = require("path");
+const NotificationService = require("../notificationService"); // NotificationService 추가
+
+let notificationService; // notificationService 인스턴스를 저장할 변수
+
+// 미들웨어에서 req.app.get('socketHandler')를 통해 socketHandler를 주입받아 NotificationService 인스턴스 생성
+exports.initNotificationService = (req, res, next) => {
+  if (!notificationService) {
+    const socketHandler = req.app.get('socketHandler');
+    if (socketHandler) {
+      notificationService = new NotificationService(socketHandler);
+    } else {
+      console.warn("SocketHandler not found on app. NotificationService will not send real-time notifications.");
+    }
+  }
+  next();
+};
 
 exports.createPost = async (req, res) => {
   const { title, content } = req.body;
@@ -224,6 +240,22 @@ exports.likePost = async (req, res) => {
       // 동시에 싫어요가 있었다면 해제
       if (existedDislike) {
         await postModel.deletePostLike(post_id, user_id, "dislike");
+      }
+
+      // 게시글 소유자에게 알림 전송
+      if (notificationService) {
+        const post = await postModel.getByIdAsync(post_id); // 게시글 정보 가져오기
+        if (post && post.user_id !== user_id) { // 자신의 게시글에 좋아요 누르는 경우 제외
+          await notificationService.createLikeNotification(
+            post.user_id, 
+            user_id, 
+            post_id, 
+            null, // 게시글 좋아요는 commentId가 없음
+            'post', 
+            post.title, 
+            req.user?.nickname || "익명"
+          );
+        }
       }
     }
 

@@ -20,7 +20,7 @@ router.put(
   upload.array("files"),
   postController.updatePost
 );
-router.post("/:id/like", authMiddleware, postController.likePost);
+router.post("/:id/like", authMiddleware, postController.initNotificationService, postController.likePost);
 router.post("/:id/dislike", authMiddleware, postController.dislikePost);
 
 module.exports = router;

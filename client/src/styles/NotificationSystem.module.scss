@@ -1,0 +1,119 @@
+.notification-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.notification-dropdown {
+  position: absolute;
+  right: 0;
+  top: 2.5rem;
+  width: 24rem;
+  background: var(--color-bg, #181a20);
+  color: var(--color-text, #f5f6fa);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  border: 1px solid #23242a;
+  z-index: 100;
+  overflow: hidden;
+  animation: dropdown-fade-in 0.2s;
+}
+
+@keyframes dropdown-fade-in {
+  from { opacity: 0; transform: translateY(-10px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: linear-gradient(90deg, #e0e7ff 0%, #f3e8ff 100%);
+  color: #22223b;
+  border-bottom: 1px solid #e0e7ff;
+}
+
+.notification-list {
+  max-height: 20rem;
+  overflow-y: auto;
+  background: inherit;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid #23242a;
+  background: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover {
+    background: #23242a;
+  }
+  &.unread {
+    background: #1e293b;
+    border-left: 4px solid #3b82f6;
+  }
+}
+
+.notification-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+  .notification-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+  .notification-message {
+    font-size: 0.95rem;
+    color: #cbd5e1;
+  }
+  .notification-time {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+}
+
+.notification-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 9999px;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0);}
+  50% { transform: translateY(-4px);}
+}
