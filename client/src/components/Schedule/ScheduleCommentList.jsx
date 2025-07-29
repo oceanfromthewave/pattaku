@@ -90,7 +90,7 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
 
   // 댓글 삭제
   const handleDelete = async (commentId) => {
-    if (!window.confirm('댓글을 삭제하시겠습니까?\n(답글이 있는 경우 답글도 함께 삭제됩니다)')) return;
+    if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
     
     setSubmitting(true);
     try {
@@ -118,21 +118,23 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
         if (comment.id === commentId) {
           const currentLiked = comment.isLiked;
           const currentDisliked = comment.isDisliked;
+          const currentLikes = Number(comment.likes) || 0;
+          const currentDislikes = Number(comment.dislikes) || 0;
           
           if (type === VOTE.LIKE) {
             if (currentLiked) {
               // 이미 좋아요 -> 취소
               return {
                 ...comment,
-                likes: Math.max(0, (comment.likes || 0) - 1),
+                likes: Math.max(0, currentLikes - 1),
                 isLiked: false
               };
             } else {
               // 좋아요 추가 (기존 싫어요가 있다면 취소)
               return {
                 ...comment,
-                likes: (comment.likes || 0) + 1,
-                dislikes: currentDisliked ? Math.max(0, (comment.dislikes || 0) - 1) : (comment.dislikes || 0),
+                likes: currentLikes + 1,
+                dislikes: currentDisliked ? Math.max(0, currentDislikes - 1) : currentDislikes,
                 isLiked: true,
                 isDisliked: false
               };
@@ -142,15 +144,15 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
               // 이미 싫어요 -> 취소
               return {
                 ...comment,
-                dislikes: Math.max(0, (comment.dislikes || 0) - 1),
+                dislikes: Math.max(0, currentDislikes - 1),
                 isDisliked: false
               };
             } else {
               // 싫어요 추가 (기존 좋아요가 있다면 취소)
               return {
                 ...comment,
-                dislikes: (comment.dislikes || 0) + 1,
-                likes: currentLiked ? Math.max(0, (comment.likes || 0) - 1) : (comment.likes || 0),
+                dislikes: currentDislikes + 1,
+                likes: currentLiked ? Math.max(0, currentLikes - 1) : currentLikes,
                 isDisliked: true,
                 isLiked: false
               };
@@ -179,10 +181,10 @@ export default function ScheduleCommentList({ scheduleId, isLogin, currentUser }
             comment.id === commentId 
               ? {
                   ...comment,
-                  likes: result.likeCount || 0,
-                  dislikes: result.dislikeCount || 0,
-                  isLiked: result.isLiked || false,
-                  isDisliked: result.isDisliked || false
+                  likes: Number(result.likeCount) || 0,
+                  dislikes: Number(result.dislikeCount) || 0,
+                  isLiked: Boolean(result.isLiked),
+                  isDisliked: Boolean(result.isDisliked)
                 }
               : comment
           )

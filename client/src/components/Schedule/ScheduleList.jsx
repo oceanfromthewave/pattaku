@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 import { getSchedules } from '../../api/scheduleApi';
@@ -11,13 +11,31 @@ import styles from '../../styles/ScheduleList.module.scss';
 export default function ScheduleList({ refreshCount }) {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(''); // 실제 검색어
+  const [searchInput, setSearchInput] = useState(''); // 입력창 값
   const [sort, setSort] = useState('recent');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 8;
   const navigate = useNavigate();
+
+  // 스크롤 위치 저장용 ref
+  const scrollPositionRef = useRef(0);
+
+  // 스크롤 위치 저장
+  const saveScrollPosition = () => {
+    scrollPositionRef.current = window.pageYOffset || document.documentElement.scrollTop;
+  };
+
+  // 스크롤 위치 복원
+  const restoreScrollPosition = () => {
+    setTimeout(() => {
+      if (scrollPositionRef.current > 0) {
+        window.scrollTo(0, scrollPositionRef.current);
+      }
+    }, 50);
+  };
 
   useEffect(() => {
     const fetchSchedules = async () => {
@@ -29,7 +47,6 @@ export default function ScheduleList({ refreshCount }) {
           search,
           sort
         };
-        
         const data = await getSchedules(params);
         setSchedules(data.schedules || data);
         setTotalPages(data.totalPages || Math.ceil((data.total || data.length) / itemsPerPage));
@@ -40,29 +57,56 @@ export default function ScheduleList({ refreshCount }) {
         setSchedules([]);
       } finally {
         setLoading(false);
+        // 로딩 완료 후 스크롤 위치 복원 (정렬 변경 시에만)
+        if (scrollPositionRef.current > 0) {
+          restoreScrollPosition();
+        }
       }
     };
-
     fetchSchedules();
   }, [refreshCount, search, sort, currentPage]);
 
-  const handleSearch = (value) => {
-    setSearch(value);
-    setCurrentPage(1);
+  // 디바운스: 입력 후 400ms 뒤에만 실제 검색 실행
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      // 검색 시에는 스크롤을 맨 위로
+      if (searchInput !== search) {
+        scrollPositionRef.current = 0;
+      }
+      setSearch(searchInput);
+      setCurrentPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+    // eslint-disable-next-line
+  }, [searchInput]);
+
+  // 입력창 값만 변경
+  const handleSearchInput = (value) => {
+    setSearchInput(value);
   };
 
-  const handleSortChange = () => {
+  // 정렬 변경 (스크롤 위치 유지)
+  const handleSortChange = (e) => {
+    e.preventDefault(); // 기본 동작 방지
+    
+    // 현재 스크롤 위치 저장
+    saveScrollPosition();
+    
     setSort(s => (s === 'recent' ? 'old' : 'recent'));
     setCurrentPage(1);
   };
 
   const resetFilters = () => {
+    scrollPositionRef.current = 0; // 초기화 시에는 맨 위로
+    setSearchInput('');
     setSearch('');
     setSort('recent');
     setCurrentPage(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handlePageChange = (page) => {
+    scrollPositionRef.current = 0; // 페이지 변경 시에는 맨 위로
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -87,8 +131,8 @@ export default function ScheduleList({ refreshCount }) {
           <input
             type="text"
             className={styles.searchInput}
-            value={search}
-            onChange={e => handleSearch(e.target.value)}
+            value={searchInput}
+            onChange={e => handleSearchInput(e.target.value)}
             placeholder="제목/설명 검색"
           />
         </div>
@@ -97,6 +141,7 @@ export default function ScheduleList({ refreshCount }) {
             type="button"
             className={styles.sortBtn}
             onClick={handleSortChange}
+            title={`현재: ${sort === 'recent' ? '최신순' : '과거순'}`}
           >
             {sort === 'recent' ? '📅 최신순' : '🕰️ 과거순'}
           </button>

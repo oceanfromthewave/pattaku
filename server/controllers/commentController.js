@@ -84,29 +84,14 @@ exports.likeComment = async (req, res) => {
   if (!user_id) return res.status(401).json({ error: "로그인 필요" });
   
   try {
-    // 현재 좋아요 상태 확인
-    const existedLike = await commentModel.checkLike(id, user_id, "like");
-    const existedDislike = await commentModel.checkLike(id, user_id, "dislike");
+    const result = await commentModel.toggleVoteAsync(id, user_id, 'like');
     
-    if (existedLike) {
-      // 이미 좋아요 → 취소
-      await commentModel.deleteLike(id, user_id, "like");
-    } else {
-      // 좋아요 추가
-      await commentModel.addLike(id, user_id, "like");
-      // 동시에 싫어요가 있었다면 해제
-      if (existedDislike) {
-        await commentModel.deleteLike(id, user_id, "dislike");
-      }
-    }
-    
-    // 최신 상태 반환
-    const likes = await commentModel.getLikeCount(id, "like");
-    const dislikes = await commentModel.getLikeCount(id, "dislike");
-    const liked = await commentModel.checkLike(id, user_id, "like");
-    const disliked = await commentModel.checkLike(id, user_id, "dislike");
-    
-    res.json({ liked, disliked, likes, dislikes });
+    res.json({ 
+      liked: result.userVote === 'like',
+      disliked: result.userVote === 'dislike',
+      likes: result.likeCount,
+      dislikes: result.dislikeCount
+    });
   } catch (err) {
     console.error("댓글 좋아요 에러:", err);
     res.status(500).json({ error: "DB 에러" });
@@ -121,29 +106,14 @@ exports.dislikeComment = async (req, res) => {
   if (!user_id) return res.status(401).json({ error: "로그인 필요" });
   
   try {
-    // 현재 싫어요 상태 확인
-    const existedDislike = await commentModel.checkLike(id, user_id, "dislike");
-    const existedLike = await commentModel.checkLike(id, user_id, "like");
+    const result = await commentModel.toggleVoteAsync(id, user_id, 'dislike');
     
-    if (existedDislike) {
-      // 이미 싫어요 → 취소
-      await commentModel.deleteLike(id, user_id, "dislike");
-    } else {
-      // 싫어요 추가
-      await commentModel.addLike(id, user_id, "dislike");
-      // 동시에 좋아요가 있었다면 해제
-      if (existedLike) {
-        await commentModel.deleteLike(id, user_id, "like");
-      }
-    }
-    
-    // 최신 상태 반환
-    const likes = await commentModel.getLikeCount(id, "like");
-    const dislikes = await commentModel.getLikeCount(id, "dislike");
-    const liked = await commentModel.checkLike(id, user_id, "like");
-    const disliked = await commentModel.checkLike(id, user_id, "dislike");
-    
-    res.json({ liked, disliked, likes, dislikes });
+    res.json({ 
+      liked: result.userVote === 'like',
+      disliked: result.userVote === 'dislike',
+      likes: result.likeCount,
+      dislikes: result.dislikeCount
+    });
   } catch (err) {
     console.error("댓글 싫어요 에러:", err);
     res.status(500).json({ error: "DB 에러" });

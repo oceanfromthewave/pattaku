@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
 import { getPosts } from '../../api/postApi';
@@ -10,13 +10,33 @@ import styles from '../../styles/PostList.module.scss';
 export default function PostList({ refreshCount }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState({ keyword: '', author: '', sort: 'recent' });
-  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState({ q: '', author: '', sort: 'recent' });
+  const [search, setSearch] = useState(''); // 제목/내용/태그 검색 input
+  const [authorInput, setAuthorInput] = useState(''); // 작성자 검색 input
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 10;
   const navigate = useNavigate();
+  
+  // 스크롤 위치 저장용 ref
+  const scrollPositionRef = useRef(0);
+  const containerRef = useRef(null);
+
+  // 스크롤 위치 저장
+  const saveScrollPosition = () => {
+    scrollPositionRef.current = window.pageYOffset || document.documentElement.scrollTop;
+  };
+
+  // 스크롤 위치 복원
+  const restoreScrollPosition = () => {
+    // 다음 렌더링 사이클에서 스크롤 복원
+    setTimeout(() => {
+      if (scrollPositionRef.current > 0) {
+        window.scrollTo(0, scrollPositionRef.current);
+      }
+    }, 50);
+  };
 
   // 게시글 불러오기
   useEffect(() => {
@@ -28,9 +48,8 @@ export default function PostList({ refreshCount }) {
           limit: itemsPerPage,
           ...filter
         };
-        
         const data = await getPosts(params);
-        setPosts(data.posts || data); // 백엔드 응답 구조에 따라 조정
+        setPosts(data.posts || data);
         setTotalPages(data.totalPages || Math.ceil((data.total || data.length) / itemsPerPage));
         setTotalItems(data.total || data.length);
       } catch (error) {
@@ -39,51 +58,72 @@ export default function PostList({ refreshCount }) {
         setPosts([]);
       } finally {
         setLoading(false);
+        // 로딩 완료 후 스크롤 위치 복원 (정렬 변경 시에만)
+        if (scrollPositionRef.current > 0) {
+          restoreScrollPosition();
+        }
       }
     };
-
     fetchPosts();
   }, [refreshCount, filter, currentPage]);
 
-  // 검색 폼 전송
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setFilter({ ...filter, keyword: search });
-    setCurrentPage(1); // 검색 시 첫 페이지로
+  // 검색 실행 (제목/내용/태그/작성자 모두)
+  const handleSearch = () => {
+    // 검색 시에는 스크롤을 맨 위로
+    scrollPositionRef.current = 0;
+    setFilter(f => ({ ...f, q: search, author: authorInput }));
+    setCurrentPage(1);
   };
 
-  // 정렬 토글
-  const toggleSort = () => {
+  // 정렬 토글 (스크롤 위치 유지)
+  const toggleSort = (e) => {
+    e.preventDefault(); // 기본 동작 방지
+    
+    // 현재 스크롤 위치 저장
+    saveScrollPosition();
+    
     setFilter(f => ({
       ...f,
       sort: f.sort === 'recent' ? 'popular' : 'recent'
     }));
-    setCurrentPage(1); // 정렬 변경 시 첫 페이지로
+    setCurrentPage(1);
   };
 
-  // 페이지 변경
+  // 페이지 변경 (스크롤을 맨 위로)
   const handlePageChange = (page) => {
+    scrollPositionRef.current = 0; // 페이지 변경 시에는 맨 위로
     setCurrentPage(page);
+    // 부드러운 스크롤로 맨 위로 이동
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 작성자 필터 변경
+  // 작성자 input 변경 (입력값만 변경)
   const handleAuthorChange = (e) => {
-    setFilter(f => ({ ...f, author: e.target.value }));
-    setCurrentPage(1);
+    setAuthorInput(e.target.value);
   };
 
   // 필터 초기화
   const resetFilters = () => {
-    setFilter({ keyword: '', author: '', sort: 'recent' });
+    scrollPositionRef.current = 0; // 초기화 시에는 맨 위로
+    setFilter({ q: '', author: '', sort: 'recent' });
     setSearch('');
+    setAuthorInput('');
     setCurrentPage(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Enter 키 핸들러
+  const handleKeyDown = (e, action) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      action();
+    }
   };
 
   if (loading) return <Loading message="게시글을 불러오는 중..." />;
 
   return (
-    <div className={classNames(styles.postList, 'postList')}>
+    <div className={classNames(styles.postList, 'postList')} ref={containerRef}>
       <div className={styles.listHeader}>
         <h3 className={styles.listTitle}>자유게시판</h3>
         <button 
@@ -95,7 +135,7 @@ export default function PostList({ refreshCount }) {
         </button>
       </div>
 
-      <form className={styles.searchBar} onSubmit={handleSearch}>
+      <div className={styles.searchBar}>
         <div className={styles.searchGroup}>
           <input
             type="text"
@@ -103,32 +143,41 @@ export default function PostList({ refreshCount }) {
             value={search}
             onChange={e => setSearch(e.target.value)}
             className={styles.searchInput}
+            onKeyDown={e => handleKeyDown(e, handleSearch)}
           />
           <input
             type="text"
             placeholder="작성자"
-            value={filter.author}
+            value={authorInput}
             onChange={handleAuthorChange}
             className={styles.searchInput}
+            onKeyDown={e => handleKeyDown(e, handleSearch)}
           />
         </div>
         <div className={styles.controlGroup}>
-          <button type="submit" className={styles.searchBtn}>검색</button>
+          <button 
+            type="button" 
+            className={styles.searchBtn} 
+            onClick={handleSearch}
+          >
+            검색
+          </button>
           <button
             type="button"
             className={styles.sortBtn}
             onClick={toggleSort}
+            title={`현재: ${filter.sort === 'recent' ? '최신순' : '인기순'}`}
           >
             {filter.sort === 'recent' ? '📅 최신순' : '👍 인기순'}
           </button>
         </div>
-      </form>
+      </div>
 
       {posts.length === 0 ? (
         <div className={styles.noPost}>
           <div className={styles.noPostIcon}>📝</div>
           <p>게시글이 없습니다.</p>
-          {(filter.keyword || filter.author) && (
+          {(filter.q || filter.author) && (
             <button className={styles.resetBtn} onClick={resetFilters}>
               전체 게시글 보기
             </button>

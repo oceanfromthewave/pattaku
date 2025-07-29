@@ -12,6 +12,7 @@ import EditPostForm from './components/Posts/EditPostForm';
 import ScheduleForm from './components/Schedule/ScheduleForm';
 import ScheduleList from './components/Schedule/ScheduleList';
 import ScheduleDetail from './components/Schedule/ScheduleDetail';
+import MyPage from './components/MyPage/MyPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -175,6 +176,21 @@ function App() {
                 <ScheduleDetail isLogin={isLogin} />
               </ErrorBoundary>
             </div>
+          } />
+          <Route path="/mypage" element={
+            isLogin ? (
+              <div className="center-container">
+                <ErrorBoundary>
+                  <MyPage />
+                </ErrorBoundary>
+              </div>
+            ) : (
+              <div className="center-container">
+                <ErrorBoundary>
+                  <FreeBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />
+                </ErrorBoundary>
+              </div>
+            )
           } />
         </Routes>
 

@@ -111,3 +111,53 @@ exports.getLikeCount = async (postId, type) => {
   );
   return rows[0].cnt;
 };
+
+// 사용자가 작성한 게시글 목록
+exports.getByUserIdAsync = async (userId, page = 1, limit = 10) => {
+  const offset = (page - 1) * limit;
+  
+  // 전체 개수 조회
+  const [countResult] = await db.query(
+    "SELECT COUNT(*) as total FROM posts WHERE user_id = ?",
+    [userId]
+  );
+  const total = countResult[0].total;
+  
+  // 게시글 목록 조회
+  const [rows] = await db.query(`
+    SELECT 
+      posts.*,
+      users.nickname AS author_nickname,
+      COALESCE(like_stats.like_count, 0) as likes,
+      COALESCE(like_stats.dislike_count, 0) as dislikes,
+      COALESCE(comment_count.count, 0) as comment_count
+    FROM posts
+    LEFT JOIN users ON posts.user_id = users.id
+    LEFT JOIN (
+      SELECT 
+        post_id,
+        SUM(CASE WHEN type = 'like' THEN 1 ELSE 0 END) as like_count,
+        SUM(CASE WHEN type = 'dislike' THEN 1 ELSE 0 END) as dislike_count
+      FROM post_likes 
+      GROUP BY post_id
+    ) like_stats ON posts.id = like_stats.post_id
+    LEFT JOIN (
+      SELECT post_id, COUNT(*) as count 
+      FROM comments 
+      GROUP BY post_id
+    ) comment_count ON posts.id = comment_count.post_id
+    WHERE posts.user_id = ?
+    ORDER BY posts.created_at DESC
+    LIMIT ? OFFSET ?
+  `, [userId, limit, offset]);
+  
+  return {
+    posts: rows,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
+};

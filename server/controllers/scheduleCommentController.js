@@ -91,26 +91,50 @@ exports.remove = async (req, res) => {
   }
 };
 
-// 댓글 좋아요 (임시)
+// 댓글 좋아요
 exports.like = async (req, res) => {
-  res.json({
-    message: "좋아요가 반영되었습니다.",
-    likeCount: 0,
-    dislikeCount: 0,
-    isLiked: false,
-    isDisliked: false,
-  });
+  const { commentId } = req.params;
+  const user_id = req.user?.id;
+  
+  if (!user_id) return res.status(401).json({ error: "로그인 필요" });
+  
+  try {
+    const result = await scheduleCommentModel.toggleVoteAsync(commentId, user_id, 'like');
+    
+    res.json({ 
+      message: "좋아요가 반영되었습니다.",
+      likeCount: result.likeCount,
+      dislikeCount: result.dislikeCount,
+      isLiked: result.userVote === 'like',
+      isDisliked: result.userVote === 'dislike'
+    });
+  } catch (err) {
+    console.error("스케줄 댓글 좋아요 에러:", err);
+    res.status(500).json({ error: "DB 에러" });
+  }
 };
 
-// 댓글 싫어요 (임시)
+// 댓글 싫어요
 exports.dislike = async (req, res) => {
-  res.json({
-    message: "싫어요가 반영되었습니다.",
-    likeCount: 0,
-    dislikeCount: 0,
-    isLiked: false,
-    isDisliked: false,
-  });
+  const { commentId } = req.params;
+  const user_id = req.user?.id;
+  
+  if (!user_id) return res.status(401).json({ error: "로그인 필요" });
+  
+  try {
+    const result = await scheduleCommentModel.toggleVoteAsync(commentId, user_id, 'dislike');
+    
+    res.json({ 
+      message: "싫어요가 반영되었습니다.",
+      likeCount: result.likeCount,
+      dislikeCount: result.dislikeCount,
+      isLiked: result.userVote === 'like',
+      isDisliked: result.userVote === 'dislike'
+    });
+  } catch (err) {
+    console.error("스케줄 댓글 싫어요 에러:", err);
+    res.status(500).json({ error: "DB 에러" });
+  }
 };
 
 exports.update = async (req, res) => {

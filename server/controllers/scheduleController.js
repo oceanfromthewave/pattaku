@@ -60,7 +60,8 @@ exports.getSchedules = async (req, res) => {
     
     // 각 스케줄에 이미지 추가
     for (const schedule of schedules) {
-      schedule.images = await scheduleModel.getImagesAsync(schedule.id);
+      const images = await scheduleModel.getImagesAsync(schedule.id);
+      schedule.images = images.map(image => `${req.protocol}://${req.get('host')}${image}`);
     }
     
     const totalPages = Math.ceil(total / limit);

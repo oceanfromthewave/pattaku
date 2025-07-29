@@ -29,6 +29,7 @@ export default function Header({ isLogin, setIsLogin }) {
             <>
               <Link to="/board/free">자유게시판</Link>
               <Link to="/board/schedule">일정공유</Link>
+              <Link to="/mypage">마이페이지</Link>
             </>
           )}
           <DarkModeToggle />

@@ -30,10 +30,10 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
           const obj = {};
           data.forEach(c => {
             obj[c.id] = {
-              likeCount: c.likes || 0,
-              dislikeCount: c.dislikes || 0,
-              liked: c.isLiked || false,
-              disliked: c.isDisliked || false
+              likeCount: Number(c.likes) || 0,
+              dislikeCount: Number(c.dislikes) || 0,
+              liked: Boolean(c.isLiked),
+              disliked: Boolean(c.isDisliked)
             };
           });
           setLikeStates(obj);
@@ -166,15 +166,16 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error();
+      
+      // 서버에서 받은 정확한 데이터로 업데이트
+      const data = await res.json();
       setLikeStates(prev => ({
         ...prev,
         [commentId]: {
-          ...prev[commentId],
-          [`${type}Count`]: prev[commentId][`${type}d`]
-            ? prev[commentId][`${type}Count`] - 1
-            : prev[commentId][`${type}Count`] + 1,
-          liked: type === VOTE.LIKE ? !prev[commentId].liked : prev[commentId].liked,
-          disliked: type === VOTE.DISLIKE ? !prev[commentId].disliked : prev[commentId].disliked
+          likeCount: Number(data.likes) || 0,
+          dislikeCount: Number(data.dislikes) || 0,
+          liked: Boolean(data.liked),
+          disliked: Boolean(data.disliked)
         }
       }));
     } catch {

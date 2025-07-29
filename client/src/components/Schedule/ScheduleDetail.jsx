@@ -103,7 +103,7 @@ export default function ScheduleDetail({ isLogin }) {
         </h1>
         <div className={styles['schedule-meta']}>
           <span className={styles['schedule-date']}>
-            📅 {formatDate(schedule.created_at)}
+            {formatDate(schedule.created_at)}
           </span>
           <span className={styles['schedule-author']}>
             👤 {schedule.author_nickname || schedule.author}

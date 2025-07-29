@@ -15,32 +15,32 @@ li {
 }
 
 :root {
-  --primary: #3a60fa;
+  --primary: #c5c5c2;
   --bg: #FDF6E3;
   --text: #222;
-  --container-bg: rgba(29, 32, 39, 0.96);
+  --container-bg: #fffef4;
   --post-bg: #fcf8e8;
   --postform-bg: #fdfbe7;
   --postform-title: #463b25;
   --postform-input-bg: #fffef4;
   --postform-input-color: #21231c;
-  --postform-input-border: #ede6b9;
+  --postform-input-border: #f7e990;
   --radius: 12px;
   --border: #293056;
-  --accent-color: #3a60fa;
+  --accent-color:#c5c5c2;
   --header-bg: #fcf6e7;
   --header-border: #eddcb5;
 }
 
 [data-theme="dark"] {
-  --bg: #18191c;               // 메인 배경 (블랙에 가까움)
-  --container-bg: #22232a;     // 카드, 폼 등 컨테이너
-  --post-bg: #23242a;          // 카드, 글 배경
-  --postform-bg: #22232a;
-  --postform-title: #e6e6e6;   // 카드 타이틀
+  --bg: #000000;               // 메인 배경 (블랙에 가까움)
+  --container-bg: #000000;     // 카드, 폼 등 컨테이너
+  --post-bg: #1f1f1f;          // 카드, 글 배경
+  --postform-bg: #1d1d1d;
+  --postform-title: #575757;   // 카드 타이틀
   --postform-input-bg: #23242a;// input/textarea bg
   --postform-input-color: #f3f3f3;
-  --postform-input-border: #343844;
+  --postform-input-border: #000000;
   --radius: 13px;
   --text: #e6e6e6;            // 본문 텍스트
   --accent-color: #79a7fa;    // 포인트(블루)
