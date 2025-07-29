@@ -1,0 +1,106 @@
+.paginationContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.paginationInfo {
+  font-size: 0.9rem;
+  color: var(--text, #222);
+  opacity: 0.7;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pageBtn {
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid var(--postform-input-border, #ede6b9);
+  background: var(--postform-input-bg, #fffef4);
+  color: var(--text, #222);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    background: var(--primary, #3a60fa);
+    color: white;
+    border-color: var(--primary, #3a60fa);
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  &.active {
+    background: var(--primary, #3a60fa);
+    color: white;
+    border-color: var(--primary, #3a60fa);
+    font-weight: 700;
+  }
+
+  &.navBtn {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+}
+
+.ellipsis {
+  color: var(--text, #222);
+  font-weight: 500;
+  padding: 0 0.5rem;
+  opacity: 0.6;
+}
+
+/* 다크모드 스타일 */
+[data-theme="dark"] .paginationInfo {
+  color: var(--text, #e6e6e6);
+}
+
+[data-theme="dark"] .pageBtn {
+  background: var(--postform-input-bg, #23242a);
+  border-color: var(--postform-input-border, #343844);
+  color: var(--text, #e6e6e6);
+
+  &.active {
+    background: var(--primary, #4171e7);
+    border-color: var(--primary, #4171e7);
+  }
+}
+
+[data-theme="dark"] .ellipsis {
+  color: var(--text, #e6e6e6);
+}
+
+/* 모바일 최적화 */
+@media (max-width: 600px) {
+  .pagination {
+    gap: 0.2rem;
+  }
+  
+  .pageBtn {
+    min-width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+  
+  .paginationInfo {
+    font-size: 0.8rem;
+  }
+}

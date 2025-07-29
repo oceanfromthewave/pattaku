@@ -1,17 +1,51 @@
-import axios from "axios";
+import apiClient from './apiClient';
 
-const API_URL = "http://localhost:5000/api/posts";
-
-export const getPosts = async () => {
-  const res = await axios.get(API_URL);
-  return res.data;
+// 게시글 목록 조회 (검색, 정렬 포함)
+export const getPosts = async (params = {}) => {
+  const response = await apiClient.get('/api/posts', { params });
+  return response.data;
 };
 
-export const createPost = async (post, token) => {
-  const res = await axios.post(API_URL, post, {
+// 특정 게시글 조회
+export const getPostById = async (id) => {
+  const response = await apiClient.get(`/api/posts/${id}`);
+  return response.data;
+};
+
+// 게시글 생성
+export const createPost = async (formData) => {
+  const response = await apiClient.post('/api/posts', formData, {
     headers: {
-      Authorization: `Bearer ${token}`,
+      'Content-Type': 'multipart/form-data',
     },
   });
-  return res.data;
+  return response.data;
+};
+
+// 게시글 수정
+export const updatePost = async (id, formData) => {
+  const response = await apiClient.put(`/api/posts/${id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+// 게시글 삭제
+export const deletePost = async (id) => {
+  const response = await apiClient.delete(`/api/posts/${id}`);
+  return response.data;
+};
+
+// 게시글 좋아요
+export const likePost = async (id) => {
+  const response = await apiClient.post(`/api/posts/${id}/like`);
+  return response.data;
+};
+
+// 게시글 싫어요
+export const dislikePost = async (id) => {
+  const response = await apiClient.post(`/api/posts/${id}/dislike`);
+  return response.data;
 };

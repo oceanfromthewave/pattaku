@@ -1,134 +1,328 @@
-@use './main.scss' as *;
-@use './variables' as *;
-
-// 라이트/다크 통일을 위한 CSS 변수 선언
 .postList {
-  margin-bottom: 30px;
-  color: var(--post-text, $text);
   background: var(--post-bg, #fcf8e8);
-  border-radius: 12px;
-  box-shadow: 0 1px 10px #b7a26822;
-  padding: 22px 15px 18px 15px;
-  max-width: 630px;
-  margin-left: auto;
-  margin-right: auto;
-  transition: background 0.21s, color 0.21s;
+  border-radius: var(--radius, 12px);
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  margin: 1rem 0;
+  transition: all 0.3s ease;
 }
-[data-theme="dark"] .postList {
-  --post-bg: #181a25;
-  --post-text: #e8e6e2;
+
+.listHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--postform-input-border, #ede6b9);
+}
+
+.listTitle {
+  color: var(--accent-color, #3a60fa);
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.resetBtn {
+  background: transparent;
+  border: 1px solid var(--postform-input-border, #ede6b9);
+  color: var(--text, #222);
+  border-radius: 6px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+
+  &:hover {
+    background: var(--primary, #3a60fa);
+    color: white;
+    border-color: var(--primary, #3a60fa);
+  }
 }
 
 .searchBar {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  align-items: center;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--postform-input-bg, #fffef4);
+  border-radius: 8px;
+  border: 1px solid var(--postform-input-border, #ede6b9);
+}
+
+.searchGroup {
+  display: flex;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  .searchInput {
-    padding: 7px 11px;
-    border-radius: 8px;
-    border: 1.2px solid var(--post-input-border, #d6cbac);
-    font-size: 1em;
-    background: var(--post-input-bg, #fffef6);
-    color: var(--post-input-color, #1a1a15);
-    transition: border 0.17s, background 0.17s;
-    &:focus { border-color: $primary; background: #fcf8e8; }
+}
+
+.controlGroup {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 150px;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--postform-input-border, #ede6b9);
+  border-radius: 6px;
+  background: var(--bg, #FDF6E3);
+  color: var(--text, #222);
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary, #3a60fa);
+    box-shadow: 0 0 0 2px rgba(58, 96, 250, 0.1);
   }
-  .searchBtn, .sortBtn {
-    padding: 7px 16px;
-    border-radius: 8px;
-    border: none;
-    font-size: 0.99em;
-    font-weight: 700;
-    cursor: pointer;
-    background: $primary;
-    color: #fff;
-    transition: background 0.18s;
-    &:hover { background: #4155d7; }
-  }
-  .sortBtn {
-    background: var(--post-sort-bg, #e6c566);
-    color: var(--post-sort-color, #333);
-    margin-left: 5px;
-    &:hover { background: #ffeeb1; color: #2428ad; }
+
+  &::placeholder {
+    color: var(--text, #222);
+    opacity: 0.5;
   }
 }
-[data-theme="dark"] .searchBar .searchInput {
-  --post-input-bg: #23273b;
-  --post-input-color: #f2f2f2;
-  --post-input-border: #444869;
+
+.searchBtn,
+.sortBtn {
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
-[data-theme="dark"] .searchBar .searchBtn,
-[data-theme="dark"] .searchBar .sortBtn {
-  background: #4155d7;
-  color: #fff;
+
+.searchBtn {
+  background: var(--primary, #3a60fa);
+  color: white;
+
+  &:hover {
+    background: var(--accent-color, #2a50ea);
+    transform: translateY(-1px);
+  }
 }
-[data-theme="dark"] .searchBar .sortBtn {
-  --post-sort-bg: #353949;
-  --post-sort-color: #fbeeb7;
+
+.sortBtn {
+  background: var(--postform-input-bg, #fffef4);
+  color: var(--text, #222);
+  border: 1px solid var(--postform-input-border, #ede6b9);
+
+  &:hover {
+    background: var(--primary, #3a60fa);
+    color: white;
+    border-color: var(--primary, #3a60fa);
+  }
 }
 
 .noPost {
-  color: var(--post-empty, #bca464);
-  font-size: 1.07em;
-  padding: 14px 0;
   text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text, #222);
+  opacity: 0.7;
 }
-[data-theme="dark"] .noPost { --post-empty: #ffeab2; }
+
+.noPostIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
 
 .postListUl {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .postItem {
-  margin-bottom: 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  padding: 8px 0 4px 0;
+  background: var(--bg, #FDF6E3);
+  border: 1px solid var(--postform-input-border, #ede6b9);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  overflow: hidden;
+
+  &:hover {
+    border-color: var(--primary, #3a60fa);
+    box-shadow: 0 4px 12px rgba(58, 96, 250, 0.1);
+    transform: translateY(-1px);
+  }
+}
+
+.postContent {
+  padding: 1rem;
 }
 
 .postTitleLink {
-  color: var(--post-title, #6ea4ff);
-  font-weight: 700;
+  display: block;
+  color: var(--text, #222);
+  font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
-  text-decoration: underline;
-  font-size: 1.11em;
-  outline: none;
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+  transition: color 0.2s ease;
+
   &:hover {
-    color: #97bfff;
+    color: var(--primary, #3a60fa);
     text-decoration: underline;
   }
+
   &:focus {
-    border-bottom: 2px solid #495acb;
-    background: #f7edd0;
+    outline: 2px solid var(--primary, #3a60fa);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 }
-[data-theme="dark"] .postTitleLink {
-  --post-title: #b3d7ff;
-  &:hover { color: #d3eaff; }
-  &:focus { background: #283266; border-bottom: 2px solid #93baff; }
+
+.attachmentIcon {
+  color: var(--primary, #3a60fa);
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
 }
 
 .postMeta {
-  font-size: 0.95em;
-  color: var(--post-meta, #8ea3bb);
-  margin-left: 8px;
-  .postAuthor { color: #496ec6; font-weight: 600; }
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text, #222);
+  opacity: 0.7;
 }
+
+.postAuthor {
+  font-weight: 600;
+  color: var(--accent-color, #3a60fa);
+}
+
+.postDate {
+  color: var(--text, #222);
+  opacity: 0.6;
+}
+
+.postStats {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+  background: var(--postform-input-bg, #fffef4);
+  border-radius: 4px;
+  border: 1px solid var(--postform-input-border, #ede6b9);
+}
+
+/* 다크모드 스타일 */
+[data-theme="dark"] .postList {
+  background: var(--post-bg, #23242a);
+}
+
+[data-theme="dark"] .listHeader {
+  border-bottom-color: var(--postform-input-border, #343844);
+}
+
+[data-theme="dark"] .resetBtn {
+  color: var(--text, #e6e6e6);
+  border-color: var(--postform-input-border, #343844);
+}
+
+[data-theme="dark"] .searchBar {
+  background: var(--postform-input-bg, #23242a);
+  border-color: var(--postform-input-border, #343844);
+}
+
+[data-theme="dark"] .searchInput {
+  background: var(--bg, #18191c);
+  color: var(--text, #e6e6e6);
+  border-color: var(--postform-input-border, #343844);
+  
+  &::placeholder {
+    color: var(--text, #e6e6e6);
+  }
+}
+
+[data-theme="dark"] .sortBtn {
+  background: var(--postform-input-bg, #23242a);
+  color: var(--text, #e6e6e6);
+  border-color: var(--postform-input-border, #343844);
+}
+
+[data-theme="dark"] .noPost {
+  color: var(--text, #e6e6e6);
+}
+
+[data-theme="dark"] .postItem {
+  background: var(--bg, #18191c);
+  border-color: var(--postform-input-border, #343844);
+}
+
+[data-theme="dark"] .postTitleLink {
+  color: var(--text, #e6e6e6);
+}
+
 [data-theme="dark"] .postMeta {
-  --post-meta: #cac8b8;
-  .postAuthor { color: #ffeab2; }
+  color: var(--text, #e6e6e6);
 }
 
-// 모바일 대응
-@media (max-width: 650px) {
-  .postList { padding: 12px 2vw 10px 2vw; }
-  .postItem { flex-direction: column; gap: 4px; }
-  .postTitleLink { font-size: 1em; }
+[data-theme="dark"] .postDate {
+  color: var(--text, #e6e6e6);
 }
 
+[data-theme="dark"] .statItem {
+  background: var(--postform-input-bg, #23242a);
+  border-color: var(--postform-input-border, #343844);
+}
+
+/* 모바일 최적화 */
+@media (max-width: 700px) {
+  .postList {
+    padding: 1rem;
+    margin: 0.5rem 0;
+  }
+  
+  .listHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .searchGroup {
+    flex-direction: column;
+  }
+  
+  .controlGroup {
+    justify-content: center;
+  }
+  
+  .searchInput {
+    min-width: unset;
+  }
+  
+  .postStats {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+  
+  .postMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+}

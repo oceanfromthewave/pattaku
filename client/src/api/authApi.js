@@ -1,8 +1,13 @@
-import axios from "axios";
+import apiClient from './apiClient';
 
-const API_URL = "http://localhost:5000/api/auth";
-
+// 로그인
 export const login = async (userData) => {
-  const res = await axios.post(`${API_URL}/login`, userData);
-  return res.data;
+  const response = await apiClient.post('/api/auth/login', userData);
+  return response.data;
+};
+
+// 토큰 검증
+export const verifyToken = async () => {
+  const response = await apiClient.get('/api/auth/verify');
+  return response.data;
 };

@@ -1,5 +1,7 @@
 const db = require("../config/db");
 
+exports.db = db; // 다른 파일에서 db 접근용
+
 exports.createAsync = async ({ user_id, title, content }) => {
   const [result] = await db.query(
     "INSERT INTO posts (user_id, title, content) VALUES (?, ?, ?)",
@@ -18,6 +20,12 @@ exports.getAllAsync = async () => {
   return rows;
 };
 
+// 페이지네이션이 적용된 게시글 조회
+exports.getAllWithPaginationAsync = async (query, params) => {
+  const [rows] = await db.query(query, params);
+  return rows;
+};
+
 exports.getByIdAsync = async (id) => {
   const [rows] = await db.query(
     `SELECT posts.*, users.nickname AS author_nickname
@@ -27,6 +35,11 @@ exports.getByIdAsync = async (id) => {
     [id]
   );
   return rows[0];
+};
+
+// 조회수 증가
+exports.incrementViewsAsync = async (id) => {
+  await db.query("UPDATE posts SET views = COALESCE(views, 0) + 1 WHERE id = ?", [id]);
 };
 
 exports.updateAsync = async (id, title, content) => {

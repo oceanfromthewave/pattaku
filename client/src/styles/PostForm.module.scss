@@ -1,266 +1,422 @@
 .postForm {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
   background: var(--postform-bg, #fdfbe7);
-  border-radius: 20px;
-  padding: 36px 30px 28px 30px;
-  margin-bottom: 32px;
-  box-shadow: 0 3px 36px #10101a1f;
-  max-width: 540px;
-  margin-left: auto; margin-right: auto;
-  transition: background 0.23s;
+  border-radius: var(--radius, 12px);
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin: 1rem 0;
+  border: 1px solid var(--postform-input-border, #ede6b9);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  }
 }
-[data-theme="dark"] .postForm {
-  background: var(--container-bg, #1a1b22);
-  box-shadow: 0 3px 28px #050511e0;
+
+.formHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--postform-input-border, #ede6b9);
 }
 
 .h3 {
-  font-size: 1.22em;
-  font-weight: 900;
-  margin-bottom: 10px;
+  color: var(--postform-title, #463b25);
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0;
   letter-spacing: -0.5px;
-  color: #977f45;
-  text-shadow: 0 1.5px 0 #fff2, 0 2.5px 7px #ffe2ad33;
-}
-[data-theme="dark"] .h3{
-  color: #a9c3fd;
 }
 
+.formStats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
+.charCount {
+  font-size: 0.8rem;
+  color: var(--text, #222);
+  opacity: 0.6;
+  background: var(--postform-input-bg, #fffef4);
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid var(--postform-input-border, #ede6b9);
+}
 
 .labelWrap {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--postform-input-border, #ede6b9);
+  border-radius: 8px;
+  background: var(--postform-input-bg, #fffef4);
+  color: var(--postform-input-color, #21231c);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent-color, #3a60fa);
+    box-shadow: 0 0 0 3px rgba(58, 96, 250, 0.1);
+    background: white;
+  }
+
+  &::placeholder {
+    color: var(--postform-input-color, #21231c);
+    opacity: 0.5;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 150px;
+  line-height: 1.6;
+}
+
+.textareaStats {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.attachWrap {
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background: var(--postform-input-bg, #fffef4);
+  border: 2px dashed var(--postform-input-border, #ede6b9);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &.dragOver {
+    border-color: var(--accent-color, #3a60fa);
+    background: rgba(58, 96, 250, 0.05);
+    transform: scale(1.02);
+  }
+}
+
+.fileInputArea {
   display: flex;
   flex-direction: column;
-  gap: 9px;
-  width: 100%;
-}
-
-.input, .textarea {
-  width: 100%;
-  background: var(--postform-input-bg, #fffef4);
-  color: var(--postform-input-color, #23231b);
-  border: 1.5px solid var(--postform-input-border, #ede6b9);
-  border-radius: 11px;
-  padding: 13px 17px;
-  font-size: 1.08em;
-  font-family: inherit;
-  transition: border-color 0.18s, background 0.18s;
-  margin-bottom: 0;
-  box-sizing: border-box;
-  resize: none;
-  &:focus {
-    border-color: var(--primary, #3976fa);
-    background: #f6f2da;
-    outline: none;
-  }
-  &:disabled {
-    background: #f2f2f2;
-    color: #999;
-  }
-}
-[data-theme="dark"] .postForm .input,
-[data-theme="dark"] .postForm .textarea {
-  background: #23242a;
-  color: #f7f7f7;
-  border: 1.5px solid #343844;
-  &:focus { background: #24252e; border-color: #4076fa; }
-}
-
-.input { height: 44px; min-height: 44px; }
-.textarea { min-height: 150px; max-height: 380px; }
-
-/* --- 첨부파일 영역 --- */
-.attachWrap {
- display: flex;
   align-items: center;
-  gap: 9px;
-}
-.attachWrap label {
-  font-weight: 900;
-  color: #856111;
-  font-size: 1.09em;
-  margin-bottom: 2px;
-  letter-spacing: -0.5px;
-}
-[data-theme="dark"] .attachWrap label { color:#4979fa }
-
-/* 파일 업로드 줄 */
-.fileRow {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  background: #f8f7ec;      /* 라이트모드 배경 일정등록과 동일! */
-  border-radius: 12px;
-  padding: 0 0 0 10px;
-  min-height: 54px;
-  box-shadow: 0 1px 8px #19182a0f;
-  border: 1.5px solid #f8f7ec;
-  gap: 0;
-  position: relative;
-  margin-bottom: 2px;
-  overflow: hidden;
-}
-[data-theme="dark"] .fileRow {
-  background: #23273c;
-  border: 1.5px solid #23273c;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
 }
 
-/* 파일 선택 버튼 */
 .fileInputBtn {
-  background: #ffe2ad;
-  color: #856111;
-  border: none;
-  border-radius: 8px 0 0 8px;
-  font-weight: 700;
-  font-size: 1.06em;
-  padding: 0 26px;
-  height: 54px;
-  cursor: pointer;
-  transition: background 0.16s, color 0.16s;
-  outline: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  &:hover, &:focus {
-    background: #ffeebb;
-    color: #a07c1b;
+  gap: 0.5rem;
+  background: var(--primary, #3a60fa);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  border: none;
+
+  &:hover {
+    background: var(--accent-color, #2a50ea);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(58, 96, 250, 0.3);
+  }
+
+  &:focus {
+    outline: 2px solid var(--accent-color, #3a60fa);
+    outline-offset: 2px;
   }
 }
-[data-theme="dark"] .fileInputBtn {
-  background: #27365b;
-  color: #ffe2ad;
-  &:hover, &:focus {
-    background: #1d2942;
-    color: #ffeebb;
-  }
-}
-[data-theme="dark"] .fileInputBtn:hover,
-[data-theme="dark"] .fileInputBtn:focus { background: #1d2942; }
 
 .fileInput {
   display: none;
-  &::-webkit-file-upload-button {
-    background: #ffe2ad;
-    border: none;
-    border-radius: 7px;
-    color: #694504;
-    font-weight: 700;
-    font-size: 1em;
-    padding: 6px 13px;
-    cursor: pointer;
-    transition: background 0.16s;
-  }
-  &::-webkit-file-upload-button:hover {
-    background: #ffeebb;
-    color: #433100;
-  }
 }
-[data-theme="dark"] .fileInput {
-  color: #ffe2ad;
-  &::-webkit-file-upload-button {
-    background: #393a4b;
-    color: #e4cf95;
+
+.dragInfo {
+  font-size: 0.8rem;
+  color: var(--text, #222);
+  opacity: 0.6;
+  text-align: center;
+}
+
+.fileInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  background: var(--bg, #FDF6E3);
+  border-radius: 6px;
+  border: 1px solid var(--postform-input-border, #ede6b9);
+  margin-bottom: 1rem;
+}
+
+.fileNameBox {
+  font-size: 0.9rem;
+  color: var(--text, #222);
+  font-weight: 500;
+}
+
+.fileSize {
+  font-size: 0.8rem;
+  color: var(--text, #222);
+  opacity: 0.6;
+}
+
+.previewWrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.previewBox {
+  position: relative;
+  background: var(--bg, #FDF6E3);
+  border: 1px solid var(--postform-input-border, #ede6b9);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
   }
 }
 
-/* 파일명 영역 */
-.fileNameBox {
+.previewImg {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.previewFile {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text, #222);
+  font-size: 0.9rem;
+  min-height: 120px;
   display: flex;
   align-items: center;
-  flex: 1;
-  height: 54px;
-  background: #fdfbe7;      /* 일정등록과 동일! */
-  color: #ba9d63;           /* 일정등록과 동일! */
-  font-size: 1.09em;
-  font-weight: 600;
-  padding-left: 14px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  border-radius: 0 8px 8px 0;
-}
-[data-theme="dark"] .fileNameBox {
-  color:#4979fa;
-  background: none;
+  justify-content: center;
+  background: var(--postform-input-bg, #fffef4);
 }
 
-/* 첨부파일 미리보기 */
-.previewWrap {
-  display: flex;
-  gap: 9px;
-  flex-wrap: wrap;
-  margin-top: 8px;
+.fileDetails {
+  padding: 0.8rem;
+  border-top: 1px solid var(--postform-input-border, #ede6b9);
 }
-.previewBox {
-  display: flex; align-items: center;
-  background: var(--postform-preview-bg, #fffef2);
-  border-radius: 7px;
-  box-shadow: 0 1px 5px #eddc9a33;
-  padding: 4px 7px 4px 4px;
-  position: relative;
+
+.fileName {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text, #222);
+  word-break: break-word;
+  margin-bottom: 0.3rem;
 }
-[data-theme="dark"] .previewBox {
-  background: #23242a;
-  box-shadow: 0 1px 8px #0005;
-}
-.previewImg {
-  width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #e8deaa;
-}
-[data-theme="dark"] .previewImg { border: 1px solid #444859; }
-.previewFile {
-  font-size: 0.98em;
-  color: #856b1c;
-  padding: 1px 7px;
-  margin-right: 3px;
-  background: #fff6e1;
-  border-radius: 4px;
-}
-[data-theme="dark"] .previewFile { background: #27355c; color: #e9c374; }
+
 .delBtn {
-  margin-left: 6px;
-  color: #d47b2a;
-  font-weight: 900;
-  background: none;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
   border: none;
-  font-size: 1.4em;
+  border-radius: 50%;
   cursor: pointer;
-  transition: color 0.14s;
-  &:hover { color: #ff4c1a; }
+  font-size: 1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 0, 0, 1);
+    transform: scale(1.1);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
 
 .button {
-  background: #ffe2ad;
-  color: #856111;         // <- 파일선택 버튼과 동일하게!
+  width: 100%;
+  padding: 1rem 2rem;
+  background: var(--primary, #3a60fa);
+  color: white;
   border: none;
-  border-radius: 12px;
-  padding: 15px 0;
-  font-weight: 800;
-  font-size: 1.12em;
-  margin-top: 11px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 10px #10205022;
-  transition: background 0.18s, color 0.18s;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+
   &:hover:not(:disabled) {
-    background: #ffeebb; // 파일선택 hover와 동일
-    color: #a07c1b;      // 살짝 더 진한 갈색으로 강조
+    background: var(--accent-color, #2a50ea);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(58, 96, 250, 0.3);
   }
+
   &:disabled {
-    background: #f2e4c6; // 비활성화는 연한 베이지
-    color: #b3a179;
+    opacity: 0.6;
     cursor: not-allowed;
-    box-shadow: none;
+    transform: none !important;
+  }
+
+  &.loading {
+    background: var(--accent-color, #2a50ea);
   }
 }
-[data-theme="dark"] .button {
-  background: #27365b;
-  color: #ffe2ad;
-  &:hover:not(:disabled) {
-    background: #1d2942;
-    color: #ffeebb;
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 다크모드 스타일 */
+[data-theme="dark"] .postForm {
+  background: var(--postform-bg, #22232a);
+  border-color: var(--postform-input-border, #343844);
+}
+
+[data-theme="dark"] .formHeader {
+  border-bottom-color: var(--postform-input-border, #343844);
+}
+
+[data-theme="dark"] .h3 {
+  color: var(--postform-title, #e6e6e6);
+}
+
+[data-theme="dark"] .charCount {
+  background: var(--postform-input-bg, #23242a);
+  border-color: var(--postform-input-border, #343844);
+  color: var(--text, #e6e6e6);
+}
+
+[data-theme="dark"] .input,
+[data-theme="dark"] .textarea {
+  background: var(--postform-input-bg, #23242a);
+  border-color: var(--postform-input-border, #343844);
+  color: var(--postform-input-color, #f3f3f3);
+
+  &::placeholder {
+    color: var(--postform-input-color, #f3f3f3);
   }
-  &:disabled {
-    background: #23242a;
-    color: #b3a179;
+
+  &:focus {
+    background: var(--bg, #18191c);
+  }
+}
+
+[data-theme="dark"] .attachWrap {
+  background: var(--postform-input-bg, #23242a);
+  border-color: var(--postform-input-border, #343844);
+}
+
+[data-theme="dark"] .dragInfo {
+  color: var(--text, #e6e6e6);
+}
+
+[data-theme="dark"] .fileInfo {
+  background: var(--bg, #18191c);
+  border-color: var(--postform-input-border, #343844);
+}
+
+[data-theme="dark"] .fileNameBox {
+  color: var(--text, #e6e6e6);
+}
+
+[data-theme="dark"] .fileSize {
+  color: var(--text, #e6e6e6);
+}
+
+[data-theme="dark"] .previewBox {
+  background: var(--bg, #18191c);
+  border-color: var(--postform-input-border, #343844);
+}
+
+[data-theme="dark"] .previewFile {
+  background: var(--postform-input-bg, #23242a);
+  color: var(--text, #e6e6e6);
+}
+
+[data-theme="dark"] .fileDetails {
+  border-top-color: var(--postform-input-border, #343844);
+}
+
+[data-theme="dark"] .fileName {
+  color: var(--text, #e6e6e6);
+}
+
+/* 모바일 최적화 */
+@media (max-width: 700px) {
+  .postForm {
+    padding: 1.5rem;
+    margin: 0.5rem 0;
+  }
+  
+  .formHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+  
+  .previewWrap {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  .previewImg {
+    height: 100px;
+  }
+  
+  .previewFile {
+    min-height: 100px;
+    font-size: 0.8rem;
+  }
+  
+  .input,
+  .textarea {
+    padding: 0.8rem;
+    font-size: 0.9rem;
+  }
+  
+  .button {
+    padding: 0.9rem;
+    font-size: 1rem;
   }
 }

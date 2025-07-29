@@ -12,6 +12,21 @@ exports.getAllAsync = async () => {
   return rows;
 };
 
+// 페이지네이션이 적용된 스케줄 조회
+exports.getAllWithPaginationAsync = async (query, params) => {
+  const [rows] = await db.query(query, params);
+  return rows;
+};
+
+// 스케줄 이미지 조회
+exports.getImagesAsync = async (scheduleId) => {
+  const [rows] = await db.query(
+    `SELECT image_url FROM schedule_images WHERE schedule_id = ?`,
+    [scheduleId]
+  );
+  return rows.map(row => row.image_url);
+};
+
 // 상세 조회 (이미지, 작성자 포함)
 exports.getByIdAsync = async (id) => {
   const [rows] = await db.query(

@@ -1,4 +1,19 @@
 // main.scss
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+ul, ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+li {
+  list-style: none;
+}
+
 :root {
   --primary: #3a60fa;
   --bg: #FDF6E3;

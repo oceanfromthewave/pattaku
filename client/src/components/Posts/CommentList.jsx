@@ -5,7 +5,6 @@ import { notifySuccess, notifyError } from '../../utils/notify';
 import styles from '../../styles/CommentList.module.scss';
 import authFetch from '../../utils/authFetch';
 
-
 const VOTE = { LIKE: 'like', DISLIKE: 'dislike' };
 
 export default function CommentList({ postId, isLogin, currentUser, showLike = true, type = 'post' }) {
@@ -220,49 +219,49 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
               <div className={styles['comment-head']}>
                 <span className={styles['comment-author']}>{comment.author_nickname || comment.author}</span>
                 <span className={styles['comment-date']}>{new Date(comment.created_at).toLocaleString()}</span>
-                {showLike && (
-                  <>
-                    <button
-                      className={classNames(
-                        styles['comment-like-btn'],
-                        { [styles['liked']]: likeStates[comment.id]?.liked }
-                      )}
-                      onClick={() => handleVote(comment.id, VOTE.LIKE)}
-                      type="button"
-                      aria-label="좋아요"
-                      disabled={loading}
-                    >
-                      👍 {likeStates[comment.id]?.likeCount || 0}
-                    </button>
-                    <button
-                      className={classNames(
-                        styles['comment-dislike-btn'],
-                        { [styles['disliked']]: likeStates[comment.id]?.disliked }
-                      )}
-                      onClick={() => handleVote(comment.id, VOTE.DISLIKE)}
-                      type="button"
-                      aria-label="싫어요"
-                      disabled={loading}
-                    >
-                      👎 {likeStates[comment.id]?.dislikeCount || 0}
-                    </button>
-                  </>
-                )}
-                {isMyComment(comment) && (
-                  <>
+                <div className={styles['comment-actions']}>
+                  {showLike && (
+                    <>
+                      <button
+                        className={classNames(
+                          styles['comment-like-btn'],
+                          { [styles['liked']]: likeStates[comment.id]?.liked }
+                        )}
+                        onClick={() => handleVote(comment.id, VOTE.LIKE)}
+                        type="button"
+                        aria-label="좋아요"
+                        disabled={loading}
+                      >
+                        👍 {likeStates[comment.id]?.likeCount || 0}
+                      </button>
+                      <button
+                        className={classNames(
+                          styles['comment-dislike-btn'],
+                          { [styles['disliked']]: likeStates[comment.id]?.disliked }
+                        )}
+                        onClick={() => handleVote(comment.id, VOTE.DISLIKE)}
+                        type="button"
+                        aria-label="싫어요"
+                        disabled={loading}
+                      >
+                        👎 {likeStates[comment.id]?.dislikeCount || 0}
+                      </button>
+                    </>
+                  )}
+                  {isMyComment(comment) && (
                     <button className={styles['comment-del']} onClick={() => handleDelete(comment.id)}>
                       삭제
                     </button>
-                  </>
-                )}
-                {isLogin && (
-                  <button
-                    className={styles['comment-reply-btn']}
-                    onClick={() => setParentId(parentId === comment.id ? null : comment.id)}
-                  >
-                    {parentId === comment.id ? '취소' : '답글'}
-                  </button>
-                )}
+                  )}
+                  {isLogin && (
+                    <button
+                      className={styles['comment-reply-btn']}
+                      onClick={() => setParentId(parentId === comment.id ? null : comment.id)}
+                    >
+                      {parentId === comment.id ? '취소' : '답글'}
+                    </button>
+                  )}
+                </div>
               </div>
               {editId === comment.id ? (
                 <div className={styles['comment-edit-form']}>
@@ -325,41 +324,41 @@ export default function CommentList({ postId, isLogin, currentUser, showLike = t
                     <div className={styles['comment-head']}>
                       <span className={styles['comment-author']}>{reply.author_nickname || reply.author}</span>
                       <span className={styles['comment-date']}>{new Date(reply.created_at).toLocaleString()}</span>
-                      {showLike && (
-                        <>
-                          <button
-                            className={classNames(
-                              styles['comment-like-btn'],
-                              { [styles['liked']]: likeStates[reply.id]?.liked }
-                            )}
-                            onClick={() => handleVote(reply.id, VOTE.LIKE)}
-                            type="button"
-                            aria-label="좋아요"
-                            disabled={loading}
-                          >
-                            👍 {likeStates[reply.id]?.likeCount || 0}
-                          </button>
-                          <button
-                            className={classNames(
-                              styles['comment-dislike-btn'],
-                              { [styles['disliked']]: likeStates[reply.id]?.disliked }
-                            )}
-                            onClick={() => handleVote(reply.id, VOTE.DISLIKE)}
-                            type="button"
-                            aria-label="싫어요"
-                            disabled={loading}
-                          >
-                            👎 {likeStates[reply.id]?.dislikeCount || 0}
-                          </button>
-                        </>
-                      )}
-                      {isMyComment(reply) && (
-                        <>
+                      <div className={styles['comment-actions']}>
+                        {showLike && (
+                          <>
+                            <button
+                              className={classNames(
+                                styles['comment-like-btn'],
+                                { [styles['liked']]: likeStates[reply.id]?.liked }
+                              )}
+                              onClick={() => handleVote(reply.id, VOTE.LIKE)}
+                              type="button"
+                              aria-label="좋아요"
+                              disabled={loading}
+                            >
+                              👍 {likeStates[reply.id]?.likeCount || 0}
+                            </button>
+                            <button
+                              className={classNames(
+                                styles['comment-dislike-btn'],
+                                { [styles['disliked']]: likeStates[reply.id]?.disliked }
+                              )}
+                              onClick={() => handleVote(reply.id, VOTE.DISLIKE)}
+                              type="button"
+                              aria-label="싫어요"
+                              disabled={loading}
+                            >
+                              👎 {likeStates[reply.id]?.dislikeCount || 0}
+                            </button>
+                          </>
+                        )}
+                        {isMyComment(reply) && (
                           <button className={styles['comment-del']} onClick={() => handleDelete(reply.id)}>
                             삭제
                           </button>
-                        </>
-                      )}
+                        )}
+                      </div>
                     </div>
                     {editId === reply.id ? (
                       <div className={styles['comment-edit-form']}>

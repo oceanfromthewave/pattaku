@@ -47,3 +47,37 @@ exports.deleteAsync = async (id) => {
 exports.updateAsync = async (id, content) => {
   await db.query("UPDATE comments SET content = ? WHERE id = ?", [content, id]);
 };
+
+// 댓글 좋아요/싫어요 추가
+exports.addLike = async (commentId, userId, type) => {
+  await db.query(
+    "INSERT INTO comment_likes (comment_id, user_id, type) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE created_at=NOW()",
+    [commentId, userId, type]
+  );
+};
+
+// 댓글 좋아요/싫어요 여부 확인
+exports.checkLike = async (commentId, userId, type) => {
+  const [rows] = await db.query(
+    "SELECT id FROM comment_likes WHERE comment_id=? AND user_id=? AND type=?",
+    [commentId, userId, type]
+  );
+  return rows.length > 0;
+};
+
+// 댓글 좋아요/싫어요 취소 (삭제)
+exports.deleteLike = async (commentId, userId, type) => {
+  await db.query(
+    "DELETE FROM comment_likes WHERE comment_id=? AND user_id=? AND type=?",
+    [commentId, userId, type]
+  );
+};
+
+// 댓글 좋아요/싫어요 개수
+exports.getLikeCount = async (commentId, type) => {
+  const [rows] = await db.query(
+    "SELECT COUNT(*) AS cnt FROM comment_likes WHERE comment_id=? AND type=?",
+    [commentId, type]
+  );
+  return rows[0].cnt;
+};

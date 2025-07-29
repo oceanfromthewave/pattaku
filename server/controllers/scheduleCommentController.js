@@ -1,64 +1,149 @@
 const scheduleCommentModel = require("../models/scheduleCommentModel");
 
-// 목록
+// 댓글 목록 조회
 exports.list = async (req, res) => {
   const schedule_id = req.params.id;
+  const user_id = req.user?.id || null;
+
   try {
-    const rows = await scheduleCommentModel.listAsync(schedule_id);
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: "댓글 조회 실패" });
+    const comments = await scheduleCommentModel.listAsync(schedule_id, user_id);
+
+    const formattedComments = comments.map((comment) => ({
+      id: comment.id,
+      content: comment.content,
+      created_at: comment.created_at,
+      parent_id: comment.parent_id,
+      user_id: comment.user_id,
+      author: comment.author,
+      author_nickname: comment.author_nickname,
+      likes: comment.likes,
+      dislikes: comment.dislikes,
+      isLiked: Boolean(comment.isLiked),
+      isDisliked: Boolean(comment.isDisliked),
+    }));
+
+    res.json(formattedComments);
+  } catch (error) {
+    console.error("댓글 목록 조회 오류:", error);
+    res.status(500).json({
+      error: "댓글을 불러오는데 실패했습니다.",
+    });
   }
 };
 
-// 등록 (대댓글 지원)
+// 댓글 등록
 exports.create = async (req, res) => {
   const schedule_id = req.params.id;
   const user_id = req.user.id;
   const { content, parentId } = req.body;
-  if (!content) return res.status(400).json({ error: "내용을 입력하세요" });
+
+  if (!content || content.trim().length === 0) {
+    return res.status(400).json({ error: "댓글 내용을 입력해주세요." });
+  }
+
   try {
-    await scheduleCommentModel.createAsync(
+    const commentId = await scheduleCommentModel.createAsync(
       schedule_id,
       user_id,
-      content,
+      content.trim(),
       parentId || null
     );
-    res.json({ message: "등록됨" });
-  } catch (err) {
-    res.status(500).json({ error: "댓글 등록 실패" });
+
+    res.status(201).json({
+      message: "댓글이 등록되었습니다.",
+      id: commentId,
+    });
+  } catch (error) {
+    console.error("댓글 등록 오류:", error);
+    res.status(500).json({
+      error: "댓글 등록에 실패했습니다.",
+    });
   }
 };
 
-// 삭제 (본인만)
+// 댓글 삭제
 exports.remove = async (req, res) => {
   const commentId = req.params.commentId;
   const user_id = req.user.id;
+
   try {
-    // 권한 체크 (불필요시 제거 가능)
     const comment = await scheduleCommentModel.findByIdAsync(commentId);
-    if (!comment) return res.status(404).json({ error: "댓글 없음" });
-    if (comment.user_id !== user_id)
-      return res.status(403).json({ error: "권한 없음" });
+    if (!comment) {
+      return res.status(404).json({ error: "존재하지 않는 댓글입니다." });
+    }
+
+    if (comment.user_id !== user_id) {
+      return res.status(403).json({ error: "댓글을 삭제할 권한이 없습니다." });
+    }
 
     const affected = await scheduleCommentModel.removeAsync(commentId, user_id);
-    if (!affected) return res.status(403).json({ error: "권한 없음" });
-    res.json({ message: "삭제됨" });
-  } catch (err) {
-    res.status(500).json({ error: "댓글 삭제 실패" });
+
+    if (affected === 0) {
+      return res.status(403).json({ error: "댓글을 삭제할 권한이 없습니다." });
+    }
+
+    res.json({ message: "댓글이 삭제되었습니다." });
+  } catch (error) {
+    console.error("댓글 삭제 오류:", error);
+    res.status(500).json({
+      error: "댓글 삭제에 실패했습니다.",
+    });
   }
 };
 
+// 댓글 좋아요 (임시)
 exports.like = async (req, res) => {
-  // schedule_id: req.params.id, comment_id: req.params.commentId, user_id: req.user.id
-  // 1. 중복 허용 안하려면 comment_likes 테이블 필요 (user_id, comment_id, type: like/dislike)
-  // 2. insert 또는 toggle 처리, 이미 있으면 삭제, 없으면 추가 등
-  // 3. 최종 like/dislike count 반환
-  // 기본 구현 예시 (추가 설명 가능)
-  res.json({ ok: true });
+  res.json({
+    message: "좋아요가 반영되었습니다.",
+    likeCount: 0,
+    dislikeCount: 0,
+    isLiked: false,
+    isDisliked: false,
+  });
 };
 
+// 댓글 싫어요 (임시)
 exports.dislike = async (req, res) => {
-  // 나중에 실제로 DB 처리 넣어도 되고, 일단 기본 응답만~
-  res.json({ ok: true });
+  res.json({
+    message: "싫어요가 반영되었습니다.",
+    likeCount: 0,
+    dislikeCount: 0,
+    isLiked: false,
+    isDisliked: false,
+  });
+};
+
+exports.update = async (req, res) => {
+  const commentId = req.params.commentId;
+  const user_id = req.user.id;
+  const { content } = req.body;
+
+  if (!content || content.trim().length === 0) {
+    return res.status(400).json({ error: "수정할 내용을 입력해주세요." });
+  }
+
+  try {
+    const comment = await scheduleCommentModel.findByIdAsync(commentId);
+    if (!comment) {
+      return res.status(404).json({ error: "존재하지 않는 댓글입니다." });
+    }
+
+    if (comment.user_id !== user_id) {
+      return res.status(403).json({ error: "댓글을 수정할 권한이 없습니다." });
+    }
+
+    const affected = await scheduleCommentModel.updateAsync(
+      commentId,
+      user_id,
+      content.trim()
+    );
+    if (affected === 0) {
+      return res.status(403).json({ error: "댓글을 수정할 권한이 없습니다." });
+    }
+
+    res.json({ message: "댓글이 수정되었습니다." });
+  } catch (error) {
+    console.error("댓글 수정 오류:", error);
+    res.status(500).json({ error: "댓글 수정에 실패했습니다." });
+  }
 };

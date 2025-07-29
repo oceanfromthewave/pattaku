@@ -12,13 +12,16 @@ import EditPostForm from './components/Posts/EditPostForm';
 import ScheduleForm from './components/Schedule/ScheduleForm';
 import ScheduleList from './components/Schedule/ScheduleList';
 import ScheduleDetail from './components/Schedule/ScheduleDetail';
-import { useState,useEffect } from 'react';
+import ErrorBoundary from './components/ErrorBoundary';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Modal from "./components/Modal";
 
 function FreeBoardPage({ isLogin, setIsLogin }) {
   const [showRegister, setShowRegister] = useState(false);
+  const [refreshCount, setRefreshCount] = useState(0);
   const handleRegisterSuccess = () => setShowRegister(false);
+  const handlePostSuccess = () => setRefreshCount(prev => prev + 1);
 
   return (
     <div className="center-container">
@@ -45,8 +48,8 @@ function FreeBoardPage({ isLogin, setIsLogin }) {
         )
       ) : (
         <>
-          <PostForm onPost={() => window.location.reload()} />
-          <PostList />
+          <PostForm onPost={handlePostSuccess} />
+          <PostList refreshCount={refreshCount} />
         </>
       )}
     </div>
@@ -55,7 +58,9 @@ function FreeBoardPage({ isLogin, setIsLogin }) {
 
 function ScheduleBoardPage({ isLogin, setIsLogin }) {
   const [showRegister, setShowRegister] = useState(false);
+  const [refreshCount, setRefreshCount] = useState(0);
   const handleRegisterSuccess = () => setShowRegister(false);
+  const handleScheduleSuccess = () => setRefreshCount(prev => prev + 1);
 
   return (
     <div className="center-container">
@@ -85,8 +90,8 @@ function ScheduleBoardPage({ isLogin, setIsLogin }) {
         </div>
       ) : (
         <>
-          <ScheduleForm onAdd={() => window.location.reload()} />
-          <ScheduleList />
+          <ScheduleForm onAdd={handleScheduleSuccess} />
+          <ScheduleList refreshCount={refreshCount} />
         </>
       )}
     </div>
@@ -117,52 +122,85 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <Header isLogin={isLogin} setIsLogin={setIsLogin} />
-      <ToastContainer position="top-right" autoClose={3000} />
-      <Routes>
-        <Route path="/" element={
-          <div className="center-container"><Home /></div>
-        } />
-        <Route path="/board/free" element={
-          <FreeBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />
-        } />
-        <Route path="/board/schedule" element={
-          <ScheduleBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />
-        } />
-        <Route path="/board/free/:postId" element={
-          <div className="center-container"><PostDetail isLogin={isLogin} /></div>
-        } />
-        <Route path="/board/free/:postId/edit" element={
-          <div className="center-container"><EditPostForm /></div>
-        } />
-        <Route path="/board/schedule/:id" element={
-          <div className="center-container"><ScheduleDetail isLogin={isLogin} /></div>
-        } />
-      </Routes>
+    <ErrorBoundary>
+      <Router>
+        <Header isLogin={isLogin} setIsLogin={setIsLogin} />
+        <ToastContainer 
+          position="top-right" 
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
+        <Routes>
+          <Route path="/" element={
+            <div className="center-container">
+              <ErrorBoundary>
+                <Home />
+              </ErrorBoundary>
+            </div>
+          } />
+          <Route path="/board/free" element={
+            <ErrorBoundary>
+              <FreeBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />
+            </ErrorBoundary>
+          } />
+          <Route path="/board/schedule" element={
+            <ErrorBoundary>
+              <ScheduleBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />
+            </ErrorBoundary>
+          } />
+          <Route path="/board/free/:postId" element={
+            <div className="center-container">
+              <ErrorBoundary>
+                <PostDetail isLogin={isLogin} />
+              </ErrorBoundary>
+            </div>
+          } />
+          <Route path="/board/free/:postId/edit" element={
+            <div className="center-container">
+              <ErrorBoundary>
+                <EditPostForm />
+              </ErrorBoundary>
+            </div>
+          } />
+          <Route path="/board/schedule/:id" element={
+            <div className="center-container">
+              <ErrorBoundary>
+                <ScheduleDetail isLogin={isLogin} />
+              </ErrorBoundary>
+            </div>
+          } />
+        </Routes>
 
-      {/* 1시간 만료 모달 */}
-      {showExpireModal && (
-        <Modal onClose={() => {
-          setShowExpireModal(false);
-          window.location.href = '/board/free'; // 로그인페이지, 홈 등 원하는 곳으로 이동
-        }}>
-          <div style={{ textAlign: 'center', padding: '2rem' }}>
-            <h2>로그인 세션 만료</h2>
-            <p>1시간이 경과되어 다시 로그인해야 합니다.</p>
-            <button
-              onClick={() => {
-                setShowExpireModal(false);
-                window.location.href = '/board/free'; // 로그인페이지, 홈 등으로 이동
-              }}
-              style={{ marginTop: '1rem', padding: '0.6rem 1.5rem' }}
-            >
-              확인
-            </button>
-          </div>
-        </Modal>
-      )}
-    </Router>
+        {/* 1시간 만료 모달 */}
+        {showExpireModal && (
+          <Modal onClose={() => {
+            setShowExpireModal(false);
+            window.location.href = '/board/free'; // 로그인페이지, 홈 등 원하는 곳으로 이동
+          }}>
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <h2>로그인 세션 만료</h2>
+              <p>1시간이 경과되어 다시 로그인해야 합니다.</p>
+              <button
+                onClick={() => {
+                  setShowExpireModal(false);
+                  window.location.href = '/board/free'; // 로그인페이지, 홈 등으로 이동
+                }}
+                style={{ marginTop: '1rem', padding: '0.6rem 1.5rem' }}
+              >
+                확인
+              </button>
+            </div>
+          </Modal>
+        )}
+      </Router>
+    </ErrorBoundary>
   );
 }
 export default App;
