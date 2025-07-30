@@ -5,8 +5,6 @@ import styles from '../../styles/EditPostForm.module.scss';
 import { notifySuccess, notifyError } from '../../utils/notify';
 import authFetch from '../../utils/authFetch';
 
-
-
 export default function EditPostForm() {
   const { postId } = useParams();
   const [form, setForm] = useState({ title: '', content: '' });
@@ -42,9 +40,7 @@ export default function EditPostForm() {
       .finally(() => setLoading(false));
   }, [postId, navigate]);
 
-  const handleChange = (e) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleFiles = (e) => {
     const selected = Array.from(e.target.files);
@@ -55,28 +51,34 @@ export default function EditPostForm() {
   const removeFile = (idx) => setFiles(files.filter((_, i) => i !== idx));
   const removeOriginFile = (idx) => setOriginFiles(originFiles.filter((_, i) => i !== idx));
 
-  // 미리보기: 기존 파일
+  // 기존 파일 미리보기
   const renderOriginFilePreview = (file, idx) => {
     const fileUrl = file.url.startsWith('http')
       ? file.url
       : `${UPLOADS_URL}/${file.url.replace(/^\/?uploads\//, '')}`;
     if (fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
       return (
-        <div className={styles.previewOriginBox} key={file.url}>
+        <div className={styles.previewBox} key={file.url}>
           <img src={fileUrl} alt="첨부이미지" className={styles.previewImg} />
+          <div className={styles.fileDetails}>
+            <div className={styles.fileName}>{file.name || '첨부이미지'}</div>
+          </div>
           <button type="button" className={styles.delBtn} onClick={() => removeOriginFile(idx)}>×</button>
         </div>
       );
     }
     return (
-      <div className={styles.previewOriginBox} key={file.url}>
+      <div className={styles.previewBox} key={file.url}>
         <a href={fileUrl} download className={styles.previewFile}>{file.name || '첨부파일'}</a>
+        <div className={styles.fileDetails}>
+          <div className={styles.fileName}>{file.name || '첨부파일'}</div>
+        </div>
         <button type="button" className={styles.delBtn} onClick={() => removeOriginFile(idx)}>×</button>
       </div>
     );
   };
 
-  // 미리보기: 새로 추가된 파일
+  // 새 파일 미리보기
   const renderFilePreview = (file) => {
     if (!file) return null;
     if (file.type && file.type.startsWith('image/')) {
@@ -96,7 +98,6 @@ export default function EditPostForm() {
     e.preventDefault();
     setLoading(true);
     const token = localStorage.getItem('token');
-
     try {
       const compressedFiles = await Promise.all(
         files.map(file =>
@@ -105,7 +106,7 @@ export default function EditPostForm() {
           .then(compressed =>
             new File([compressed], file.name, {type: compressed.type})
           )
-          :file
+          : file
         )
       );
 
@@ -125,7 +126,7 @@ export default function EditPostForm() {
 
       if (res.ok) {
         notifySuccess('게시글이 수정되었습니다!');
-        navigate(`/board/free/${postId}`);
+        navigate(`/posts/${postId}`);
       } else {
         const data = await res.json();
         notifyError(data.error || '수정에 실패했습니다.');
@@ -142,81 +143,112 @@ export default function EditPostForm() {
   };
 
   return (
-    <form className={styles.postForm} onSubmit={handleSubmit}>
-      <h3>게시글 수정</h3>
-      <div className={styles.labelWrap}>
-        <label htmlFor="title">제목</label>
-        <input
-          id="title"
-          name="title"
-          className={styles.input}
-          placeholder="제목"
-          value={form.title}
-          onChange={handleChange}
-          required
-          maxLength={100}
-          disabled={loading}
-        />
-      </div>
-      <div className={styles.labelWrap}>
-        <label htmlFor="content">내용</label>
-        <textarea
-          id="content"
-          name="content"
-          className={styles.textarea}
-          placeholder="내용"
-          value={form.content}
-          onChange={handleChange}
-          rows={8}
-          required
-          disabled={loading}
-        />
-      </div>
-      <div className={styles.attachWrap}>
-        <label>첨부파일</label>
-        <input
-          type="file"
-          multiple
-          accept="image/*, .pdf,.xlsx,.xls,.doc,.docx,.hwp,.txt"
-          onChange={handleFiles}
-          ref={fileInputRef}
-          disabled={loading}
-          className={styles.fileInput}
-        />
-        <div className={styles.previewWrap}>
-          {originFiles.map(renderOriginFilePreview)}
-          {files.map((file, idx) => (
-            <div key={idx} className={styles.previewNewBox}>
-              {renderFilePreview(file)}
-              <button type="button" className={styles.delBtn} onClick={() => removeFile(idx)}>×</button>
-            </div>
-          ))}
+    <div className={styles.editFormRoot}>
+      <div className={styles.formCard}>
+        <div className={styles.formHeader}>
+          <h2 className={styles.formTitle}>🛠️ 게시글 수정</h2>
         </div>
+        <form className={styles.formBody} onSubmit={handleSubmit}>
+          {/* 제목 */}
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel} htmlFor="title">제목</label>
+            <input
+              id="title"
+              name="title"
+              className={styles.formInput}
+              placeholder="제목"
+              value={form.title}
+              onChange={handleChange}
+              required
+              maxLength={100}
+              disabled={loading}
+            />
+            <div className={styles.charCount}>{form.title.length}/100</div>
+          </div>
+          {/* 내용 */}
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel} htmlFor="content">내용</label>
+            <textarea
+              id="content"
+              name="content"
+              className={styles.formTextarea}
+              placeholder="내용"
+              value={form.content}
+              onChange={handleChange}
+              rows={8}
+              required
+              disabled={loading}
+              maxLength={3000}
+            />
+            <div className={styles.charCount}>{form.content.length}자</div>
+          </div>
+          {/* 파일 첨부 */}
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>파일 첨부</label>
+            <input
+              type="file"
+              multiple
+              accept="image/*, .pdf,.xlsx,.xls,.doc,.docx,.hwp,.txt"
+              onChange={handleFiles}
+              ref={fileInputRef}
+              disabled={loading}
+              className={styles.fileInput}
+            />
+            {/* 미리보기 */}
+            {(originFiles.length > 0 || files.length > 0) && (
+              <div className={styles.previewWrap}>
+                {originFiles.map(renderOriginFilePreview)}
+                {files.map((file, idx) => (
+                  <div key={idx} className={styles.previewBox}>
+                    {renderFilePreview(file)}
+                    <div className={styles.fileDetails}>
+                      <div className={styles.fileName}>{file.name.length > 25 ? file.name.slice(0, 22) + '...' : file.name}</div>
+                    </div>
+                    <button type="button" className={styles.delBtn} onClick={() => removeFile(idx)}>×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className={styles.buttonGroup}>
+            <button
+              type="button"
+              className={styles.btnSecondary}
+              onClick={() => navigate(-1)}
+              disabled={loading}
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              className={styles.btnPrimary}
+              disabled={loading || !form.title.trim() || !form.content.trim()}
+            >
+              {loading ? '수정 중...' : '수정하기'}
+            </button>
+          </div>
+        </form>
+        {/* 히스토리 */}
+        {history.length > 0 && (
+          <div className={styles.historyBox}>
+            <strong>수정 내역</strong>
+            <ul>
+              {history.map(hist => (
+                <li key={hist.id} className={styles.histItem}>
+                  <span>[{new Date(hist.updated_at).toLocaleString()}] {hist.editor_nickname || hist.editor}</span>
+                  <button
+                    type="button"
+                    className={styles.restoreBtn}
+                    onClick={() => handleRestoreHistory(hist)}
+                  >
+                    복구
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
-
-      <button type="submit" className={styles.button} disabled={loading}>
-        {loading ? '수정 중...' : '수정하기'}
-      </button>
-
-      {history.length > 0 && (
-        <div className={styles.historyBox}>
-          <strong>수정 내역</strong>
-          <ul>
-            {history.map(hist => (
-              <li key={hist.id} className={styles.histItem}>
-                <span>[{new Date(hist.updated_at).toLocaleString()}] {hist.editor_nickname || hist.editor}</span>
-                <button
-                  type="button"
-                  className={styles.restoreBtn}
-                  onClick={() => handleRestoreHistory(hist)}
-                >
-                  복구
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </form>
+    </div>
   );
 }

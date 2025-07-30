@@ -6,26 +6,28 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
   z-index: $z-modal;
   @include flex-center;
   animation: fadeIn $transition-base ease-out;
 }
 
 .modalContent {
-  background: $bg-primary;
+  background: var(--card-bg-color);
   border-radius: $radius-xl;
   padding: $space-xl;
   max-width: 90vw;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: $shadow-xl;
+  box-shadow: var(--shadow-elevation-4);
   animation: modalSlideIn $transition-slow ease-out;
   position: relative;
+  border: 1px solid var(--border-color);
 
   [data-theme="dark"] & {
-    background: $dark-bg-secondary;
+    background: var(--dark-card-bg-color);
+    border-color: var(--dark-border-color);
   }
 
   @include mobile-only {
@@ -41,20 +43,20 @@
   align-items: center;
   margin-bottom: $space-lg;
   padding-bottom: $space-md;
-  border-bottom: 1px solid $gray-200;
+  border-bottom: 1px solid var(--border-color);
 
   [data-theme="dark"] & {
-    border-bottom-color: $gray-700;
+    border-bottom-color: var(--dark-border-color);
   }
 }
 
 .modalTitle {
   font-size: $font-size-xl;
   font-weight: $font-semibold;
-  color: $text-primary;
+  color: var(--text-color);
 
   [data-theme="dark"] & {
-    color: $dark-text-primary;
+    color: var(--dark-text-color);
   }
 }
 
@@ -63,22 +65,22 @@
   border: none;
   font-size: $font-size-xl;
   cursor: pointer;
-  color: $text-secondary;
+  color: var(--text-secondary-color);
   padding: $space-sm;
   border-radius: $radius-md;
   transition: all $transition-base;
 
   &:hover {
-    background: $gray-100;
-    color: $text-primary;
+    background: var(--hover-bg-color);
+    color: var(--text-color);
   }
 
   [data-theme="dark"] & {
-    color: $dark-text-secondary;
+    color: var(--dark-text-secondary-color);
 
     &:hover {
-      background: $gray-800;
-      color: $dark-text-primary;
+      background: var(--dark-hover-bg-color);
+      color: var(--dark-text-color);
     }
   }
 }

@@ -307,8 +307,9 @@ export default function MyPage() {
   }
 
   return (
+    <div className={styles.MyPageRoot}>
     <div className={styles.myPageContainer}>
-      <div className={styles.header}>
+      <div className={styles.gradientText}>
         <h1>👤 마이페이지</h1>
         <p>안녕하세요, <strong>{profile?.nickname}</strong>님!</p>
       </div>
@@ -337,6 +338,7 @@ export default function MyPage() {
       <div className={styles.tabContent}>
         {renderTabContent()}
       </div>
+    </div>
     </div>
   );
 }

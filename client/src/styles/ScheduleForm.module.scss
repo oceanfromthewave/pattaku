@@ -5,10 +5,10 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  background: #fdfbe7;
+  background: var(--card-bg-color);
   border-radius: 15px;
   padding: 28px 24px 22px 24px;
-  box-shadow: 0 6px 20px #c9b27325;
+  box-shadow: var(--shadow-elevation-2);
   margin-bottom: 24px;
   max-width: 400px;
   width: 100%;
@@ -17,23 +17,23 @@
   transition: background 0.22s;
 }
 [data-theme="dark"] .scheduleForm {
-  background: #2f3748;
-  box-shadow: 0 6px 20px #0006;
+  background: var(--dark-card-bg-color);
+  box-shadow: var(--shadow-elevation-3);
 }
 
 .title {
   margin-bottom: 10px;
-  color: #8b7019;
+  color: var(--primary-color);
   font-size: 1.3em;
   font-weight: 900;
   text-align: left;
 }
-[data-theme="dark"] .title { color: $primary; }
+[data-theme="dark"] .title { color: var(--primary-color-dark); }
 
 .input {
-  background: #fffef4;
-  color: #222;
-  border: 1.5px solid #ede6b9;
+  background: var(--input-bg-color);
+  color: var(--text-color);
+  border: 1.5px solid var(--input-border-color);
   border-radius: 11px;
   padding: 12px 14px;
   font-size: 1.06em;
@@ -41,15 +41,15 @@
   margin-bottom: 2px;
 
   &:focus {
-    border-color: $primary;
+    border-color: var(--primary-color);
     outline: none;
-    background: #f6f2da;
+    background: var(--input-focus-bg-color);
   }
 }
 [data-theme="dark"] .input {
-  background: #232431;
-  color: #f2f2f2;
-  border: 1.5px solid #3d4668;
+  background: var(--dark-input-bg-color);
+  color: var(--dark-text-color);
+  border: 1.5px solid var(--dark-input-border-color);
 }
 
 .fileInputWrap {
@@ -58,21 +58,19 @@
   gap: 7px;
 }
 
-
-
 .fileInput {
   font-size: 1em;
   background: none;
-  color: #856111;
+  color: var(--text-secondary-color);
   border: none;
   padding: 0;
   margin: 0;
   cursor: pointer;
   &::-webkit-file-upload-button {
-    background: #ffe2ad;
+    background: var(--button-bg-color);
     border: none;
     border-radius: 7px;
-    color: #694504;
+    color: var(--button-text-color);
     font-weight: 700;
     font-size: 1em;
     padding: 6px 13px;
@@ -80,15 +78,15 @@
     transition: background 0.16s;
   }
   &::-webkit-file-upload-button:hover {
-    background: #ffeebb;
-    color: #433100;
+    background: var(--button-hover-bg-color);
+    color: var(--button-hover-text-color);
   }
 }
 [data-theme="dark"] .fileInput {
-  color: #ffe2ad;
+  color: var(--dark-text-secondary-color);
   &::-webkit-file-upload-button {
-    background: #393a4b;
-    color: #e4cf95;
+    background: var(--dark-button-bg-color);
+    color: var(--dark-button-text-color);
   }
 }
 
@@ -98,8 +96,8 @@
   align-items: center;
   flex: 1;
   height: 54px;
-  background: #fdfbe7;      /* 일정등록과 동일! */
-  color: #ba9d63;           /* 일정등록과 동일! */
+  background: var(--input-bg-color);      /* 일정등록과 동일! */
+  color: var(--text-secondary-color);           /* 일정등록과 동일! */
   font-size: 1.09em;
   font-weight: 600;
   padding-left: 14px;
@@ -109,8 +107,8 @@
   border-radius: 0 8px 8px 0;
 }
 [data-theme="dark"] .fileNameBox {
-  color: #ffeab2;
-  background: none;
+  color: var(--dark-text-secondary-color);
+  background: var(--dark-input-bg-color);
 }
 
 .imgPreviewWrap {
@@ -128,15 +126,15 @@
   height: 60px;
   object-fit: cover;
   border-radius: 7px;
-  background: #f8f6ee;
-  border: 1px solid #e2d7ac;
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
 }
-[data-theme="dark"] .imgPreview { background: #232943; border: 1px solid #2a3050; }
+[data-theme="dark"] .imgPreview { background: var(--dark-background-color); border: 1px solid var(--dark-border-color); }
 .imgDelBtn {
   position: absolute;
   top: 0; right: 0;
-  background: #ffd4b4;
-  color: #bd2111;
+  background: var(--error-color-light);
+  color: var(--error-color-dark);
   border: none;
   border-radius: 50%;
   width: 21px;
@@ -145,13 +143,13 @@
   font-size: 1.18em;
   line-height: 18px;
   cursor: pointer;
-  box-shadow: 0 1px 5px #d1b76e44;
+  box-shadow: var(--shadow-elevation-1);
   transition: background 0.17s, color 0.15s;
-  &:hover { background: #ff4949; color: #fff; }
+  &:hover { background: var(--error-color); color: white; }
 }
-[data-theme="dark"] .imgDelBtn { background: #474e68; color: #fff; }
+[data-theme="dark"] .imgDelBtn { background: var(--error-color-dark); color: white; }
 .button {
-  background: $primary;
+  background: var(--primary-color);
   color: #fff;
   border: none;
   border-radius: 11px;
@@ -161,6 +159,5 @@
   margin-top: 10px;
   cursor: pointer;
   transition: background 0.22s;
-  &:hover:not(:disabled) { background: #4968fd; }
-  &:disabled { background: #6a79a7; cursor: not-allowed; }
-}
+  &:hover:not(:disabled) { background: var(--primary-color-dark); }
+  &:disabled { background: var(--disabled-bg-color); cursor: not-allowed; }

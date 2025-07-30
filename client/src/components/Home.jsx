@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../styles/Home.module.scss';
-import logo from '../assets/pattaku-transparent.png';
 
 function Home() {
   return (
@@ -57,29 +56,6 @@ function Home() {
               <p className={styles.featureDescription}>
                 눈에 편안한 다크모드로 언제든지 테마를 변경할 수 있습니다.
               </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <section className={styles.statsSection}>
-          <h2 className={styles.sectionTitle}>📊 커뮤니티 현황</h2>
-          <div className={styles.statsGrid}>
-            <div className={styles.statItem}>
-              <span className={styles.statNumber}>150+</span>
-              <span className={styles.statLabel}>게시글</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statNumber}>50+</span>
-              <span className={styles.statLabel}>일정</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statNumber}>200+</span>
-              <span className={styles.statLabel}>댓글</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statNumber}>30+</span>
-              <span className={styles.statLabel}>활성 사용자</span>
             </div>
           </div>
         </section>

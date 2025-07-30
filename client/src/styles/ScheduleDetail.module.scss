@@ -1,17 +1,17 @@
 @use './variables' as *;
 
 .scheduleDetailWrap {
-  background: $bg-primary;
+  background: var(--card-bg-color);
   padding: $space-2xl $space-lg;
   border-radius: $radius-xl;
   max-width: 800px;
   margin: $space-2xl auto 0 auto;
-  box-shadow: $shadow-lg;
+  box-shadow: var(--shadow-elevation-3);
   transition: background $transition-slow;
 
   [data-theme="dark"] & {
-    background: $dark-bg-secondary;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    background: var(--dark-card-bg-color);
+    box-shadow: var(--shadow-elevation-4);
   }
 
   @include mobile-only {
@@ -24,15 +24,15 @@
   text-align: center;
   margin-bottom: $space-xl;
   padding-bottom: $space-lg;
-  border-bottom: 1px solid $gray-200;
+  border-bottom: 1px solid var(--border-color);
 
   [data-theme="dark"] & {
-    border-bottom-color: $gray-700;
+    border-bottom-color: var(--dark-border-color);
   }
 }
 
 .scheduleTitle {
-  color: $primary-600;
+  color: var(--primary-color);
   font-size: $font-size-3xl;
   font-weight: $font-bold;
   margin-bottom: $space-sm;
@@ -42,7 +42,7 @@
   gap: $space-sm;
 
   [data-theme="dark"] & {
-    color: $primary-400;
+    color: var(--primary-color-dark);
   }
 
   @include mobile-only {
@@ -54,15 +54,14 @@
 
 .scheduleMeta {
   font-size: $font-size-lg;
-  color: $text-secondary;
+  color: var(--text-secondary-color);
   margin-bottom: $space-md;
   display: flex;
   flex-wrap: wrap;
-  gap: $space-md;
   justify-content: center;
 
   [data-theme="dark"] & {
-    color: $dark-text-secondary;
+    color: var(--dark-text-secondary-color);
   }
 
   @include mobile-only {
@@ -80,16 +79,16 @@
 }
 
 .scheduleDate {
-  color: $primary-500;
+  color: var(--primary-color);
   font-weight: $font-semibold;
 }
 
 .scheduleAuthor {
-  color: $secondary-500;
+  color: var(--secondary-color);
 }
 
 .scheduleVotes {
-  color: $success;
+  color: var(--success-color);
 }
 
 /* 이미지 슬라이더 */
@@ -97,16 +96,16 @@
   margin-bottom: $space-xl;
   border-radius: $radius-lg;
   overflow: hidden;
-  box-shadow: $shadow-md;
+  box-shadow: var(--shadow-elevation-2);
 }
 
 .imageContainer {
   position: relative;
   width: 100%;
-  background: $gray-100;
+  background: var(--background-color);
 
   [data-theme="dark"] & {
-    background: $gray-800;
+    background: var(--dark-background-color);
   }
 }
 
@@ -175,10 +174,10 @@
   justify-content: center;
   flex-wrap: wrap;
   padding: $space-sm;
-  background: $gray-50;
+  background: var(--background-color);
 
   [data-theme="dark"] & {
-    background: $gray-900;
+    background: var(--dark-background-color);
   }
 }
 
@@ -193,12 +192,21 @@
 
   &:hover {
     transform: scale(1.05);
-    border-color: $primary-300;
+    border-color: var(--primary-color-light);
   }
 
   &.selected {
-    border-color: $primary-500;
+    border-color: var(--primary-color);
     transform: scale(1.1);
+  }
+
+  [data-theme="dark"] & {
+    &:hover {
+      border-color: var(--primary-color-dark);
+    }
+    &.selected {
+      border-color: var(--primary-color-dark);
+    }
   }
 
   @include mobile-only {
@@ -215,61 +223,61 @@
 .contentTitle {
   font-size: $font-size-xl;
   font-weight: $font-semibold;
-  color: $text-primary;
+  color: var(--text-color);
   margin-bottom: $space-md;
   display: flex;
   align-items: center;
   gap: $space-sm;
 
   [data-theme="dark"] & {
-    color: $dark-text-primary;
+    color: var(--dark-text-color);
   }
 }
 
 .scheduleDesc {
-  background: $bg-secondary;
+  background: var(--card-bg-color);
   padding: $space-lg;
   border-radius: $radius-lg;
-  border-left: 4px solid $primary-500;
+  border-left: 4px solid var(--primary-color);
   line-height: $leading-relaxed;
 
   p {
     margin-bottom: $space-sm;
-    color: $text-primary;
+    color: var(--text-color);
 
     &:last-child {
       margin-bottom: 0;
     }
 
     [data-theme="dark"] & {
-      color: $dark-text-primary;
+      color: var(--dark-text-color);
     }
   }
 
   [data-theme="dark"] & {
-    background: $dark-bg-tertiary;
-    border-left-color: $primary-400;
+    background: var(--dark-card-bg-color);
+    border-left-color: var(--primary-color-dark);
   }
 }
 
 /* 투표 섹션 */
 .scheduleVoteSection {
   margin-bottom: $space-xl;
-  background: $bg-secondary;
+  background: var(--card-bg-color);
   padding: $space-lg;
   border-radius: $radius-lg;
-  border: 1px solid $gray-200;
+  border: 1px solid var(--border-color);
 
   [data-theme="dark"] & {
-    background: $dark-bg-tertiary;
-    border-color: $gray-700;
+    background: var(--dark-card-bg-color);
+    border-color: var(--dark-border-color);
   }
 }
 
 .sectionTitle {
   font-size: $font-size-xl;
   font-weight: $font-semibold;
-  color: $text-primary;
+  color: var(--text-color);
   margin-bottom: $space-lg;
   text-align: center;
   display: flex;
@@ -278,7 +286,7 @@
   gap: $space-sm;
 
   [data-theme="dark"] & {
-    color: $dark-text-primary;
+    color: var(--dark-text-color);
   }
 }
 
@@ -314,38 +322,54 @@
 }
 
 .btnEdit {
-  background: $primary-500;
+  background: var(--primary-color);
   color: white;
-  border: 1px solid $primary-500;
+  border: 1px solid var(--primary-color);
 
   &:hover {
-    background: $primary-600;
+    background: var(--primary-color-dark);
     transform: translateY(-1px);
-    box-shadow: $shadow-md;
+    box-shadow: var(--shadow-elevation-1);
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+  }
+
+  [data-theme="dark"] & {
+    background: var(--primary-color-dark);
+    border-color: var(--primary-color-dark);
+    &:hover {
+      background: var(--primary-color);
+    }
   }
 }
 
 .btnDelete {
-  background: $error;
+  background: var(--error-color);
   color: white;
-  border: 1px solid $error;
+  border: 1px solid var(--error-color);
 
   &:hover {
-    background: $error-dark;
+    background: var(--error-color-dark);
     transform: translateY(-1px);
-    box-shadow: $shadow-md;
+    box-shadow: var(--shadow-elevation-1);
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+  }
+
+  [data-theme="dark"] & {
+    background: var(--error-color-dark);
+    border-color: var(--error-color-dark);
+    &:hover {
+      background: var(--error-color);
+    }
   }
 }
 
@@ -363,7 +387,7 @@
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: $shadow-md;
+    box-shadow: var(--shadow-elevation-1);
   }
 }
 
@@ -371,15 +395,15 @@
 .scheduleNotFound {
   text-align: center;
   padding: $space-3xl;
-  color: $text-secondary;
+  color: var(--text-secondary-color);
 
   h2 {
     font-size: $font-size-2xl;
-    color: $text-primary;
+    color: var(--text-color);
     margin-bottom: $space-md;
 
     [data-theme="dark"] & {
-      color: $dark-text-primary;
+      color: var(--dark-text-color);
     }
   }
 
@@ -388,12 +412,12 @@
     font-size: $font-size-lg;
 
     [data-theme="dark"] & {
-      color: $dark-text-secondary;
+      color: var(--dark-text-secondary-color);
     }
   }
 
   [data-theme="dark"] & {
-    color: $dark-text-secondary;
+    color: var(--dark-text-secondary-color);
   }
 }
 
@@ -411,7 +435,7 @@
 .btnEdit:focus-visible,
 .btnDelete:focus-visible,
 .btnBack:focus-visible {
-  outline: 2px solid $primary-500;
+  outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
 

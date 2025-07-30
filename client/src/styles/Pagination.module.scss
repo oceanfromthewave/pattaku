@@ -10,9 +10,9 @@
 }
 
 .paginationButton {
-  background: $bg-primary;
-  border: 1px solid $gray-300;
-  color: $text-primary;
+  background: var(--button-bg-color);
+  border: 1px solid var(--button-border-color);
+  color: var(--button-text-color);
   padding: $space-sm $space-md;
   border-radius: $radius-md;
   cursor: pointer;
@@ -26,39 +26,42 @@
   text-decoration: none;
 
   &:hover:not(:disabled) {
-    background: $primary-50;
-    border-color: $primary-300;
-    color: $primary-700;
-    transform: translateY(-1px);
+    background: var(--button-hover-bg-color);
+    border-color: var(--button-hover-border-color);
+    color: var(--button-hover-text-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevation-1);
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
   }
 
   &.active {
-    background: $primary-500;
-    border-color: $primary-500;
+    background: var(--primary-color);
+    border-color: var(--primary-color);
     color: white;
     font-weight: $font-semibold;
+    box-shadow: var(--shadow-elevation-2);
   }
 
   [data-theme="dark"] & {
-    background: $dark-bg-secondary;
-    border-color: $gray-700;
-    color: $dark-text-primary;
+    background: var(--dark-button-bg-color);
+    border-color: var(--dark-button-border-color);
+    color: var(--dark-button-text-color);
 
     &:hover:not(:disabled) {
-      background: $primary-900;
-      border-color: $primary-600;
-      color: $primary-200;
+      background: var(--dark-button-hover-bg-color);
+      border-color: var(--dark-button-hover-border-color);
+      color: var(--dark-button-hover-text-color);
     }
 
     &.active {
-      background: $primary-500;
-      border-color: $primary-500;
+      background: var(--primary-color);
+      border-color: var(--primary-color);
       color: white;
     }
   }

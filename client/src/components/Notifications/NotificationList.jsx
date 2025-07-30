@@ -31,7 +31,7 @@ const NotificationList = ({ isOpen, onClose }) => {
       fetchNotifications(1);
 
       // 실시간 알림 업데이트 처리
-      socket.on('notification', (newNotification) => {
+      socket.on('notification', () => {
         // 새 알림이 오면 목록을 새로고침하거나 추가
         // 여기서는 간단히 새로고침 (더 복잡한 로직은 중복 방지 등 필요)
         fetchNotifications(currentPage); 

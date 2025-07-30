@@ -1,4 +1,8 @@
-@use './variables' as *;
+// ===== 통합 UI 시스템 =====
+@use './variables.scss' as *;
+@use './unified-system.scss';
+
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* Global Reset */
@@ -17,22 +21,14 @@ html {
 }
 
 body {
-  font-family: $font-family;
-  font-size: $font-size-base;
-  line-height: $leading-normal;
-  color: $text-primary;
-  background-color: $bg-primary;
-  transition: background-color $transition-slow, color $transition-slow;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  transition: background-color var(--transition-slow), color var(--transition-slow);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Dark Theme */
-[data-theme="dark"] {
-  body {
-    color: $dark-text-primary;
-    background-color: $dark-bg-primary;
-  }
 }
 
 /* Global Layout */
@@ -50,162 +46,125 @@ body {
 
 .main-content {
   flex: 1;
-  padding-top: $space-lg;
-  padding-bottom: $space-2xl;
-  background: linear-gradient(135deg, $bg-primary 0%, $bg-secondary 50%, $bg-tertiary 100%);
+  // padding-top: var(--space-lg);
+  padding-bottom: var(--space-2xl);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
   min-height: calc(100vh - 70px);
-  transition: background $transition-slow;
-
-  [data-theme="dark"] & {
-    background: linear-gradient(135deg, $dark-bg-primary 0%, $dark-bg-secondary 50%, $dark-bg-tertiary 100%);
-  }
+  transition: background var(--transition-slow);
 }
 
 /* Global Utility Classes */
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 $space-md;
+  padding: 0 var(--space-md);
 
   @include mobile-only {
-    padding: 0 $space-sm;
+    padding: 0 var(--space-sm);
   }
 }
 
 .page-container {
   @extend .container;
-  padding-top: $space-lg;
-  padding-bottom: $space-lg;
+  padding-top: var(--space-lg);
+  padding-bottom: var(--space-lg);
 }
 
 .page-header {
-  margin-bottom: $space-xl;
+  margin-bottom: var(--space-xl);
   text-align: center;
 
   @include mobile-only {
     text-align: left;
-    margin-bottom: $space-lg;
+    margin-bottom: var(--space-lg);
   }
 }
 
 .page-title {
-  font-size: $font-size-3xl;
-  font-weight: $font-bold;
-  color: $text-primary;
-  margin-bottom: $space-sm;
-  background: linear-gradient(135deg, $primary-600, $secondary-600);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+  background: linear-gradient(135deg, var(--primary-600), var(--secondary-600));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 
   @include mobile-only {
-    font-size: $font-size-2xl;
-  }
-
-  [data-theme="dark"] & {
-    background: linear-gradient(135deg, $primary-400, $secondary-400);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: var(--font-size-2xl);
   }
 }
 
 .page-subtitle {
-  font-size: $font-size-lg;
-  color: $text-secondary;
-  font-weight: $font-medium;
-
-  [data-theme="dark"] & {
-    color: $dark-text-secondary;
-  }
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  font-weight: var(--font-medium);
 }
 
 /* Card Layouts */
 .card {
   @include card-base;
-
-  [data-theme="dark"] & {
-    background: $dark-bg-secondary;
-    border: 1px solid $gray-700;
-  }
 }
 
 .card-grid {
   display: grid;
-  gap: $space-lg;
+  gap: var(--space-lg);
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 
   @include mobile-only {
     grid-template-columns: 1fr;
-    gap: $space-md;
+    gap: var(--space-md);
   }
 }
 
 .card-list {
   display: flex;
   flex-direction: column;
-  gap: $space-md;
+  gap: var(--space-md);
 }
 
 /* Loading States */
 .loading-container {
   @include flex-center;
   flex-direction: column;
-  padding: $space-3xl;
-  gap: $space-md;
+  padding: var(--space-3xl);
+  gap: var(--space-md);
 
   .loading-spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid $gray-200;
-    border-top: 3px solid $primary-500;
+    border: 3px solid var(--gray-200);
+    border-top: 3px solid var(--primary-500);
     border-radius: $radius-full;
     animation: spin 1s linear infinite;
-
-    [data-theme="dark"] & {
-      border-color: $gray-700;
-      border-top-color: $primary-400;
-    }
   }
 
   p {
-    color: $text-secondary;
-    font-weight: $font-medium;
-
-    [data-theme="dark"] & {
-      color: $dark-text-secondary;
-    }
+    color: var(--text-secondary);
+    font-weight: var(--font-medium);
   }
 }
 
 /* Empty States */
 .empty-state {
   text-align: center;
-  padding: $space-3xl;
-  color: $text-secondary;
+  padding: var(--space-3xl);
+  color: var(--text-secondary);
 
   .empty-state-icon {
-    font-size: $font-size-4xl;
-    margin-bottom: $space-md;
+    font-size: var(--font-size-4xl);
+    margin-bottom: var(--space-md);
     opacity: 0.5;
   }
 
   h3 {
-    font-size: $font-size-xl;
-    color: $text-primary;
-    margin-bottom: $space-sm;
-
-    [data-theme="dark"] & {
-      color: $dark-text-primary;
-    }
+    font-size: var(--font-size-xl);
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
   }
 
   p {
-    margin-bottom: $space-md;
-
-    [data-theme="dark"] & {
-      color: $dark-text-secondary;
-    }
+    margin-bottom: var(--space-md);
   }
 }
 
@@ -213,52 +172,33 @@ body {
 .form-container {
   max-width: 500px;
   margin: 0 auto;
-  padding: $space-xl;
+  padding: var(--space-xl);
 
   @include mobile-only {
-    padding: $space-lg;
+    padding: var(--space-lg);
     max-width: 100%;
   }
 }
 
 .form-group {
-  margin-bottom: $space-lg;
+  margin-bottom: var(--space-lg);
 }
 
 .form-label {
   display: block;
-  margin-bottom: $space-xs;
-  font-size: $font-size-sm;
-  font-weight: $font-medium;
-  color: $text-primary;
-
-  [data-theme="dark"] & {
-    color: $dark-text-primary;
-  }
+  margin-bottom: var(--space-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
 }
 
 .form-input {
   @include input-base;
-
-  [data-theme="dark"] & {
-    background: $dark-bg-secondary;
-    color: $dark-text-primary;
-    border-color: $gray-700;
-
-    &:focus {
-      border-color: $primary-400;
-      box-shadow: 0 0 0 3px rgba($primary-400, 0.1);
-    }
-
-    &::placeholder {
-      color: $dark-text-disabled;
-    }
-  }
 }
 
 .form-row {
   display: flex;
-  gap: $space-md;
+  gap: var(--space-md);
 
   @include mobile-only {
     flex-direction: column;
@@ -272,13 +212,13 @@ body {
 
 .form-actions {
   display: flex;
-  gap: $space-sm;
+  gap: var(--space-sm);
   justify-content: flex-end;
-  margin-top: $space-xl;
+  margin-top: var(--space-xl);
 
   @include mobile-only {
     flex-direction: column;
-    gap: $space-sm;
+    gap: var(--space-sm);
   }
 }
 
@@ -292,66 +232,45 @@ body {
 
   &.btn-secondary {
     @include button-secondary;
-
-    [data-theme="dark"] & {
-      background: $dark-bg-tertiary;
-      color: $dark-text-primary;
-      border-color: $gray-600;
-
-      &:hover {
-        background: $gray-700;
-        border-color: $gray-500;
-      }
-    }
   }
 
   &.btn-outline {
     @include button-outline;
-
-    [data-theme="dark"] & {
-      color: $primary-400;
-      border-color: $primary-400;
-
-      &:hover {
-        background: $primary-400;
-        color: $dark-bg-primary;
-      }
-    }
   }
 
   &.btn-danger {
     @include button-base;
-    background: $error;
+    background: var(--error);
     color: white;
 
     &:hover {
-      background: $error-dark;
+      background: var(--error-dark);
       transform: translateY(-1px);
-      box-shadow: $shadow-md;
+      box-shadow: var(--shadow-md);
     }
   }
 
   &.btn-success {
     @include button-base;
-    background: $success;
+    background: var(--success);
     color: white;
 
     &:hover {
-      background: $success-dark;
+      background: var(--success-dark);
       transform: translateY(-1px);
-      box-shadow: $shadow-md;
+      box-shadow: var(--shadow-md);
     }
   }
 
   &.btn-sm {
-    padding: $space-xs $space-sm;
-    font-size: $font-size-xs;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
     min-height: 32px;
   }
 
   &.btn-lg {
-    padding: $space-md $space-lg;
-    font-size: $font-size-lg;
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-lg);
     min-height: 48px;
   }
 
@@ -364,45 +283,33 @@ body {
 }
 
 /* Text Utilities */
-.text-xs { font-size: $font-size-xs; }
-.text-sm { font-size: $font-size-sm; }
-.text-lg { font-size: $font-size-lg; }
-.text-xl { font-size: $font-size-xl; }
-.text-2xl { font-size: $font-size-2xl; }
-.text-3xl { font-size: $font-size-3xl; }
+.text-xs { font-size: var(--font-size-xs); }
+.text-sm { font-size: var(--font-size-sm); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+.text-2xl { font-size: var(--font-size-2xl); }
+.text-3xl { font-size: var(--font-size-3xl); }
 
-.font-medium { font-weight: $font-medium; }
-.font-semibold { font-weight: $font-semibold; }
-.font-bold { font-weight: $font-bold; }
+.font-medium { font-weight: var(--font-medium); }
+.font-semibold { font-weight: var(--font-semibold); }
+.font-bold { font-weight: var(--font-bold); }
 
 .text-primary { 
-  color: $text-primary !important;
-  
-  [data-theme="dark"] & {
-    color: $dark-text-primary !important;
-  }
+  color: var(--text-primary) !important;
 }
 
 .text-secondary { 
-  color: $text-secondary !important;
-  
-  [data-theme="dark"] & {
-    color: $dark-text-secondary !important;
-  }
+  color: var(--text-secondary) !important;
 }
 
 .text-muted { 
-  color: $text-disabled !important;
-  
-  [data-theme="dark"] & {
-    color: $dark-text-disabled !important;
-  }
+  color: var(--text-disabled) !important;
 }
 
-.text-success { color: $success !important; }
-.text-warning { color: $warning !important; }
-.text-error { color: $error !important; }
-.text-info { color: $info !important; }
+.text-success { color: var(--success) !important; }
+.text-warning { color: var(--warning) !important; }
+.text-error { color: var(--error) !important; }
+.text-info { color: var(--info) !important; }
 
 .text-center { text-align: center; }
 .text-left { text-align: left; }
@@ -419,48 +326,48 @@ body {
 .justify-start { justify-content: flex-start; }
 .justify-end { justify-content: flex-end; }
 
-.gap-xs { gap: $space-xs; }
-.gap-sm { gap: $space-sm; }
-.gap-md { gap: $space-md; }
-.gap-lg { gap: $space-lg; }
-.gap-xl { gap: $space-xl; }
+.gap-xs { gap: var(--space-xs); }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+.gap-xl { gap: var(--space-xl); }
 
 /* Spacing Utilities */
-.p-xs { padding: $space-xs; }
-.p-sm { padding: $space-sm; }
-.p-md { padding: $space-md; }
-.p-lg { padding: $space-lg; }
-.p-xl { padding: $space-xl; }
+.p-xs { padding: var(--space-xs); }
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+.p-xl { padding: var(--space-xl); }
 
-.m-xs { margin: $space-xs; }
-.m-sm { margin: $space-sm; }
-.m-md { margin: $space-md; }
-.m-lg { margin: $space-lg; }
-.m-xl { margin: $space-xl; }
+.m-xs { margin: var(--space-xs); }
+.m-sm { margin: var(--space-sm); }
+.m-md { margin: var(--space-md); }
+.m-lg { margin: var(--space-lg); }
+.m-xl { margin: var(--space-xl); }
 
-.mt-xs { margin-top: $space-xs; }
-.mt-sm { margin-top: $space-sm; }
-.mt-md { margin-top: $space-md; }
-.mt-lg { margin-top: $space-lg; }
-.mt-xl { margin-top: $space-xl; }
+.mt-xs { margin-top: var(--space-xs); }
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+.mt-lg { margin-top: var(--space-lg); }
+.mt-xl { margin-top: var(--space-xl); }
 
-.mb-xs { margin-bottom: $space-xs; }
-.mb-sm { margin-bottom: $space-sm; }
-.mb-md { margin-bottom: $space-md; }
-.mb-lg { margin-bottom: $space-lg; }
-.mb-xl { margin-bottom: $space-xl; }
+.mb-xs { margin-bottom: var(--space-xs); }
+.mb-sm { margin-bottom: var(--space-sm); }
+.mb-md { margin-bottom: var(--space-md); }
+.mb-lg { margin-bottom: var(--space-lg); }
+.mb-xl { margin-bottom: var(--space-xl); }
 
-.ml-xs { margin-left: $space-xs; }
-.ml-sm { margin-left: $space-sm; }
-.ml-md { margin-left: $space-md; }
-.ml-lg { margin-left: $space-lg; }
-.ml-xl { margin-left: $space-xl; }
+.ml-xs { margin-left: var(--space-xs); }
+.ml-sm { margin-left: var(--space-sm); }
+.ml-md { margin-left: var(--space-md); }
+.ml-lg { margin-left: var(--space-lg); }
+.ml-xl { margin-left: var(--space-xl); }
 
-.mr-xs { margin-right: $space-xs; }
-.mr-sm { margin-right: $space-sm; }
-.mr-md { margin-right: $space-md; }
-.mr-lg { margin-right: $space-lg; }
-.mr-xl { margin-right: $space-xl; }
+.mr-xs { margin-right: var(--space-xs); }
+.mr-sm { margin-right: var(--space-sm); }
+.mr-md { margin-right: var(--space-md); }
+.mr-lg { margin-right: var(--space-lg); }
+.mr-xl { margin-right: var(--space-xl); }
 
 /* Border Radius */
 .rounded { border-radius: $radius-md; }
@@ -470,10 +377,10 @@ body {
 .rounded-full { border-radius: $radius-full; }
 
 /* Shadow */
-.shadow-sm { box-shadow: $shadow-sm; }
-.shadow-md { box-shadow: $shadow-md; }
-.shadow-lg { box-shadow: $shadow-lg; }
-.shadow-xl { box-shadow: $shadow-xl; }
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }
 
 /* Accessibility */
 .sr-only {
@@ -481,7 +388,7 @@ body {
 }
 
 .focus-visible:focus-visible {
-  outline: 2px solid $primary-500;
+  outline: 2px solid var(--primary-500);
   outline-offset: 2px;
 }
 
@@ -501,40 +408,23 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: $gray-100;
+  background: var(--gray-100);
   border-radius: $radius-sm;
-
-  [data-theme="dark"] & {
-    background: $gray-800;
-  }
 }
 
 ::-webkit-scrollbar-thumb {
-  background: $gray-400;
+  background: var(--gray-400);
   border-radius: $radius-sm;
 
   &:hover {
-    background: $gray-500;
-  }
-
-  [data-theme="dark"] & {
-    background: $gray-600;
-
-    &:hover {
-      background: $gray-500;
-    }
+    background: var(--gray-500);
   }
 }
 
 /* Selection */
 ::selection {
-  background: rgba($primary-500, 0.2);
-  color: $text-primary;
-}
-
-[data-theme="dark"] ::selection {
-  background: rgba($primary-400, 0.3);
-  color: $dark-text-primary;
+  background: rgba(var(--primary-500), 0.2);
+  color: var(--text-primary);
 }
 
 /* Print Styles */
@@ -545,7 +435,7 @@ body {
 
   .card {
     box-shadow: none;
-    border: 1px solid $gray-300;
+    border: 1px solid var(--gray-300);
   }
 
   body {
@@ -557,54 +447,53 @@ body {
 /* Mobile Optimization */
 @include mobile-only {
   body {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
   }
 
   .page-container {
-    padding-left: $space-sm;
-    padding-right: $space-sm;
+    padding-left: var(--space-sm);
+    padding-right: var(--space-sm);
   }
 
   .card {
-    padding: $space-md;
+    padding: var(--space-md);
   }
 
   .btn {
-    padding: $space-sm $space-md;
-    font-size: $font-size-sm;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-sm);
   }
 }
 
 /* Toast Notifications Global Override */
 .Toastify__toast-container {
-  z-index: $z-tooltip;
+  z-index: var(--z-tooltip);
 }
 
 .Toastify__toast {
   border-radius: $radius-lg;
-  box-shadow: $shadow-lg;
-  font-family: $font-family;
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-family);
 }
 
 .Toastify__toast--success {
-  background: $success;
+  background: var(--success);
 }
 
 .Toastify__toast--error {
-  background: $error;
+  background: var(--error);
 }
 
 .Toastify__toast--warning {
-  background: $warning;
+  background: var(--warning);
 }
 
 .Toastify__toast--info {
-  background: $info;
+  background: var(--info);
 }
 
-[data-theme="dark"] {
-  .Toastify__toast {
-    background: $dark-bg-secondary;
-    color: $dark-text-primary;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

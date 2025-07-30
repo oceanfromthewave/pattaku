@@ -1,4 +1,5 @@
 @use './variables' as *;
+@use "sass:color";
 
 .homeRoot {
   width: 100vw;
@@ -19,6 +20,12 @@
     min-height: calc(100vh - 60px);
   }
 }
+
+  // 마이페이지 헤더 스타일
+  .gradientText {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
 
 .homeContainer {
   max-width: 1200px;
@@ -44,7 +51,11 @@
 .heroTitle {
   font-size: $font-size-4xl;
   font-weight: $font-extrabold;
-  background: linear-gradient(135deg, $primary-600, $secondary-600);
+  background: linear-gradient(
+    135deg,
+    color.adjust($primary-600, $lightness: 0%),
+    color.adjust($accent, $lightness: 0%)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -52,7 +63,11 @@
   line-height: $leading-tight;
 
   [data-theme="dark"] & {
-    background: linear-gradient(135deg, $primary-400, $secondary-400);
+    background: linear-gradient(
+      135deg,
+      color.adjust($primary-400, $lightness: 0%),
+      color.adjust($accent, $lightness: 0%)
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -113,7 +128,7 @@
 
   &.secondary {
     @include button-outline;
-    
+
     &:hover {
       transform: translateY(-2px);
       box-shadow: $shadow-md;

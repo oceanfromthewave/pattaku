@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_SERVER_URL = process.env.NODE_ENV === 'production' 
+const SOCKET_SERVER_URL = import.meta.env.MODE === 'production' 
   ? window.location.origin.replace(/^http/, 'ws') 
   : 'http://localhost:5000'; // 서버 주소에 맞게 변경
 

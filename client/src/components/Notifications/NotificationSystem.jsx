@@ -80,7 +80,7 @@ export default function NotificationSystem({ userId }) {
                       onClick={async () => {
                         if (!notification.read) {
                           markAsRead(notification.id);
-                          try { await apiMarkAsRead(notification.id); } catch {}
+                          try { await apiMarkAsRead(notification.id); } catch { /* ignore */ }
                         }
                         setOpen(false);
                         if (notification.postId) {

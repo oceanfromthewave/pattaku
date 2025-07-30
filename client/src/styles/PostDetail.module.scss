@@ -1,235 +1,227 @@
-@use './main.scss' as *;
 @use './variables' as *;
+@use "sass:color";
 
-:root {
-  --detail-bg: #fffef7;
-  --detail-shadow: 0 2px 20px #0002;
-  --detail-title: #3a60fa;
-  --detail-title-shadow: 0 0 6px #3a60fa11;
-  --detail-meta: #888;
-  --like-bg: #f6f2da;
-  --like-color: #c67d00;
-  --like-hover: #ffefd6;
-  --like-active: #ffe0b5;
-  --like-active-color: #ce7200;
-  --dislike-bg: #ffecec;
-  --dislike-color: #b4462d;
-  --dislike-hover: #ffd5c5;
-  --dislike-active-color: #c42809;
-  --history-bg: #f6f9ff;
-  --history-color: #4260b4;
-  --history-hover: #eaf3ff;
-  --edit-bg: #f2f6ff;
-  --edit-color: #3959df;
-  --edit-hover: #dde8ff;
-  --delete-color: #ff6161;
-  --delete-hover: #ffecec;
-  --historybox-bg: #fff9e3;
-  --historybox-color: #94731c;
-  --restore-bg: #e3d3b0;
-  --restore-color: #674a0c;
-  --restore-hover-bg: #ffeab6;
-  --restore-hover-color: #dd8417;
-  --body-attachment-bg: #fffdf7;
-  --body-attachment-border: #e8deaa;
-  --body-attachment-shadow: 0 2px 8px #e9deba55;
-  --body-attachment-file-bg: #fff8e5;
-  --body-attachment-file-color: #776121;
-  --divider: #e7e7b6;
-}
-[data-theme="dark"] {
-  --detail-bg: #232833;
-  --detail-title: #ffeab2;
-  --detail-title-shadow: 0 0 7px #ffeab211;
-  --detail-meta: #d4d3c9;
-  --like-bg: #38302a;
-  --like-color: #ffc14d;
-  --like-hover: #46340d;
-  --like-active: #52411a;
-  --like-active-color: #ffe8b6;
-  --dislike-bg: #342327;
-  --dislike-color: #ffa090;
-  --dislike-hover: #42363a;
-  --dislike-active-color: #ffadad;
-  --history-bg: #223157;
-  --history-color: #b6c8ff;
-  --history-hover: #24316a;
-  --edit-bg: #2c3751;
-  --edit-color: #c5d7ff;
-  --edit-hover: #223157;
-  --delete-color: #ff9f9f;
-  --delete-hover: #482d2d;
-  --historybox-bg: #2d344b;
-  --historybox-color: #efdcae;
-  --restore-bg: #252a39;
-  --restore-color: #ffeab2;
-  --restore-hover-bg: #24316a;
-  --restore-hover-color: #ffeab2;
-  --body-attachment-bg: #232833;
-  --body-attachment-border: #353d50;
-  --body-attachment-shadow: 0 2px 8px #1118;
-  --body-attachment-file-bg: #293349;
-  --body-attachment-file-color: #ffd18b;
-  --divider: #393b60;
-}
-
-.post-detail-wrap {
-  background: var(--detail-bg);
-  border-radius: 18px;
-  box-shadow: var(--detail-shadow);
-  padding: 34px 30px 24px 30px;
-  max-width: 620px;
-  margin: 38px auto 0 auto;
-  font-size: 1.09em;
-  color: inherit;
-  transition: background 0.25s;
-}
-
-.post-detail-header {
-  border-bottom: 1.5px solid #ececec;
-  padding-bottom: 16px;
-  margin-bottom: 16px;
-}
-[data-theme="dark"] .post-detail-header { border-bottom: 1.5px solid #33374a; }
-
-[data-theme="dark"] .post-detail-body {
-  color: #f2f2f2; // 다크모드에서 밝게
-}
-
-.post-detail-title {
-  font-size: 2em;
-  font-weight: 900;
-  margin: 0 0 10px 0;
-  color: var(--detail-title);
-  text-shadow: var(--detail-title-shadow);
-}
-
-.post-detail-meta {
-  font-size: 1.02em;
-  color: var(--detail-meta);
-  margin-bottom: 7px;
-}
-
-.post-detail-actions {
+/* 루트 */
+.postDetailRoot {
+  width: 100vw;
+  min-height: calc(100vh - 70px);
   display: flex;
-  gap: 12px;
+  flex-direction: column;
   align-items: center;
-  margin-top: 7px;
+  background: linear-gradient(120deg, $primary-50 50%, $primary-100 100%);
+  padding-top: $space-3xl;
+  transition: background $transition-slow;
+
+  [data-theme="dark"] & {
+    background: linear-gradient(120deg, $dark-bg-primary 50%, $dark-bg-secondary 100%);
+  }
+
+  @include mobile-only {
+    padding-top: $space-xl;
+    min-height: calc(100vh - 60px);
+  }
+}
+
+// 카드 박스
+.card, .postDetail {
+  @include card-base;
+  margin: 0 auto $space-xl auto;
+  border: 1px solid $gray-200;
+  box-shadow: $shadow-lg;
+  max-width: 720px;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: $shadow-xl;
+    border-color: $primary-300;
+  }
+
+    [data-theme="dark"] & {
+    background: $dark-bg-secondary;
+    border-color: $gray-700;
+
+    &:hover {
+      border-color: $primary-400;
+    }
+  }
+
+  @include mobile-only {
+    padding: $space-lg;
+    max-width: 100%;
+  }
+}
+
+// 헤더(제목/작성자/날짜)
+.postHeader {
+  margin-bottom: $space-lg;
+  border-bottom: 1.5px solid var(--border-color);
+  padding-bottom: $space-md;
+
+  [data-theme="dark"] & {
+    border-bottom-color: var(--gray-700);
+  }
+}
+.postTitle {
+  font-size: $font-size-2xl;
+  font-weight: $font-extrabold;
+  color: $primary-600;
+  margin-bottom: $space-xs;
+  background: linear-gradient(135deg, $primary-600, $accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  [data-theme="dark"] & {
+    color: $primary-400;
+    background: linear-gradient(135deg, $primary-400, $accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+.postMeta {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  font-weight: $font-medium;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $space-sm;
+
+  [data-theme="dark"] & {
+    color: $dark-text-secondary;
+  }
+}
+
+// 본문/첨부
+.postContent {
+  font-size: $font-size-lg;
+  line-height: $leading-relaxed;
+  margin-bottom: $space-xl;
+  color: $text-primary;
+  word-break: break-all;
+  white-space: pre-line;
+
+  [data-theme="dark"] & {
+    color: $dark-text-primary;
+  }
+}
+.attachments {
+  margin-top: $space-md;
+  display: flex;
+  gap: $space-md;
   flex-wrap: wrap;
 }
+.attachmentImg {
+  width: 160px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  background: $bg-primary;
+  border: 1px solid var(--border-color);
+  transition: box-shadow $transition-fast;
 
-.like-btn, .dislike-btn, .history-btn {
-  background: var(--like-bg);
-  color: var(--like-color);
-  font-weight: 900;
-  border-radius: 7px;
-  border: none;
-  font-size: 1.08em;
-  padding: 6px 17px;
-  box-shadow: 0 1px 5px #ffd88e22;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  &:hover { background: var(--like-hover); }
-}
-.like-btn.liked, .like-btn:active { background: var(--like-active); color: var(--like-active-color); }
-.dislike-btn {
-  color: var(--dislike-color);
-  background: var(--dislike-bg);
-  margin-left: 2px;
-}
-.dislike-btn.disliked { background: var(--dislike-hover); color: var(--dislike-active-color); }
-.history-btn {
-  color: var(--history-color);
-  background: var(--history-bg);
-  margin-left: 2px;
-  font-weight: 700;
-  &:hover { background: var(--history-hover); }
-}
+  &:hover {
+    box-shadow: $shadow-lg;
+  }
 
-.edit-btn, .delete-btn {
-  background: var(--edit-bg);
-  color: var(--edit-color);
-  font-weight: 700;
-  border-radius: 6px;
-  border: none;
-  padding: 6px 14px;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background 0.19s;
-  margin-left: 3px;
-  &:hover { background: var(--edit-hover); }
+  [data-theme="dark"] & {
+    background: $dark-bg-tertiary;
+    border-color: var(--gray-700);
+  }
 }
-.delete-btn {
-  color: var(--delete-color);
-  &:hover { background: var(--delete-hover); }
-}
+.attachmentFile {
+  display: inline-block;
+  color: $primary-500;
+  font-size: $font-size-base;
+  padding: $space-xs $space-md;
+  background: $bg-secondary;
+  border-radius: $radius-md;
+  border: 1px solid var(--border-color);
+  font-weight: $font-semibold;
+  margin-top: $space-xs;
+  text-decoration: underline;
+  transition: background $transition-fast;
 
-.history-box {
-  background: var(--historybox-bg);
-  border-radius: 11px;
-  box-shadow: 0 1px 7px #dbc89133;
-  padding: 13px 11px;
-  margin-top: 7px;
-  ul { margin: 0; padding: 0; list-style: none; }
-  li {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.97em;
-    color: var(--historybox-color);
-    margin-bottom: 3px;
-    .restore-btn {
-      margin-left: 7px;
-      background: var(--restore-bg);
-      color: var(--restore-color);
-      border: none;
-      border-radius: 5px;
-      font-weight: 700;
-      font-size: 0.97em;
-      cursor: pointer;
-      transition: background 0.15s, color 0.13s;
-      &:hover { background: var(--restore-hover-bg); color: var(--restore-hover-color);}
+  &:hover {
+    background: $primary-100;
+    color: $primary-700;
+  }
+
+  [data-theme="dark"] & {
+    color: $primary-200;
+    background: $dark-bg-tertiary;
+    border-color: var(--gray-700);
+
+    &:hover {
+      background: $primary-900;
+      color: $primary-300;
     }
   }
 }
 
-.post-detail-body {
-  font-size: 1.15em;
-  line-height: 1.7;
-  margin-bottom: 26px;
-  color: #232323; // 혹은 #222, #333 처럼 진하게!
-  word-break: break-all;
-  white-space: pre-line;
-  .attachments {
-    margin-top: 14px;
-    display: flex;
-    gap: 9px;
-    flex-wrap: wrap;
-  }
-  .attachmentImg {
-    width: 170px;
-    max-height: 180px;
-    object-fit: cover;
-    border-radius: 10px;
-    box-shadow: var(--body-attachment-shadow);
-    background: var(--body-attachment-bg);
-    border: 1px solid var(--body-attachment-border);
-  }
-  .attachmentFile {
-    display: inline-block;
-    color: var(--body-attachment-file-color);
-    font-size: 0.98em;
-    margin-top: 6px;
-    padding: 5px 10px;
-    background: var(--body-attachment-file-bg);
-    border-radius: 7px;
-    text-decoration: underline;
-    margin-right: 7px;
-    font-weight: 600;
+// 액션 버튼
+.postActions {
+  display: flex;
+  gap: $space-md;
+  align-items: center;
+  margin-top: $space-lg;
+  flex-wrap: wrap;
+}
+
+// (버튼 스타일은 .btn, .btnPrimary, .btnOutline, .btnSecondary, .btnDanger 공통 사용!)
+
+/* 구분선 */
+.postCommentDivider {
+  border-top: 2px dashed var(--border-color);
+  margin: $space-xl 0 $space-lg 0;
+  
+
+  [data-theme="dark"] & {
+    border-top-color: var(--gray-700);
   }
 }
 
-.post-comment-divider {
-  border-top: 2px dashed var(--divider);
-  margin: 24px 0 18px 0;
+// 로딩/빈상태
+.loadingContainer, .emptyState {
+  @include flex-center;
+  flex-direction: column;
+  gap: $space-md;
+  min-height: 250px;
+}
+.loadingSpinner {
+  width: 38px;
+  height: 38px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid $primary-500;
+  border-radius: $radius-full;
+  animation: spin 1s linear infinite;
+
+  [data-theme="dark"] & {
+    border-color: var(--gray-700);
+    border-top-color: $primary-400;
+  }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.emptyStateIcon {
+  font-size: $font-size-4xl;
+  opacity: 0.5;
+  margin-bottom: $space-sm;
+}
+.emptyText, .loadingText {
+  color: $text-secondary;
+  font-size: $font-size-lg;
+  margin: $space-lg 0;
+  [data-theme="dark"] & {
+    color: $dark-text-secondary;
+  }
+}
+.textSecondary {
+  color: $text-secondary;
+  [data-theme="dark"] & {
+    color: $dark-text-secondary;
+  }
 }

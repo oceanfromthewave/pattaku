@@ -20,7 +20,7 @@ function Header() {
       if (userInfoStr) {
         try {
           setUserInfo(JSON.parse(userInfoStr));
-        } catch (e) {
+        } catch {
           setUserInfo({ nickname: '사용자' });
         }
       }

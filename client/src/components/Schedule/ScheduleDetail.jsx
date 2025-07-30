@@ -122,6 +122,25 @@ export default function ScheduleDetail({ isLogin }) {
               <span className={styles.scheduleAuthor}>
                 👤 {schedule.author_nickname || schedule.author}
               </span>
+                      {/* 수정/삭제 버튼 (작성자만) */}
+        {isAuthor && (
+          <div className={styles.scheduleDetailButtons}>
+            <button 
+              className={styles.btnEdit}
+              onClick={() => navigate(`/schedules/${scheduleId}/edit`)}
+              disabled={deleting}
+            >
+              ✏️ 수정
+            </button>
+            <button 
+              className={styles.btnDelete}
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? '삭제 중...' : '🗑️ 삭제'}
+            </button>
+          </div>
+        )}
             </div>
             {schedule.vote_count > 0 && (
               <div className={styles.metaItem}>
@@ -216,25 +235,7 @@ export default function ScheduleDetail({ isLogin }) {
           <ScheduleCommentList scheduleId={scheduleId} isLogin={isLogin} currentUser={userId} type="schedule" />
         </section>
 
-        {/* 수정/삭제 버튼 (작성자만) */}
-        {isAuthor && (
-          <div className={styles.scheduleDetailButtons}>
-            <button 
-              className={styles.btnEdit}
-              onClick={() => navigate(`/schedules/${scheduleId}/edit`)}
-              disabled={deleting}
-            >
-              ✏️ 수정
-            </button>
-            <button 
-              className={styles.btnDelete}
-              onClick={handleDelete}
-              disabled={deleting}
-            >
-              {deleting ? '삭제 중...' : '🗑️ 삭제'}
-            </button>
-          </div>
-        )}
+
         
         {/* 뒤로가기 버튼 */}
         <div className={styles.scheduleBackButton}>

@@ -109,7 +109,7 @@ export default function useImprovedNotificationSocket(userId) {
     reconnectTimeoutRef.current = setTimeout(() => {
       connectWebSocket();
     }, RECONNECT_INTERVAL);
-  }, []);
+  }, [connectWebSocket]);
 
   // WebSocket 연결
   const connectWebSocket = useCallback(() => {

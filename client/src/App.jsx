@@ -5,9 +5,11 @@ import Header from './components/Header';
 import Home from './components/Home';
 import PostList from './components/Posts/PostList';
 import PostDetail from './components/Posts/PostDetail';
+import PostForm from './components/Posts/PostForm';
 import EditPostForm from './components/Posts/EditPostForm';
 import ScheduleList from './components/Schedule/ScheduleList';
 import ScheduleDetail from './components/Schedule/ScheduleDetail';
+import ScheduleForm from './components/Schedule/ScheduleForm';
 import MyPage from './components/MyPage/MyPage';
 import LoginForm from './components/Auth/LoginForm';
 import RegisterForm from './components/Auth/RegisterForm';
@@ -17,26 +19,15 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     // 로그인 상태 확인
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
-    const userInfoStr = localStorage.getItem('userInfo');
     
     if (token && userId) {
       setIsLoggedIn(true);
-      if (userInfoStr) {
-        try {
-          setUserInfo(JSON.parse(userInfoStr));
-        } catch (e) {
-          setUserInfo({ id: userId });
-        }
-      } else {
-        setUserInfo({ id: userId });
-      }
     }
 
     // 다크모드 상태 확인
@@ -51,20 +42,11 @@ function App() {
   // 로그인 상태 업데이트 함수
   const updateAuthState = () => {
     const token = localStorage.getItem('token');
-    const userInfoStr = localStorage.getItem('userInfo');
     
     if (token) {
       setIsLoggedIn(true);
-      if (userInfoStr) {
-        try {
-          setUserInfo(JSON.parse(userInfoStr));
-        } catch (e) {
-          setUserInfo({ nickname: '사용자' });
-        }
-      }
     } else {
       setIsLoggedIn(false);
-      setUserInfo(null);
     }
   };
 
@@ -82,9 +64,11 @@ function App() {
             />
             <Route path="/register" element={<RegisterForm />} />
             <Route path="/posts" element={<PostList />} />
+            <Route path="/posts/new" element={<PostForm />} />
             <Route path="/posts/:postId" element={<PostDetail />} />
             <Route path="/posts/:postId/edit" element={<EditPostForm />} />
             <Route path="/schedules" element={<ScheduleList />} />
+            <Route path="/schedules/new" element={<ScheduleForm />} />
             <Route 
               path="/schedules/:scheduleId" 
               element={<ScheduleDetail isLogin={isLoggedIn} />} 

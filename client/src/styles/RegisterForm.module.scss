@@ -1,24 +1,25 @@
 @use './variables' as *;
 
-/* RegisterForm 컴포넌트 스타일 */
 .registerContainer {
   min-height: calc(100vh - 70px);
   @include flex-center;
   padding: $space-lg;
-  background: linear-gradient(135deg, $primary-50 0%, $secondary-50 100%);
+  background: linear-gradient(120deg, $primary-50 50%, $primary-100 100%);
+  transition: background $transition-slow;
 
   [data-theme="dark"] & {
-    background: linear-gradient(135deg, $dark-bg-primary 0%, $dark-bg-secondary 100%);
+    background: linear-gradient(120deg, $dark-bg-primary 50%, $dark-bg-secondary 100%);
   }
 }
 
 .registerCard {
   @include card-base;
   width: 100%;
-  max-width: 450px;
+  max-width: 400px;
   padding: $space-2xl;
   margin: $space-lg auto;
   border: 1px solid $gray-200;
+  box-shadow: $shadow-lg;
 
   [data-theme="dark"] & {
     background: $dark-bg-secondary;
@@ -40,15 +41,15 @@
 .registerTitle {
   font-size: $font-size-2xl;
   font-weight: $font-bold;
-  color: $text-primary;
+  color: $primary-600;
   margin-bottom: $space-sm;
-  background: linear-gradient(135deg, $primary-600, $secondary-600);
+  background: linear-gradient(135deg, $primary-600, $primary-700);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 
   [data-theme="dark"] & {
-    background: linear-gradient(135deg, $primary-400, $secondary-400);
+    background: linear-gradient(135deg, $primary-400, $primary-300);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -57,7 +58,8 @@
 
 .registerSubtitle {
   color: $text-secondary;
-  font-size: $font-size-sm;
+  font-size: $font-size-base;
+  font-weight: $font-medium;
 
   [data-theme="dark"] & {
     color: $dark-text-secondary;
@@ -81,11 +83,6 @@
   font-weight: $font-semibold;
   color: $text-primary;
 
-  .required {
-    color: $error;
-    margin-left: $space-xs;
-  }
-
   [data-theme="dark"] & {
     color: $dark-text-primary;
   }
@@ -98,6 +95,7 @@
   &:focus {
     transform: translateY(-1px);
     box-shadow: 0 0 0 3px rgba($primary-500, 0.1), $shadow-md;
+    border-color: $primary-500;
   }
 
   &.error {
@@ -115,6 +113,11 @@
       box-shadow: 0 0 0 3px rgba($primary-400, 0.1), $shadow-md;
     }
 
+    &.error {
+      border-color: $error;
+      box-shadow: 0 0 0 3px rgba($error, 0.1);
+    }
+
     &::placeholder {
       color: $dark-text-disabled;
     }
@@ -122,17 +125,10 @@
 }
 
 .errorMessage {
-  font-size: $font-size-xs;
   color: $error;
+  font-size: $font-size-xs;
+  font-weight: $font-medium;
   margin-top: $space-xs;
-  display: flex;
-  align-items: center;
-  gap: $space-xs;
-
-  &::before {
-    content: '⚠️';
-    font-size: $font-size-xs;
-  }
 }
 
 .submitButton {
@@ -152,8 +148,8 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.7s ease-in-out;
   }
 
   &:hover::before {
@@ -161,9 +157,10 @@
   }
 
   &:disabled {
-    opacity: 0.7;
+    opacity: 0.6;
     cursor: not-allowed;
     transform: none !important;
+    box-shadow: none;
 
     &::before {
       display: none;
@@ -171,17 +168,17 @@
   }
 
   .spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top: 2px solid white;
+    width: 22px;
+    height: 22px;
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    border-top: 3px solid white;
     border-radius: $radius-full;
-    animation: spin 1s linear infinite;
+    animation: spin 0.8s linear infinite;
     margin-right: $space-sm;
   }
 }
 
-.loginLink {
+.loginLink, .registerLink {
   text-align: center;
   margin-top: $space-lg;
   padding-top: $space-lg;
@@ -218,33 +215,6 @@
         color: $primary-300;
       }
     }
-  }
-}
-
-/* 입력 필드 포커스 애니메이션 */
-.formGroup {
-  position: relative;
-
-  &.focused .formLabel {
-    color: $primary-500;
-
-    [data-theme="dark"] & {
-      color: $primary-400;
-    }
-  }
-}
-
-/* 성공 상태 애니메이션 */
-.formGroup.success {
-  .formInput {
-    border-color: $success;
-    box-shadow: 0 0 0 3px rgba($success, 0.1);
-  }
-
-  .formLabel::after {
-    content: ' ✓';
-    color: $success;
-    font-weight: $font-bold;
   }
 }
 

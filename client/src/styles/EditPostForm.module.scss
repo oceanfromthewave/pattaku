@@ -1,176 +1,288 @@
-@use './main.scss' as *;
 @use './variables' as *;
+@use "sass:color";
 
-.postForm {
-  background: var(--detail-bg);
-  border-radius: 18px;
-  box-shadow: var(--detail-shadow);
-  padding: 34px 30px 24px 30px;
-  max-width: 420px;
-  margin: 38px auto 0 auto;
-  font-size: 1.09em;
-  color: inherit;
-  transition: background 0.25s;
+.editFormRoot {
+  min-height: 100vh;
+  width: 100vw;
+  background: linear-gradient(120deg, $primary-50 50%, $primary-100 100%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: $space-3xl 0;
+  [data-theme="dark"] & {
+    background: linear-gradient(120deg, $dark-bg-primary 50%, $dark-bg-secondary 100%);
+  }
+}
+
+.formCard {
+  @include card-base;
+  max-width: 720px;
+  width: 100%;
+  background: $bg-primary;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-lg;
+  padding: $space-2xl;
+  border: 1px solid $gray-200;
+  [data-theme="dark"] & {
+    background: $dark-bg-secondary;
+    border-color: $gray-700;
+  }
+  @include mobile-only {
+    padding: $space-lg $space-xs;
+  }
+}
+
+.formHeader {
+  text-align: center;
+  margin-bottom: $space-xl;
+}
+.formTitle {
+  font-size: $font-size-2xl;
+  font-weight: $font-extrabold;
+  background: linear-gradient(135deg, $primary-600, $accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: $space-xs;
+  @include mobile-only { font-size: $font-size-xl; }
+}
+
+.formBody {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 17px;
+  gap: $space-lg;
 }
 
-h3 {
-  color: var(--detail-title);
-  font-size: 1.35em;
-  font-weight: 900;
-  margin-bottom: 15px;
-  margin-top: 0;
-}
-
-.labelWrap {
+.formGroup {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: $space-xs;
 }
 
-.labelWrap > label {
-  font-weight: 700;
-  font-size: 1.08em;
-  color: var(--detail-title);
-  margin-bottom: 2px;
+.formLabel {
+  font-size: $font-size-base;
+  font-weight: $font-semibold;
+  margin-bottom: $space-xs;
+  color: $text-primary;
+  [data-theme="dark"] & { color: $dark-text-primary; }
 }
 
-.input, .textarea {
-  color: #222 !important;
-  background: #fff !important;
-  border: 1.5px solid #ccc;
-  border-radius: 7px;
-  padding: 10px 13px;
-  font-size: 1.09em;
-  outline: none;
-  transition: border 0.2s;
+.formInput,
+.formTextarea {
+  width: 100%;
+  padding: $space-md;
+  border: 1.5px solid $gray-200;
+  border-radius: $radius-md;
+  background: $bg-secondary;
+  color: $text-primary;
+  font-size: $font-size-base;
+  transition: border $transition-fast, box-shadow $transition-fast;
+  &:focus {
+    border-color: $primary-500;
+    box-shadow: 0 0 0 3px rgba(58, 96, 250, 0.09);
+    outline: none;
+  }
+  &::placeholder {
+    color: $text-secondary;
+    opacity: 0.8;
+  }
+  &:disabled {
+    background: $gray-100;
+    color: $gray-400;
+  }
+  [data-theme="dark"] & {
+    background: $dark-bg-tertiary;
+    color: $dark-text-primary;
+    border-color: $gray-700;
+    &::placeholder {
+      color: $dark-text-secondary;
+    }
+  }
 }
-.input:focus, .textarea:focus {
-  border-color: var(--detail-title);
-}
-.input::placeholder, .textarea::placeholder {
-  color: #999 !important;
-  opacity: 1;
+.formTextarea {
+  min-height: 160px;
+  resize: vertical;
 }
 
-[data-theme="dark"] .input, [data-theme="dark"] .textarea {
-  background: #232833 !important;
-  color: #fff !important;
-  border: 1.5px solid #555;
-}
-[data-theme="dark"] .input::placeholder, [data-theme="dark"] .textarea::placeholder {
-  color: #aaa !important;
-}
-
-.attachWrap {
-  margin-top: 5px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.charCount {
+  align-self: flex-end;
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  margin-top: 2px;
+  [data-theme="dark"] & { color: $dark-text-secondary; }
 }
 
 .fileInput {
-  margin-top: 2px;
+  margin-top: $space-xs;
 }
 
 .previewWrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 7px;
-}
-.previewImg {
-  width: 72px;
-  height: 72px;
-  object-fit: cover;
-  border-radius: 7px;
-  border: 1.2px solid #e7e7b6;
-  background: #fffdf7;
-  box-shadow: 0 1px 6px #e9deba35;
-}
-[data-theme="dark"] .previewImg {
-  border: 1.2px solid #393b60;
-  background: #232833;
-  box-shadow: 0 1px 6px #2228;
-}
-.previewFile {
-  color: #776121;
-  font-size: 0.98em;
-  background: #fff8e5;
-  border-radius: 7px;
-  padding: 5px 10px;
-  font-weight: 600;
-}
-[data-theme="dark"] .previewFile {
-  color: #ffd18b;
-  background: #293349;
-}
-.delBtn {
-  background: #ffeded;
-  color: #b4462d;
-  border: none;
-  border-radius: 7px;
-  font-size: 1.1em;
-  margin-left: 5px;
-  padding: 2px 9px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.18s, color 0.18s;
-}
-.delBtn:hover {
-  background: #ffd5c5;
-  color: #c42809;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: $space-md;
+  margin-top: $space-md;
 }
 
-.button {
-  width: 100%;
-  background: #3a60fa;
-  color: #fff;
-  font-size: 1.15em;
-  font-weight: 900;
-  border: none;
-  border-radius: 10px;
-  padding: 16px 0 13px 0;
-  box-shadow: 0 2px 8px #3a60fa25;
-  cursor: pointer;
-  margin-top: 18px;
-  margin-bottom: 0;
-  transition: background 0.17s;
+.previewBox {
+  position: relative;
+  background: $bg-primary;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+  padding: $space-sm;
+  @include mobile-only { min-width: 0; }
+  [data-theme="dark"] & {
+    background: $dark-bg-secondary;
+    border-color: $gray-700;
+  }
 }
-.button:disabled {
-  background: #8ca2ec;
+
+.previewImg {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  border-radius: $radius-md;
+  margin-bottom: $space-xs;
+}
+
+.previewFile {
+  width: 100%;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg-secondary;
+  color: $primary-500;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  [data-theme="dark"] & {
+    background: $dark-bg-tertiary;
+    color: $primary-400;
+  }
+}
+
+.fileDetails {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  margin-bottom: 4px;
+  [data-theme="dark"] & { color: $dark-text-secondary; }
+}
+.fileName { font-weight: 500; }
+.fileSize { font-size: $font-size-xs; }
+
+.delBtn {
+  position: absolute;
+  top: $space-xs;
+  right: $space-xs;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: $error;
+  color: #fff;
+  cursor: pointer;
+  font-size: $font-size-sm;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-fast;
+  &:hover {
+    background: $error-dark;
+    transform: scale(1.09);
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  [data-theme="dark"] & {
+    background: $error-dark;
+    &:hover { background: $error; }
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  gap: $space-md;
+  justify-content: flex-end;
+  margin-top: $space-xl;
+}
+
+.btnPrimary {
+  @include button-primary;
+  font-size: $font-size-base;
+  font-weight: $font-semibold;
+  border-radius: $radius-md;
+  padding: $space-xs $space-xl;
+  min-width: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-xs;
+}
+.btnSecondary {
+  @include button-secondary;
+  font-size: $font-size-base;
+  font-weight: $font-semibold;
+  border-radius: $radius-md;
+  padding: $space-xs $space-xl;
+  min-width: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .historyBox {
-  background: #f6f9ff;
-  color: #4260b4;
-  border-radius: 11px;
-  padding: 13px 11px;
-  margin-top: 13px;
-  font-size: 0.99em;
-  box-shadow: 0 1px 7px #bbc89125;
+  background: $bg-secondary;
+  color: $text-primary;
+  border-radius: $radius-md;
+  padding: $space-md;
+  margin-top: $space-xl;
+  font-size: $font-size-sm;
+  box-shadow: $shadow-sm;
   ul { margin: 0; padding: 0; list-style: none; }
   li {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 3px;
+    gap: $space-xs;
+    margin-bottom: 2px;
+  }
+  [data-theme="dark"] & {
+    background: $dark-bg-tertiary;
+    color: $dark-text-primary;
   }
 }
 .restoreBtn {
-  background: #e3d3b0;
-  color: #674a0c;
+  background: $primary-50;
+  color: $primary-600;
   border: none;
   border-radius: 5px;
   font-weight: 700;
-  font-size: 0.97em;
+  font-size: $font-size-xs;
   cursor: pointer;
   transition: background 0.15s, color 0.13s;
-  margin-left: 7px;
+  margin-left: $space-xs;
+  padding: 3px 10px;
+  &:hover {
+    background: $primary-500;
+    color: #fff;
+  }
+  [data-theme="dark"] & {
+    background: $primary-900;
+    color: $primary-200;
+    &:hover {
+      background: $primary-400;
+      color: $dark-bg-primary;
+    }
+  }
 }
-.restoreBtn:hover {
-  background: #ffeab6;
-  color: #dd8417;
+
+@media (max-width: 700px) {
+  .formCard { padding: $space-lg $space-xs; }
+  .previewWrap { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: $space-xs; }
+  .previewImg, .previewFile { height: 64px; font-size: $font-size-xs; }
+  .buttonGroup { flex-direction: column; gap: $space-xs; }
+  .btnPrimary, .btnSecondary { width: 100%; justify-content: center; }
 }

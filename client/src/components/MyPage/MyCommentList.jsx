@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { getMyComments, getApiErrorMessage } from '../../api/userApi';
 import { notifyError } from '../../utils/notify';
 import Pagination from '../Pagination';
-import styles from '../../styles/MyPage.module.scss';
+import styles from '../../styles/MyCommentList.module.scss';
 
 export default function MyCommentList() {
   const [comments, setComments] = useState([]);
@@ -12,11 +12,12 @@ export default function MyCommentList() {
     page: 1,
     limit: 10,
     total: 0,
-    totalPages: 0
+    totalPages: 0,
   });
 
   useEffect(() => {
     loadComments(1);
+    // eslint-disable-next-line
   }, []);
 
   const loadComments = async (page = 1) => {
@@ -26,22 +27,29 @@ export default function MyCommentList() {
       setComments(response.comments);
       setPagination(response.pagination);
     } catch (error) {
-      console.error('내 댓글 목록 로드 오류:', error);
       notifyError(getApiErrorMessage(error));
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePageChange = (newPage) => {
-    loadComments(newPage);
+  const handlePageChange = (newPage) => loadComments(newPage);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
   };
+
+  const truncate = (str, max = 100) =>
+    str && str.length > max ? str.slice(0, max) + '...' : str;
 
   if (loading) {
     return (
       <div className={styles.loading}>
         <div className={styles.spinner}></div>
-        <p>내가 쓴 댓글을 불러오는 중...</p>
+        <div>내가 쓴 댓글을 불러오는 중...</div>
       </div>
     );
   }
@@ -49,9 +57,11 @@ export default function MyCommentList() {
   if (comments.length === 0) {
     return (
       <div className={styles.emptyState}>
-        <p>💬 아직 작성한 댓글이 없습니다.</p>
-        <Link to="/board/free" className={styles.writeBtn}>
-          게시판에서 댓글 작성하기
+        <div className={styles.emptyIcon}>💬</div>
+        <div className={styles.emptyText}>작성한 댓글이 없습니다</div>
+        <div className={styles.emptySub}>게시글에 첫 댓글을 남겨보세요!</div>
+        <Link to="/posts" className={styles.writeBtn}>
+          💬 게시글 보러가기
         </Link>
       </div>
     );
@@ -59,50 +69,66 @@ export default function MyCommentList() {
 
   return (
     <div className={styles.myCommentList}>
-      <div className={styles.listHeader}>
-        <h3>💬 내가 쓴 댓글 ({pagination.total}개)</h3>
+      <div className={styles.header}>
+        <h2>💬 내가 쓴 댓글</h2>
+        <span className={styles.count}>총 {pagination.total}개</span>
       </div>
-
-      <div className={styles.commentList}>
-        {comments.map(comment => (
+      <div className={styles.list}>
+        {comments.map((comment) => (
           <div key={comment.id} className={styles.commentItem}>
-            <div className={styles.commentHeader}>
-              <Link 
-                to={`/board/free/${comment.post_id}`} 
-                className={styles.postTitle}
+            <div className={styles.itemHead}>
+              <span
+                className={styles.type}
+                style={{
+                  background: comment.post_id
+                    ? 'var(--primary-50, #fef7ee)'
+                    : 'var(--success-50, #dcfce7)',
+                  color: comment.post_id
+                    ? 'var(--primary-700, #c2410c)'
+                    : 'var(--success-700, #047857)',
+                }}
               >
-                📄 {comment.post_title}
-              </Link>
-              <div className={styles.commentMeta}>
-                <span className={styles.commentDate}>
-                  {new Date(comment.created_at).toLocaleDateString()}
-                </span>
-                <div className={styles.commentStats}>
-                  <span>👍 {comment.likes || 0}</span>
-                  <span>👎 {comment.dislikes || 0}</span>
-                  {comment.parent_id && (
-                    <span className={styles.replyBadge}>답글</span>
-                  )}
-                </div>
-              </div>
+                {comment.post_id ? '게시글' : '일정'} 댓글
+              </span>
+              <span className={styles.date}>📅 {formatDate(comment.created_at)}</span>
             </div>
-            
-            <div className={styles.commentContent}>
-              {comment.content.length > 150 
-                ? `${comment.content.substring(0, 150)}...` 
-                : comment.content
-              }
+            <div className={styles.itemContent}>
+              <span className={styles.text}>{truncate(comment.content, 120)}</span>
+              {comment.parent_id && (
+                <span className={styles.replyTag}>↳ 답글</span>
+              )}
+            </div>
+            <div className={styles.itemFooter}>
+              <div className={styles.meta}>
+                {comment.like_count > 0 && (
+                  <span className={styles.likes}>👍 {comment.like_count}</span>
+                )}
+                {comment.dislike_count > 0 && (
+                  <span className={styles.dislikes}>👎 {comment.dislike_count}</span>
+                )}
+              </div>
+              <Link
+                to={comment.post_id ? `/posts/${comment.post_id}` : `/schedules/${comment.schedule_id}`}
+                className={styles.detailBtn}
+              >
+                {comment.post_title
+                  ? truncate(comment.post_title, 32)
+                  : '원글 보기'} →
+              </Link>
             </div>
           </div>
         ))}
       </div>
-
       {pagination.totalPages > 1 && (
-        <Pagination
-          currentPage={pagination.page}
-          totalPages={pagination.totalPages}
-          onPageChange={handlePageChange}
-        />
+        <div className={styles.paginationWrap}>
+          <Pagination
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            onPageChange={handlePageChange}
+            itemsPerPage={pagination.limit}
+            totalItems={pagination.total}
+          />
+        </div>
       )}
     </div>
   );

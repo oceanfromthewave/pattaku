@@ -6,19 +6,20 @@
   padding: $space-3xl;
   text-align: center;
   min-height: 400px;
-  background: $bg-secondary;
+  background: var(--card-bg-color);
   border-radius: $radius-lg;
   margin: $space-lg;
+  box-shadow: var(--shadow-elevation-2);
 
   [data-theme="dark"] & {
-    background: $dark-bg-secondary;
+    background: var(--dark-card-bg-color);
   }
 }
 
 .errorIcon {
   font-size: $font-size-5xl;
   margin-bottom: $space-lg;
-  color: $error;
+  color: var(--error-color);
 }
 
 .errorTitle {
@@ -72,15 +73,15 @@
 .errorDetails {
   margin-top: $space-xl;
   padding: $space-lg;
-  background: $bg-primary;
+  background: var(--background-color);
   border-radius: $radius-md;
-  border-left: 4px solid $error;
+  border-left: 4px solid var(--error-color);
   text-align: left;
   max-width: 100%;
   overflow-x: auto;
 
   [data-theme="dark"] & {
-    background: $dark-bg-tertiary;
+    background: var(--dark-background-color);
   }
 }
 

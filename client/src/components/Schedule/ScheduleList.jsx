@@ -11,8 +11,8 @@ import styles from '../../styles/ScheduleList.module.scss';
 export default function ScheduleList({ refreshCount }) {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState(''); // 실제 검색어
-  const [searchInput, setSearchInput] = useState(''); // 입력창 값
+  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [sort, setSort] = useState('recent');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -23,20 +23,6 @@ export default function ScheduleList({ refreshCount }) {
   // 스크롤 위치 저장용 ref
   const scrollPositionRef = useRef(0);
 
-  // 스크롤 위치 저장
-  const saveScrollPosition = () => {
-    scrollPositionRef.current = window.pageYOffset || document.documentElement.scrollTop;
-  };
-
-  // 스크롤 위치 복원
-  const restoreScrollPosition = () => {
-    setTimeout(() => {
-      if (scrollPositionRef.current > 0) {
-        window.scrollTo(0, scrollPositionRef.current);
-      }
-    }, 50);
-  };
-
   useEffect(() => {
     const fetchSchedules = async () => {
       setLoading(true);
@@ -45,34 +31,32 @@ export default function ScheduleList({ refreshCount }) {
           page: currentPage,
           limit: itemsPerPage,
           search,
-          sort
+          sort,
         };
         const data = await getSchedules(params);
         setSchedules(data.schedules || data);
         setTotalPages(data.totalPages || Math.ceil((data.total || data.length) / itemsPerPage));
         setTotalItems(data.total || data.length);
       } catch (error) {
-        console.error('스케줄 로딩 실패:', error);
         notifyError('스케줄을 불러오는데 실패했습니다.');
         setSchedules([]);
       } finally {
         setLoading(false);
-        // 로딩 완료 후 스크롤 위치 복원 (정렬 변경 시에만)
         if (scrollPositionRef.current > 0) {
-          restoreScrollPosition();
+          setTimeout(() => {
+            window.scrollTo(0, scrollPositionRef.current);
+          }, 50);
         }
       }
     };
     fetchSchedules();
+    // eslint-disable-next-line
   }, [refreshCount, search, sort, currentPage]);
 
-  // 디바운스: 입력 후 400ms 뒤에만 실제 검색 실행
+  // 검색 입력 디바운스
   useEffect(() => {
     const handler = setTimeout(() => {
-      // 검색 시에는 스크롤을 맨 위로
-      if (searchInput !== search) {
-        scrollPositionRef.current = 0;
-      }
+      if (searchInput !== search) scrollPositionRef.current = 0;
       setSearch(searchInput);
       setCurrentPage(1);
     }, 400);
@@ -80,24 +64,17 @@ export default function ScheduleList({ refreshCount }) {
     // eslint-disable-next-line
   }, [searchInput]);
 
-  // 입력창 값만 변경
-  const handleSearchInput = (value) => {
-    setSearchInput(value);
-  };
+  const handleSearchInput = (value) => setSearchInput(value);
 
-  // 정렬 변경 (스크롤 위치 유지)
   const handleSortChange = (e) => {
-    e.preventDefault(); // 기본 동작 방지
-    
-    // 현재 스크롤 위치 저장
-    saveScrollPosition();
-    
-    setSort(s => (s === 'recent' ? 'old' : 'recent'));
+    e.preventDefault();
+    scrollPositionRef.current = window.pageYOffset || document.documentElement.scrollTop;
+    setSort((s) => (s === 'recent' ? 'old' : 'recent'));
     setCurrentPage(1);
   };
 
   const resetFilters = () => {
-    scrollPositionRef.current = 0; // 초기화 시에는 맨 위로
+    scrollPositionRef.current = 0;
     setSearchInput('');
     setSearch('');
     setSort('recent');
@@ -106,7 +83,7 @@ export default function ScheduleList({ refreshCount }) {
   };
 
   const handlePageChange = (page) => {
-    scrollPositionRef.current = 0; // 페이지 변경 시에는 맨 위로
+    scrollPositionRef.current = 0;
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -114,6 +91,7 @@ export default function ScheduleList({ refreshCount }) {
   if (loading) return <Loading message="스케줄을 불러오는 중..." />;
 
   return (
+    <div ScheduleRoot>
     <div className={classNames(styles.scheduleList, 'scheduleList')}>
       <div className={styles.listHeader}>
         <h3 className={styles.listTitle}>📅 일정 공유</h3>
@@ -127,25 +105,21 @@ export default function ScheduleList({ refreshCount }) {
       </div>
 
       <div className={styles.filterBar}>
-        <div className={styles.searchGroup}>
-          <input
-            type="text"
-            className={styles.searchInput}
-            value={searchInput}
-            onChange={e => handleSearchInput(e.target.value)}
-            placeholder="제목/설명 검색"
-          />
-        </div>
-        <div className={styles.controlGroup}>
-          <button
-            type="button"
-            className={styles.sortBtn}
-            onClick={handleSortChange}
-            title={`현재: ${sort === 'recent' ? '최신순' : '과거순'}`}
-          >
-            {sort === 'recent' ? '📅 최신순' : '🕰️ 과거순'}
-          </button>
-        </div>
+        <input
+          type="text"
+          className={styles.searchInput}
+          value={searchInput}
+          onChange={e => handleSearchInput(e.target.value)}
+          placeholder="제목/설명 검색"
+        />
+        <button
+          type="button"
+          className={styles.sortBtn}
+          onClick={handleSortChange}
+          title={`현재: ${sort === 'recent' ? '최신순' : '과거순'}`}
+        >
+          {sort === 'recent' ? '📅 최신순' : '🕰️ 과거순'}
+        </button>
       </div>
 
       {schedules.length === 0 ? (
@@ -168,17 +142,15 @@ export default function ScheduleList({ refreshCount }) {
                 tabIndex={0}
                 role="button"
                 aria-label={s.title}
-                onClick={() => navigate(`/board/schedule/${s.id}`)}
-                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && navigate(`/board/schedule/${s.id}`)}
+                onClick={() => navigate(`/schedules/${s.id}`)}
+                onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && navigate(`/schedules/${s.id}`)}
               >
                 <div className={styles.itemContent}>
                   {s.images && s.images.length > 0 && (
                     <div className={styles.imgThumbWrap}>
                       <img src={s.images[0]} alt="일정 썸네일" className={styles.imgThumb} />
                       {s.images.length > 1 && (
-                        <div className={styles.imageCount}>
-                          +{s.images.length - 1}
-                        </div>
+                        <div className={styles.imageCount}>+{s.images.length - 1}</div>
                       )}
                     </div>
                   )}
@@ -216,5 +188,6 @@ export default function ScheduleList({ refreshCount }) {
         </>
       )}
     </div>
+</div>
   );
 }

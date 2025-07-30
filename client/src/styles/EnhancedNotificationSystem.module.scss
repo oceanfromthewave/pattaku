@@ -1,0 +1,93 @@
+
+.notificationSystem {
+  position: relative;
+
+  .notificationButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    color: var(--icon-color);
+    position: relative;
+
+    .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: var(--danger-color);
+      color: white;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+  }
+
+  .notificationList {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 300px;
+    background-color: var(--card-bg-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1001;
+
+    .header {
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .markAsRead {
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        cursor: pointer;
+        font-size: 12px;
+      }
+    }
+
+    .content {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .notificationItem {
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: var(--hover-bg-color);
+      }
+
+      &.unread {
+        font-weight: bold;
+      }
+
+      p {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .timestamp {
+        font-size: 12px;
+        color: var(--secondary-text-color);
+        margin-top: 5px;
+      }
+    }
+
+    .empty {
+      padding: 20px;
+      text-align: center;
+      color: var(--secondary-text-color);
+    }
+  }
+}

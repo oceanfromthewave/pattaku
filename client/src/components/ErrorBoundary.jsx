@@ -13,7 +13,7 @@ class ErrorBoundary extends React.Component {
     };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
 
@@ -67,7 +67,7 @@ class ErrorBoundary extends React.Component {
           </div>
 
           {/* 개발 모드에서만 에러 상세 정보 표시 */}
-          {process.env.NODE_ENV === 'development' && (
+          {import.meta.env.MODE === 'development' && (
             <div className={styles.errorDetails}>
               <button 
                 className={styles.detailsToggle}

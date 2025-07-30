@@ -1,0 +1,242 @@
+@use './variables' as *;
+
+.myCommentList {
+  background: $bg-primary;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-lg;
+  padding: $space-2xl $space-xl;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 950px;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $space-lg;
+
+    h2 {
+      font-size: $font-size-xl;
+      font-weight: $font-extrabold;
+      color: $primary-700;
+      letter-spacing: -1px;
+    }
+
+    .count {
+      font-size: $font-size-base;
+      color: $primary-400;
+      background: $primary-50;
+      padding: 0.33em 1em;
+      border-radius: $radius-full;
+      font-weight: 700;
+    }
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .commentItem {
+    background: $bg-primary;
+    border: 1.5px solid $border-color;
+    border-radius: $radius-xl;
+    box-shadow: $shadow-lg;
+    padding: $space-lg $space-xl $space-md $space-xl;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $space-xs;
+    transition: box-shadow 0.18s, border-color 0.18s, transform 0.12s;
+
+    &:hover {
+      box-shadow: $shadow-lg;
+      border-color: $primary-300;
+      transform: translateY(-2px) scale(1.012);
+    }
+  }
+
+  .itemHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    .type {
+      font-size: 0.73rem;
+      font-weight: 700;
+      border-radius: 0.6em;
+      padding: 0.17em 0.8em;
+      letter-spacing: 0.01em;
+      display: inline-block;
+    }
+    .date {
+      font-size: $font-size-xs;
+      color: $text-secondary;
+      font-weight: 400;
+    }
+  }
+
+  .itemContent {
+    margin-bottom: 0.2rem;
+    .text {
+      color: $text-primary;
+      font-size: $font-size-base;
+      line-height: 1.52;
+    }
+    .replyTag {
+      font-size: 0.82em;
+      color: $primary-600;
+      background: $primary-100;
+      border-radius: 0.4em;
+      padding: 0.18em 0.9em;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+  }
+
+  .itemFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: $font-size-sm;
+    margin-top: 0.1rem;
+
+    .meta {
+      display: flex;
+      gap: 0.6rem;
+      color: $text-secondary;
+
+      .likes {
+        color: $success;
+        font-weight: 600;
+      }
+      .dislikes {
+        color: $error;
+        font-weight: 600;
+      }
+    }
+
+    .detailBtn {
+      color: $primary-600;
+      background: $primary-50;
+      font-size: $font-size-sm;
+      border-radius: $radius-md;
+      padding: 0.24em 0.95em;
+      text-decoration: none;
+      font-weight: 600;
+      transition: background 0.12s, color 0.14s;
+      &:hover {
+        background: $primary-200;
+        color: $primary-900;
+      }
+    }
+  }
+
+  /* 로딩 */
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 0;
+    color: $text-secondary;
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid $gray-200;
+      border-top: 4px solid $primary-500;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 1rem;
+    }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 비었을 때 */
+  .emptyState {
+    text-align: center;
+    padding: 3rem 0 2rem 0;
+    color: $text-secondary;
+
+    .emptyIcon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    .emptyText {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      color: $text-primary;
+    }
+    .emptySub {
+      font-size: 0.97rem;
+      margin-bottom: 1.3rem;
+      opacity: 0.88;
+    }
+    .writeBtn {
+      background: $primary-500;
+      color: white;
+      font-weight: 600;
+      font-size: $font-size-base;
+      padding: 0.7em 1.6em;
+      border-radius: $radius-lg;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6em;
+      text-decoration: none;
+      transition: background 0.13s, transform 0.12s;
+      box-shadow: $shadow-md;
+      &:hover {
+        background: $primary-600;
+        transform: translateY(-1px) scale(1.01);
+      }
+    }
+  }
+
+  .paginationWrap {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+/* 다크모드 */
+[data-theme="dark"] .myCommentList {
+  background: $dark-bg-secondary;
+  box-shadow: $shadow-lg;
+  .header h2 { color: $primary-200; }
+  .header .count { color: $primary-100; background: $dark-bg-tertiary; }
+  .commentItem {
+    background: $dark-bg-secondary;
+    border-color: $gray-700;
+    box-shadow: $shadow-md;
+  }
+  .itemHead .date { color: $dark-text-secondary; }
+  .itemContent .text { color: $dark-text-primary; }
+  .itemContent .replyTag { color: $primary-200; background: $primary-900; }
+  .itemFooter .meta { color: $dark-text-secondary; }
+  .itemFooter .likes { color: $success-light; }
+  .itemFooter .dislikes { color: $error-dark; }
+  .itemFooter .detailBtn {
+    color: $primary-200; background: $dark-bg-tertiary;
+    &:hover { color: $primary-100; background: $primary-400; }
+  }
+  .loading { color: $dark-text-secondary; }
+  .emptyState { color: $dark-text-secondary;
+    .emptyText { color: $dark-text-primary; }
+  }
+}
+@media (max-width: 700px) {
+  .myCommentList {
+    padding: $space-lg $space-sm;
+    .header { flex-direction: column; gap: 0.7rem; align-items: flex-start; }
+    .list { gap: 0.7rem; }
+    .commentItem { padding: $space-md $space-md $space-sm $space-md; }
+  }
+}

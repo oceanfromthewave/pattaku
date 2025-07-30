@@ -28,6 +28,7 @@ export default function useNotificationSocket(userId) {
       setNotifications(mapped);
       setUnreadCount(mapped.filter(n => !n.read).length);
     }).catch(() => {
+      /* ignore */
       setNotifications([]);
       setUnreadCount(0);
     });
@@ -58,7 +59,7 @@ export default function useNotificationSocket(userId) {
             tag: notification.id
           });
         }
-      } catch {}
+      } catch { /* ignore */ }
     };
     if (Notification.permission === 'default') Notification.requestPermission();
     return () => ws.close();
@@ -73,7 +74,7 @@ export default function useNotificationSocket(userId) {
       await apiMarkAllAsRead();
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
-    } catch {}
+    } catch { /* ignore */ }
   };
   const deleteNotification = (id) => {
     setNotifications(prev => prev.filter(n => n.id !== id));

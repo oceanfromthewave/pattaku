@@ -18,49 +18,26 @@ function RegisterForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
-    // 실시간 에러 제거
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: '' });
-    }
+    if (errors[name]) setErrors({ ...errors, [name]: '' });
   };
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.username.trim()) {
-      newErrors.username = '사용자명을 입력해주세요.';
-    } else if (formData.username.length < 3) {
-      newErrors.username = '사용자명은 3자 이상이어야 합니다.';
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = '이메일을 입력해주세요.';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = '올바른 이메일 형식이 아닙니다.';
-    }
-
-    if (!formData.nickname.trim()) {
-      newErrors.nickname = '닉네임을 입력해주세요.';
-    } else if (formData.nickname.length < 2) {
-      newErrors.nickname = '닉네임은 2자 이상이어야 합니다.';
-    }
-
-    if (!formData.password) {
-      newErrors.password = '비밀번호를 입력해주세요.';
-    } else if (formData.password.length < 6) {
-      newErrors.password = '비밀번호는 6자 이상이어야 합니다.';
-    }
-
+    if (!formData.username.trim()) newErrors.username = '사용자명을 입력해주세요.';
+    else if (formData.username.length < 3) newErrors.username = '사용자명은 3자 이상이어야 합니다.';
+    if (!formData.email.trim()) newErrors.email = '이메일을 입력해주세요.';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = '올바른 이메일 형식이 아닙니다.';
+    if (!formData.nickname.trim()) newErrors.nickname = '닉네임을 입력해주세요.';
+    else if (formData.nickname.length < 2) newErrors.nickname = '닉네임은 2자 이상이어야 합니다.';
+    if (!formData.password) newErrors.password = '비밀번호를 입력해주세요.';
+    else if (formData.password.length < 6) newErrors.password = '비밀번호는 6자 이상이어야 합니다.';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-
     setLoading(true);
     try {
       await registerUser(formData);
@@ -85,9 +62,7 @@ function RegisterForm() {
 
         <form className={styles.registerForm} onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              사용자명 <span className={styles.required}>*</span>
-            </label>
+            <label className={styles.formLabel}>사용자명</label>
             <input
               type="text"
               name="username"
@@ -103,9 +78,7 @@ function RegisterForm() {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              이메일 <span className={styles.required}>*</span>
-            </label>
+            <label className={styles.formLabel}>이메일</label>
             <input
               type="email"
               name="email"
@@ -121,9 +94,7 @@ function RegisterForm() {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              닉네임 <span className={styles.required}>*</span>
-            </label>
+            <label className={styles.formLabel}>닉네임</label>
             <input
               type="text"
               name="nickname"
@@ -139,9 +110,7 @@ function RegisterForm() {
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.formLabel}>
-              비밀번호 <span className={styles.required}>*</span>
-            </label>
+            <label className={styles.formLabel}>비밀번호</label>
             <input
               type="password"
               name="password"
