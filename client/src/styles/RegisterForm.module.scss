@@ -1,130 +1,293 @@
+@use './variables' as *;
+
+/* RegisterForm 컴포넌트 스타일 */
+.registerContainer {
+  min-height: calc(100vh - 70px);
+  @include flex-center;
+  padding: $space-lg;
+  background: linear-gradient(135deg, $primary-50 0%, $secondary-50 100%);
+
+  [data-theme="dark"] & {
+    background: linear-gradient(135deg, $dark-bg-primary 0%, $dark-bg-secondary 100%);
+  }
+}
+
+.registerCard {
+  @include card-base;
+  width: 100%;
+  max-width: 450px;
+  padding: $space-2xl;
+  margin: $space-lg auto;
+  border: 1px solid $gray-200;
+
+  [data-theme="dark"] & {
+    background: $dark-bg-secondary;
+    border-color: $gray-700;
+  }
+
+  @include mobile-only {
+    padding: $space-xl;
+    margin: $space-sm;
+    max-width: 100%;
+  }
+}
+
+.registerHeader {
+  text-align: center;
+  margin-bottom: $space-xl;
+}
+
+.registerTitle {
+  font-size: $font-size-2xl;
+  font-weight: $font-bold;
+  color: $text-primary;
+  margin-bottom: $space-sm;
+  background: linear-gradient(135deg, $primary-600, $secondary-600);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  [data-theme="dark"] & {
+    background: linear-gradient(135deg, $primary-400, $secondary-400);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.registerSubtitle {
+  color: $text-secondary;
+  font-size: $font-size-sm;
+
+  [data-theme="dark"] & {
+    color: $dark-text-secondary;
+  }
+}
+
 .registerForm {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  background: #fcf6e7;
-  border-radius: 20px;
-  padding: 36px 30px 28px 30px;
-  margin-bottom: 24px;
-  max-width: 400px;
+  gap: $space-lg;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $space-xs;
+}
+
+.formLabel {
+  font-size: $font-size-sm;
+  font-weight: $font-semibold;
+  color: $text-primary;
+
+  .required {
+    color: $error;
+    margin-left: $space-xs;
+  }
+
+  [data-theme="dark"] & {
+    color: $dark-text-primary;
+  }
+}
+
+.formInput {
+  @include input-base;
+  transition: all $transition-base;
+
+  &:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba($primary-500, 0.1), $shadow-md;
+  }
+
+  &.error {
+    border-color: $error;
+    box-shadow: 0 0 0 3px rgba($error, 0.1);
+  }
+
+  [data-theme="dark"] & {
+    background: $dark-bg-tertiary;
+    color: $dark-text-primary;
+    border-color: $gray-600;
+
+    &:focus {
+      border-color: $primary-400;
+      box-shadow: 0 0 0 3px rgba($primary-400, 0.1), $shadow-md;
+    }
+
+    &::placeholder {
+      color: $dark-text-disabled;
+    }
+  }
+}
+
+.errorMessage {
+  font-size: $font-size-xs;
+  color: $error;
+  margin-top: $space-xs;
+  display: flex;
+  align-items: center;
+  gap: $space-xs;
+
+  &::before {
+    content: '⚠️';
+    font-size: $font-size-xs;
+  }
+}
+
+.submitButton {
+  @include button-primary;
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 3px 32px #bfae7c23;
-  transition: background 0.3s, box-shadow 0.3s;
-}
-[data-theme="dark"] .registerForm {
-  background: #1a1b20;
-  box-shadow: 0 3px 24px #0007;
-}
+  justify-content: center;
+  margin-top: $space-md;
+  font-size: $font-size-base;
+  min-height: 48px;
+  position: relative;
+  overflow: hidden;
 
-.title {
-  margin-bottom: 14px;
-  color: #977f45;
-  font-size: 1.5em;
-  font-weight: 900;
-  text-align: center;
-  letter-spacing: -0.02em;
-  text-shadow: 0 0 8px #977f4522;
-}
-[data-theme="dark"] .title {
-  color: #a9c3fd;
-  text-shadow: 0 0 8px #23294244;
-}
-
-.input {
-  background: #fffefb;
-  color: #977f45;
-  border: 1.5px solid #eddcb5;
-  border-radius: 12px;
-  padding: 14px 16px;
-  font-size: 1.1em;
-  transition: border-color 0.18s, background 0.18s, color 0.18s;
-  outline: none;
-
-  &::placeholder {
-    color: #c3b17a;
-    opacity: 1;
-    transition: color 0.18s;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
   }
-  &:focus {
-    border-color: #bfae7c;
-    background: #f4ebd7;
-    color: #977f45;
+
+  &:hover::before {
+    left: 100%;
   }
+
   &:disabled {
-    background: #f5eee3;
-    color: #b3a179;
+    opacity: 0.7;
     cursor: not-allowed;
-  }
-}
-[data-theme="dark"] .input {
-  background: #232942;
-  color: #a9c3fd;
-  border: 1.5px solid #343844;
+    transform: none !important;
 
-  &::placeholder {
-    color: #8ca0c9;
+    &::before {
+      display: none;
+    }
   }
-  &:focus {
-    border-color: #a9c3fd;
-    background: #22273a;
-    color: #cfd6e2;
-  }
-  &:disabled {
-    background: #22232a;
-    color: #4a5469;
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: $radius-full;
+    animation: spin 1s linear infinite;
+    margin-right: $space-sm;
   }
 }
 
-.button {
-  background: #977f45;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 16px 0;
-  font-weight: 900;
-  font-size: 1.15em;
-  margin-top: 8px;
-  cursor: pointer;
-  box-shadow: 0 2px 10px #bfae7c23;
-  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-
-  &:hover:not(:disabled) {
-    background: #c3b17a;
-    color: #fff8e3;
-  }
-  &:disabled {
-    background: #d7ccac;
-    color: #b3a179;
-    box-shadow: none;
-    cursor: not-allowed;
-  }
-}
-[data-theme="dark"] .button {
-  background: #232942;
-  color: #a9c3fd;
-  box-shadow: 0 2px 10px #0005;
-
-  &:hover:not(:disabled) {
-    background: #304372;
-    color: #f8faff;
-  }
-  &:disabled {
-    background: #232b39;
-    color: #8ca0c9;
-    box-shadow: none;
-  }
-}
-
-.msg {
-  margin-top: -6px;
-  font-size: 1em;
+.loginLink {
   text-align: center;
-  min-height: 1.3em;
-  user-select: none;
+  margin-top: $space-lg;
+  padding-top: $space-lg;
+  border-top: 1px solid $gray-200;
+
+  [data-theme="dark"] & {
+    border-top-color: $gray-700;
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+
+    [data-theme="dark"] & {
+      color: $dark-text-secondary;
+    }
+  }
+
+  a {
+    color: $primary-500;
+    text-decoration: none;
+    font-weight: $font-semibold;
+    transition: color $transition-base;
+
+    &:hover {
+      color: $primary-700;
+      text-decoration: underline;
+    }
+
+    [data-theme="dark"] & {
+      color: $primary-400;
+
+      &:hover {
+        color: $primary-300;
+      }
+    }
+  }
 }
-.success { color: #b8e86f; }
-.error { color: #ff7b7b; }
-[data-theme="dark"] .success { color: #d6efac; }
-[data-theme="dark"] .error { color: #ffb0b0; }
+
+/* 입력 필드 포커스 애니메이션 */
+.formGroup {
+  position: relative;
+
+  &.focused .formLabel {
+    color: $primary-500;
+
+    [data-theme="dark"] & {
+      color: $primary-400;
+    }
+  }
+}
+
+/* 성공 상태 애니메이션 */
+.formGroup.success {
+  .formInput {
+    border-color: $success;
+    box-shadow: 0 0 0 3px rgba($success, 0.1);
+  }
+
+  .formLabel::after {
+    content: ' ✓';
+    color: $success;
+    font-weight: $font-bold;
+  }
+}
+
+/* 로딩 애니메이션 */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 폼 등장 애니메이션 */
+.registerCard {
+  @include slide-up;
+}
+
+/* 반응형 */
+@include mobile-only {
+  .registerContainer {
+    padding: $space-md;
+    align-items: flex-start;
+    padding-top: $space-xl;
+  }
+
+  .registerCard {
+    padding: $space-lg;
+    margin: 0;
+  }
+
+  .registerTitle {
+    font-size: $font-size-xl;
+  }
+
+  .formInput {
+    font-size: 16px; // iOS 확대 방지
+  }
+}
+
+/* 접근성 */
+.formInput:focus-visible {
+  outline: 2px solid $primary-500;
+  outline-offset: 2px;
+}
+
+.submitButton:focus-visible {
+  outline: 2px solid $primary-500;
+  outline-offset: 2px;
+}

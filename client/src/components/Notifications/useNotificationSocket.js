@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import notificationApi from '../../api/notificationApi';
+import { getNotifications, markAllAsRead as apiMarkAllAsRead } from '../../api/notificationApi';
 
 export default function useNotificationSocket(userId) {
   const [notifications, setNotifications] = useState([]);
@@ -14,7 +14,7 @@ export default function useNotificationSocket(userId) {
     }
     console.log('WebSocket: 연결 시도, userId =', userId);
     // 1. 서버에서 알림 목록 fetch
-    notificationApi.getNotifications(1, 50).then(data => {
+    getNotifications(1, 50).then(data => {
       // 서버 응답이 배열 또는 객체일 수 있으므로 안전하게 처리
       let notiArr = Array.isArray(data.notifications)
         ? data.notifications
@@ -70,7 +70,7 @@ export default function useNotificationSocket(userId) {
   };
   const markAllAsRead = async () => {
     try {
-      await notificationApi.markAllAsRead();
+      await apiMarkAllAsRead();
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch {}

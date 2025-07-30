@@ -1,230 +1,134 @@
-// ...existing code...
-import './styles/main.scss';
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import Header from './components/Header';
 import Home from './components/Home';
-import RegisterForm from './components/Auth/RegisterForm';
-import LoginForm from './components/Auth/LoginForm';
-import PostForm from './components/Posts/PostForm';
 import PostList from './components/Posts/PostList';
 import PostDetail from './components/Posts/PostDetail';
 import EditPostForm from './components/Posts/EditPostForm';
-import ScheduleForm from './components/Schedule/ScheduleForm';
 import ScheduleList from './components/Schedule/ScheduleList';
 import ScheduleDetail from './components/Schedule/ScheduleDetail';
 import MyPage from './components/MyPage/MyPage';
+import LoginForm from './components/Auth/LoginForm';
+import RegisterForm from './components/Auth/RegisterForm';
 import ErrorBoundary from './components/ErrorBoundary';
-import { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Modal from "./components/Modal";
-
-function FreeBoardPage({ isLogin, setIsLogin }) {
-  const [showRegister, setShowRegister] = useState(false);
-  const [refreshCount, setRefreshCount] = useState(0);
-  const handleRegisterSuccess = () => setShowRegister(false);
-  const handlePostSuccess = () => setRefreshCount(prev => prev + 1);
-
-  return (
-    <div className="center-container">
-      {!isLogin ? (
-        !showRegister ? (
-          <>
-            <LoginForm onLogin={() => setIsLogin(true)} />
-            <div className="to-register">
-              아이디가 없으신가요?{' '}
-              <button className="link-btn" onClick={() => setShowRegister(true)}>
-                회원가입
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <RegisterForm onSuccess={handleRegisterSuccess} />
-            <div className="to-login">
-              <button className="link-btn" onClick={() => setShowRegister(false)}>
-                로그인 화면으로 돌아가기
-              </button>
-            </div>
-          </>
-        )
-      ) : (
-        <>
-          <PostForm onPost={handlePostSuccess} />
-          <PostList refreshCount={refreshCount} />
-        </>
-      )}
-    </div>
-  );
-}
-
-function ScheduleBoardPage({ isLogin, setIsLogin }) {
-  const [showRegister, setShowRegister] = useState(false);
-  const [refreshCount, setRefreshCount] = useState(0);
-  const handleRegisterSuccess = () => setShowRegister(false);
-  const handleScheduleSuccess = () => setRefreshCount(prev => prev + 1);
-
-  return (
-    <div className="center-container">
-      {!isLogin ? (
-        <div>
-          <h2 className="app-title">일정공유</h2>
-          {!showRegister ? (
-            <>
-              <LoginForm onLogin={() => setIsLogin(true)} />
-              <div className="to-register">
-                아이디가 없으신가요?{' '}
-                <button className="link-btn" onClick={() => setShowRegister(true)}>
-                  회원가입
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <RegisterForm onSuccess={handleRegisterSuccess} />
-              <div className="to-login">
-                <button className="link-btn" onClick={() => setShowRegister(false)}>
-                  로그인 화면으로 돌아가기
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      ) : (
-        <>
-          <ScheduleForm onAdd={handleScheduleSuccess} />
-          <ScheduleList refreshCount={refreshCount} />
-        </>
-      )}
-    </div>
-  );
-}
+import './styles/main.scss';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
-  const [isLogin, setIsLogin] = useState(() => !!localStorage.getItem('token'));
-  const [showExpireModal, setShowExpireModal] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    const checkLoginExpire = () => {
-      const loginTime = Number(localStorage.getItem('loginTime'));
-      if (!loginTime) return;
-      if (Date.now() - loginTime > 3600 * 1000) {
-        setShowExpireModal(true);
-        // 로그아웃 처리
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('username');
-        localStorage.removeItem('nickname');
-        localStorage.removeItem('loginTime');
-        setIsLogin(false); // 상태도 false로!
+    // 로그인 상태 확인
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    const userInfoStr = localStorage.getItem('userInfo');
+    
+    if (token && userId) {
+      setIsLoggedIn(true);
+      if (userInfoStr) {
+        try {
+          setUserInfo(JSON.parse(userInfoStr));
+        } catch (e) {
+          setUserInfo({ id: userId });
+        }
+      } else {
+        setUserInfo({ id: userId });
       }
-    };
-    const timer = setInterval(checkLoginExpire, 1000);
-    return () => clearInterval(timer);
+    }
+
+    // 다크모드 상태 확인
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+    
+    setIsDarkMode(isDark);
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   }, []);
 
-  return (
-    <ErrorBoundary>
-      <Router>
-        <Header isLogin={isLogin} setIsLogin={setIsLogin} />
-        <ToastContainer 
-          position="top-right" 
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
-        <Routes>
-          <Route path="/posts/:postId" element={
-            <div className="center-container">
-              <ErrorBoundary>
-                <PostDetail isLogin={isLogin} />
-              </ErrorBoundary>
-            </div>
-          } />
-          <Route path="/" element={
-            <div className="center-container">
-              <ErrorBoundary>
-                <Home />
-              </ErrorBoundary>
-            </div>
-          } />
-          <Route path="/board/free" element={
-            <ErrorBoundary>
-              <FreeBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />
-            </ErrorBoundary>
-          } />
-          <Route path="/board/schedule" element={
-            <ErrorBoundary>
-              <ScheduleBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />
-            </ErrorBoundary>
-          } />
-          <Route path="/board/free/:postId" element={
-            <div className="center-container">
-              <ErrorBoundary>
-                <PostDetail isLogin={isLogin} />
-              </ErrorBoundary>
-            </div>
-          } />
-          <Route path="/board/free/:postId/edit" element={
-            <div className="center-container">
-              <ErrorBoundary>
-                <EditPostForm />
-              </ErrorBoundary>
-            </div>
-          } />
-          <Route path="/board/schedule/:id" element={
-            <div className="center-container">
-              <ErrorBoundary>
-                <ScheduleDetail isLogin={isLogin} />
-              </ErrorBoundary>
-            </div>
-          } />
-          <Route path="/mypage" element={
-            isLogin ? (
-              <div className="center-container">
-                <ErrorBoundary>
-                  <MyPage />
-                </ErrorBoundary>
-              </div>
-            ) : (
-              <div className="center-container">
-                <ErrorBoundary>
-                  <FreeBoardPage isLogin={isLogin} setIsLogin={setIsLogin} />
-                </ErrorBoundary>
-              </div>
-            )
-          } />
-        </Routes>
+  // 로그인 상태 업데이트 함수
+  const updateAuthState = () => {
+    const token = localStorage.getItem('token');
+    const userInfoStr = localStorage.getItem('userInfo');
+    
+    if (token) {
+      setIsLoggedIn(true);
+      if (userInfoStr) {
+        try {
+          setUserInfo(JSON.parse(userInfoStr));
+        } catch (e) {
+          setUserInfo({ nickname: '사용자' });
+        }
+      }
+    } else {
+      setIsLoggedIn(false);
+      setUserInfo(null);
+    }
+  };
 
-        {/* 1시간 만료 모달 */}
-        {showExpireModal && (
-          <Modal onClose={() => {
-            setShowExpireModal(false);
-            window.location.href = '/board/free'; // 로그인페이지, 홈 등 원하는 곳으로 이동
-          }}>
-            <div style={{ textAlign: 'center', padding: '2rem' }}>
-              <h2>로그인 세션 만료</h2>
-              <p>1시간이 경과되어 다시 로그인해야 합니다.</p>
-              <button
-                onClick={() => {
-                  setShowExpireModal(false);
-                  window.location.href = '/board/free'; // 로그인페이지, 홈 등으로 이동
-                }}
-                style={{ marginTop: '1rem', padding: '0.6rem 1.5rem' }}
-              >
-                확인
-              </button>
-            </div>
-          </Modal>
-        )}
-      </Router>
-    </ErrorBoundary>
+  return (
+    <div className="app-container">
+      <Header />
+      
+      <main className="main-content">
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route 
+              path="/login" 
+              element={<LoginForm onLoginSuccess={updateAuthState} />} 
+            />
+            <Route path="/register" element={<RegisterForm />} />
+            <Route path="/posts" element={<PostList />} />
+            <Route path="/posts/:postId" element={<PostDetail />} />
+            <Route path="/posts/:postId/edit" element={<EditPostForm />} />
+            <Route path="/schedules" element={<ScheduleList />} />
+            <Route 
+              path="/schedules/:scheduleId" 
+              element={<ScheduleDetail isLogin={isLoggedIn} />} 
+            />
+            <Route path="/mypage" element={<MyPage />} />
+            <Route path="*" element={
+              <div className="page-container">
+                <div className="empty-state">
+                  <div className="empty-state-icon">🔍</div>
+                  <h3>404 - 페이지를 찾을 수 없습니다</h3>
+                  <p>요청하신 페이지가 존재하지 않습니다.</p>
+                  <button 
+                    className="btn btn-primary mt-md"
+                    onClick={() => window.history.back()}
+                  >
+                    ← 이전 페이지로
+                  </button>
+                </div>
+              </div>
+            } />
+          </Routes>
+        </ErrorBoundary>
+      </main>
+
+      {/* 토스트 알림 */}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={isDarkMode ? 'dark' : 'light'}
+        toastClassName="custom-toast"
+        bodyClassName="custom-toast-body"
+        style={{
+          zIndex: 9999,
+        }}
+      />
+    </div>
   );
 }
+
 export default App;

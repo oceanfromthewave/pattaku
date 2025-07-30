@@ -1,19 +1,19 @@
-// 다크모드 기본 body 적용 (앱 렌더 전)
-const theme = localStorage.getItem("theme");
-if (
-  theme === "dark" ||
-  (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
-) {
-  document.body.classList.add("dark");
-}
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import App from './App';
+import theme from './styles/theme';
+import './styles/main.scss';
 
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./styles/main.scss"; // 반드시 포함
-
-ReactDOM.createRoot(document.getElementById("root")).render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <App />
+      </Router>
+    </ThemeProvider>
   </React.StrictMode>
 );

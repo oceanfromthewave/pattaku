@@ -1,328 +1,380 @@
-.postList {
-  background: var(--post-bg, #fcf8e8);
-  border-radius: var(--radius, 12px);
-  padding: 1.5rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  margin: 1rem 0;
-  transition: all 0.3s ease;
+@use './variables' as *;
+
+/* PostList 컴포넌트 스타일 */
+.postFilters {
+  @include card-base;
+  margin-bottom: $space-xl;
 }
 
-.listHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid var(--postform-input-border, #ede6b9);
-}
+.filterRow {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr;
+  gap: $space-md;
+  margin-bottom: $space-lg;
 
-.listTitle {
-  color: var(--accent-color, #3a60fa);
-  font-size: 1.4rem;
-  font-weight: 800;
-  margin: 0;
-  letter-spacing: -0.5px;
-}
+  @include tablet-up {
+    grid-template-columns: 1fr 1fr;
+    gap: $space-sm;
 
-.resetBtn {
-  background: transparent;
-  border: 1px solid var(--postform-input-border, #ede6b9);
-  color: var(--text, #222);
-  border-radius: 6px;
-  padding: 0.5rem 0.8rem;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
+    &:last-child {
+      grid-column: 1 / -1;
+    }
+  }
 
-  &:hover {
-    background: var(--primary, #3a60fa);
-    color: white;
-    border-color: var(--primary, #3a60fa);
+  @include mobile-only {
+    grid-template-columns: 1fr;
   }
 }
 
-.searchBar {
+.filterGroup {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: var(--postform-input-bg, #fffef4);
-  border-radius: 8px;
-  border: 1px solid var(--postform-input-border, #ede6b9);
+
+  label {
+    display: block;
+    margin-bottom: $space-xs;
+    font-size: $font-size-sm;
+    font-weight: $font-medium;
+    color: $text-primary;
+  }
+
+  input,
+  select {
+    @include input-base;
+  }
 }
 
-.searchGroup {
+.filterActions {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.controlGroup {
-  display: flex;
-  gap: 0.5rem;
+  gap: $space-sm;
   justify-content: flex-end;
   flex-wrap: wrap;
-}
 
-.searchInput {
-  flex: 1;
-  min-width: 150px;
-  padding: 0.7rem 1rem;
-  border: 1px solid var(--postform-input-border, #ede6b9);
-  border-radius: 6px;
-  background: var(--bg, #FDF6E3);
-  color: var(--text, #222);
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
+  @include mobile-only {
+    justify-content: center;
+    flex-direction: column;
 
-  &:focus {
-    outline: none;
-    border-color: var(--primary, #3a60fa);
-    box-shadow: 0 0 0 2px rgba(58, 96, 250, 0.1);
-  }
-
-  &::placeholder {
-    color: var(--text, #222);
-    opacity: 0.5;
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
   }
 }
 
-.searchBtn,
-.sortBtn {
-  padding: 0.7rem 1.2rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.searchBtn {
-  background: var(--primary, #3a60fa);
-  color: white;
-
-  &:hover {
-    background: var(--accent-color, #2a50ea);
-    transform: translateY(-1px);
-  }
-}
-
-.sortBtn {
-  background: var(--postform-input-bg, #fffef4);
-  color: var(--text, #222);
-  border: 1px solid var(--postform-input-border, #ede6b9);
-
-  &:hover {
-    background: var(--primary, #3a60fa);
-    color: white;
-    border-color: var(--primary, #3a60fa);
-  }
-}
-
-.noPost {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: var(--text, #222);
-  opacity: 0.7;
-}
-
-.noPostIcon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}
-
-.postListUl {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.postList {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: $space-lg;
+  margin-bottom: $space-xl;
 }
 
-.postItem {
-  background: var(--bg, #FDF6E3);
-  border: 1px solid var(--postform-input-border, #ede6b9);
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  overflow: hidden;
-
-  &:hover {
-    border-color: var(--primary, #3a60fa);
-    box-shadow: 0 4px 12px rgba(58, 96, 250, 0.1);
-    transform: translateY(-1px);
-  }
-}
-
-.postContent {
-  padding: 1rem;
-}
-
-.postTitleLink {
-  display: block;
-  color: var(--text, #222);
-  font-weight: 600;
-  font-size: 1rem;
+.postCard {
+  @include card-base;
   cursor: pointer;
-  text-decoration: none;
-  margin-bottom: 0.5rem;
-  line-height: 1.4;
-  transition: color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid $gray-200;
+  transition: all $transition-slow;
 
-  &:hover {
-    color: var(--primary, #3a60fa);
-    text-decoration: underline;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: $primary-500;
+    transform: scaleY(0);
+    transition: transform $transition-slow;
   }
 
-  &:focus {
-    outline: 2px solid var(--primary, #3a60fa);
-    outline-offset: 2px;
-    border-radius: 4px;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
+    border-color: $primary-200;
+
+    &::before {
+      transform: scaleY(1);
+    }
+  }
+
+  @include mobile-only {
+    padding: $space-md;
   }
 }
 
-.attachmentIcon {
-  color: var(--primary, #3a60fa);
-  margin-left: 0.5rem;
-  font-size: 0.8rem;
+.postHeader {
+  margin-bottom: $space-md;
+}
+
+.postTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-semibold;
+  color: $text-primary;
+  margin-bottom: $space-sm;
+  line-height: $leading-tight;
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+
+  @include mobile-only {
+    font-size: $font-size-lg;
+  }
+}
+
+.attachmentBadge {
+  font-size: $font-size-sm;
+  background: $primary-100;
+  color: $primary-700;
+  padding: $space-xs $space-sm;
+  border-radius: $radius-sm;
+  font-weight: $font-medium;
 }
 
 .postMeta {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
-  color: var(--text, #222);
-  opacity: 0.7;
+  gap: $space-md;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+
+  @include mobile-only {
+    flex-direction: column;
+    gap: $space-xs;
+  }
 }
 
-.postAuthor {
-  font-weight: 600;
-  color: var(--accent-color, #3a60fa);
-}
-
+.postAuthor,
 .postDate {
-  color: var(--text, #222);
-  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  gap: $space-xs;
+}
+
+.postContent {
+  margin-bottom: $space-md;
+}
+
+.postExcerpt {
+  color: $text-secondary;
+  line-height: $leading-relaxed;
+  margin: 0;
+
+  @include mobile-only {
+    font-size: $font-size-sm;
+  }
 }
 
 .postStats {
   display: flex;
-  gap: 0.5rem;
-  margin-left: auto;
+  gap: $space-lg;
+  padding-top: $space-md;
+  border-top: 1px solid $gray-200;
+
+  @include mobile-only {
+    justify-content: space-around;
+  }
 }
 
 .statItem {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
-  font-size: 0.75rem;
-  padding: 0.2rem 0.4rem;
-  background: var(--postform-input-bg, #fffef4);
-  border-radius: 4px;
-  border: 1px solid var(--postform-input-border, #ede6b9);
+  gap: $space-xs;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-medium;
 }
 
-/* 다크모드 스타일 */
-[data-theme="dark"] .postList {
-  background: var(--post-bg, #23242a);
+.statIcon {
+  font-size: $font-size-base;
 }
 
-[data-theme="dark"] .listHeader {
-  border-bottom-color: var(--postform-input-border, #343844);
+.statValue {
+  color: $text-primary;
 }
 
-[data-theme="dark"] .resetBtn {
-  color: var(--text, #e6e6e6);
-  border-color: var(--postform-input-border, #343844);
+/* 페이지네이션 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: $space-xs;
+  margin-top: $space-xl;
+  flex-wrap: wrap;
 }
 
-[data-theme="dark"] .searchBar {
-  background: var(--postform-input-bg, #23242a);
-  border-color: var(--postform-input-border, #343844);
-}
+.paginationBtn {
+  background: $bg-primary;
+  border: 1px solid $gray-300;
+  color: $text-primary;
+  padding: $space-sm $space-md;
+  border-radius: $radius-md;
+  cursor: pointer;
+  font-weight: $font-medium;
+  transition: all $transition-base;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-[data-theme="dark"] .searchInput {
-  background: var(--bg, #18191c);
-  color: var(--text, #e6e6e6);
-  border-color: var(--postform-input-border, #343844);
-  
-  &::placeholder {
-    color: var(--text, #e6e6e6);
+  &:hover:not(:disabled) {
+    background: $primary-50;
+    border-color: $primary-300;
+    color: $primary-700;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &.active {
+    background: $primary-500;
+    border-color: $primary-500;
+    color: white;
+  }
+
+  @include mobile-only {
+    min-width: 35px;
+    height: 35px;
+    padding: $space-xs;
+    font-size: $font-size-sm;
   }
 }
 
-[data-theme="dark"] .sortBtn {
-  background: var(--postform-input-bg, #23242a);
-  color: var(--text, #e6e6e6);
-  border-color: var(--postform-input-border, #343844);
-}
+/* 로딩 상태 */
+.loadingContainer {
+  @include flex-center;
+  flex-direction: column;
+  padding: $space-3xl;
+  gap: $space-md;
 
-[data-theme="dark"] .noPost {
-  color: var(--text, #e6e6e6);
-}
-
-[data-theme="dark"] .postItem {
-  background: var(--bg, #18191c);
-  border-color: var(--postform-input-border, #343844);
-}
-
-[data-theme="dark"] .postTitleLink {
-  color: var(--text, #e6e6e6);
-}
-
-[data-theme="dark"] .postMeta {
-  color: var(--text, #e6e6e6);
-}
-
-[data-theme="dark"] .postDate {
-  color: var(--text, #e6e6e6);
-}
-
-[data-theme="dark"] .statItem {
-  background: var(--postform-input-bg, #23242a);
-  border-color: var(--postform-input-border, #343844);
-}
-
-/* 모바일 최적화 */
-@media (max-width: 700px) {
-  .postList {
-    padding: 1rem;
-    margin: 0.5rem 0;
+  .loadingSpinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid $gray-200;
+    border-top: 3px solid $primary-500;
+    border-radius: $radius-full;
+    animation: spin 1s linear infinite;
   }
-  
-  .listHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+
+  p {
+    color: $text-secondary;
+    font-weight: $font-medium;
   }
-  
-  .searchGroup {
-    flex-direction: column;
+}
+
+/* 빈 상태 */
+.emptyState {
+  text-align: center;
+  padding: $space-3xl;
+  color: $text-secondary;
+
+  .emptyStateIcon {
+    font-size: $font-size-4xl;
+    margin-bottom: $space-md;
+    opacity: 0.5;
   }
-  
-  .controlGroup {
-    justify-content: center;
+
+  h3 {
+    font-size: $font-size-xl;
+    color: $text-primary;
+    margin-bottom: $space-sm;
   }
-  
-  .searchInput {
-    min-width: unset;
+
+  p {
+    margin-bottom: $space-md;
   }
-  
+}
+
+/* 버튼 스타일 */
+.btn {
+  @include button-base;
+
+  &.btnPrimary {
+    @include button-primary;
+  }
+
+  &.btnSecondary {
+    @include button-secondary;
+  }
+
+  &.btnOutline {
+    @include button-outline;
+  }
+}
+
+/* 다크 테마 */
+:global([data-theme="dark"]) {
+  .postCard {
+    background: $dark-bg-secondary;
+    border-color: $gray-700;
+
+    &:hover {
+      border-color: $primary-400;
+      box-shadow: 0 10px 25px rgba($primary-500, 0.1);
+    }
+  }
+
+  .attachmentBadge {
+    background: $primary-900;
+    color: $primary-200;
+  }
+
   .postStats {
-    margin-left: 0;
-    margin-top: 0.5rem;
+    border-color: $gray-700;
   }
-  
-  .postMeta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.3rem;
+
+  .paginationBtn {
+    background: $dark-bg-secondary;
+    border-color: $gray-700;
+    color: $dark-text-primary;
+
+    &:hover:not(:disabled) {
+      background: $primary-900;
+      border-color: $primary-600;
+      color: $primary-200;
+    }
+  }
+
+  .filterGroup {
+    label {
+      color: $dark-text-primary;
+    }
+
+    input,
+    select {
+      background: $dark-bg-secondary;
+      color: $dark-text-primary;
+      border-color: $gray-700;
+
+      &:focus {
+        border-color: $primary-400;
+      }
+
+      &::placeholder {
+        color: $dark-text-disabled;
+      }
+    }
+  }
+}
+
+/* 애니메이션 */
+.postCard {
+  @include fade-in;
+}
+
+/* 접근성 */
+.postCard {
+  &:focus-visible {
+    outline: 2px solid $primary-500;
+    outline-offset: 2px;
+  }
+}
+
+.paginationBtn {
+  &:focus-visible {
+    outline: 2px solid $primary-500;
+    outline-offset: 2px;
   }
 }

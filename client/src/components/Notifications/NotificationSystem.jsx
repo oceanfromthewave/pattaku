@@ -1,7 +1,7 @@
 
 import { Bell, BellRing, X, CheckCheck } from 'lucide-react';
 import useNotificationSocket from './useNotificationSocket';
-import notificationApi from '../../api/notificationApi';
+import { markAsRead as apiMarkAsRead } from '../../api/notificationApi';
 import styles from '../../styles/NotificationSystem.module.scss';
 import '../../styles/Header.scss';
 import React, { useState } from 'react';
@@ -80,7 +80,7 @@ export default function NotificationSystem({ userId }) {
                       onClick={async () => {
                         if (!notification.read) {
                           markAsRead(notification.id);
-                          try { await notificationApi.markAsRead(notification.id); } catch {}
+                          try { await apiMarkAsRead(notification.id); } catch {}
                         }
                         setOpen(false);
                         if (notification.postId) {

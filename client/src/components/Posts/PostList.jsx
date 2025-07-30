@@ -1,44 +1,20 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import classNames from 'classnames';
 import { getPosts } from '../../api/postApi';
 import { notifyError } from '../../utils/notify';
-import Loading from '../Loading';
-import Pagination from '../Pagination';
 import styles from '../../styles/PostList.module.scss';
 
-export default function PostList({ refreshCount }) {
+function PostList() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState({ q: '', author: '', sort: 'recent' });
-  const [search, setSearch] = useState(''); // 제목/내용/태그 검색 input
-  const [authorInput, setAuthorInput] = useState(''); // 작성자 검색 input
+  const [filters, setFilters] = useState({ q: '', author: '', sort: 'recent' });
+  const [searchInput, setSearchInput] = useState('');
+  const [authorInput, setAuthorInput] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const itemsPerPage = 10;
   const navigate = useNavigate();
-  
-  // 스크롤 위치 저장용 ref
-  const scrollPositionRef = useRef(0);
-  const containerRef = useRef(null);
+  const itemsPerPage = 10;
 
-  // 스크롤 위치 저장
-  const saveScrollPosition = () => {
-    scrollPositionRef.current = window.pageYOffset || document.documentElement.scrollTop;
-  };
-
-  // 스크롤 위치 복원
-  const restoreScrollPosition = () => {
-    // 다음 렌더링 사이클에서 스크롤 복원
-    setTimeout(() => {
-      if (scrollPositionRef.current > 0) {
-        window.scrollTo(0, scrollPositionRef.current);
-      }
-    }, 50);
-  };
-
-  // 게시글 불러오기
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
@@ -46,214 +22,242 @@ export default function PostList({ refreshCount }) {
         const params = {
           page: currentPage,
           limit: itemsPerPage,
-          ...filter
+          ...filters,
         };
         const data = await getPosts(params);
-        setPosts(data.posts || data);
-        setTotalPages(data.totalPages || Math.ceil((data.total || data.length) / itemsPerPage));
-        setTotalItems(data.total || data.length);
+        setPosts(data.posts || []);
+        setTotalPages(data.totalPages || 1);
       } catch (error) {
-        console.error('게시글 로딩 실패:', error);
         notifyError('게시글을 불러오는데 실패했습니다.');
-        setPosts([]);
       } finally {
         setLoading(false);
-        // 로딩 완료 후 스크롤 위치 복원 (정렬 변경 시에만)
-        if (scrollPositionRef.current > 0) {
-          restoreScrollPosition();
-        }
       }
     };
     fetchPosts();
-  }, [refreshCount, filter, currentPage]);
+  }, [filters, currentPage]);
 
-  // 검색 실행 (제목/내용/태그/작성자 모두)
   const handleSearch = () => {
-    // 검색 시에는 스크롤을 맨 위로
-    scrollPositionRef.current = 0;
-    setFilter(f => ({ ...f, q: search, author: authorInput }));
+    setFilters({ ...filters, q: searchInput, author: authorInput });
     setCurrentPage(1);
   };
 
-  // 정렬 토글 (스크롤 위치 유지)
-  const toggleSort = (e) => {
-    e.preventDefault(); // 기본 동작 방지
-    
-    // 현재 스크롤 위치 저장
-    saveScrollPosition();
-    
-    setFilter(f => ({
-      ...f,
-      sort: f.sort === 'recent' ? 'popular' : 'recent'
-    }));
+  const handleSortChange = (e) => {
+    setFilters({ ...filters, sort: e.target.value });
     setCurrentPage(1);
   };
 
-  // 페이지 변경 (스크롤을 맨 위로)
-  const handlePageChange = (page) => {
-    scrollPositionRef.current = 0; // 페이지 변경 시에는 맨 위로
-    setCurrentPage(page);
-    // 부드러운 스크롤로 맨 위로 이동
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // 작성자 input 변경 (입력값만 변경)
-  const handleAuthorChange = (e) => {
-    setAuthorInput(e.target.value);
-  };
-
-  // 필터 초기화
-  const resetFilters = () => {
-    scrollPositionRef.current = 0; // 초기화 시에는 맨 위로
-    setFilter({ q: '', author: '', sort: 'recent' });
-    setSearch('');
+  const handleReset = () => {
+    setFilters({ q: '', author: '', sort: 'recent' });
+    setSearchInput('');
     setAuthorInput('');
     setCurrentPage(1);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Enter 키 핸들러
-  const handleKeyDown = (e, action) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      action();
-    }
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now - date;
+    const hours = diff / (1000 * 60 * 60);
+    
+    if (hours < 1) return `${Math.floor(diff / (1000 * 60))}분 전`;
+    if (hours < 24) return `${Math.floor(hours)}시간 전`;
+    if (hours < 24 * 7) return `${Math.floor(hours / 24)}일 전`;
+    return date.toLocaleDateString('ko-KR');
   };
 
-  if (loading) return <Loading message="게시글을 불러오는 중..." />;
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
 
-  return (
-    <div className={classNames(styles.postList, 'postList')} ref={containerRef}>
-      <div className={styles.listHeader}>
-        <h3 className={styles.listTitle}>자유게시판</h3>
-        <button 
-          className={styles.resetBtn}
-          onClick={resetFilters}
-          title="필터 초기화"
+    const pages = [];
+    const maxVisible = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+    if (endPage - startPage + 1 < maxVisible) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          className={`${styles.paginationBtn} ${i === currentPage ? styles.active : ''}`}
+          onClick={() => handlePageChange(i)}
         >
-          초기화
+          {i}
+        </button>
+      );
+    }
+
+    return (
+      <div className={styles.pagination}>
+        <button
+          className={styles.paginationBtn}
+          onClick={() => handlePageChange(1)}
+          disabled={currentPage === 1}
+        >
+          ⏮️
+        </button>
+        <button
+          className={styles.paginationBtn}
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          ⬅️
+        </button>
+        {pages}
+        <button
+          className={styles.paginationBtn}
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          ➡️
+        </button>
+        <button
+          className={styles.paginationBtn}
+          onClick={() => handlePageChange(totalPages)}
+          disabled={currentPage === totalPages}
+        >
+          ⏭️
         </button>
       </div>
+    );
+  };
 
-      <div className={styles.searchBar}>
-        <div className={styles.searchGroup}>
-          <input
-            type="text"
-            placeholder="제목/내용/태그 검색"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className={styles.searchInput}
-            onKeyDown={e => handleKeyDown(e, handleSearch)}
-          />
-          <input
-            type="text"
-            placeholder="작성자"
-            value={authorInput}
-            onChange={handleAuthorChange}
-            className={styles.searchInput}
-            onKeyDown={e => handleKeyDown(e, handleSearch)}
-          />
+  return (
+    <div className="page-container">
+      <div className="page-header">
+        <h1 className="page-title">📝 게시글</h1>
+        <p className="page-subtitle">커뮤니티의 다양한 이야기를 만나보세요</p>
+      </div>
+
+      {/* 검색 및 필터 */}
+      <div className={styles.postFilters}>
+        <div className={styles.filterRow}>
+          <div className={styles.filterGroup}>
+            <label>제목/내용 검색</label>
+            <input
+              type="text"
+              placeholder="검색어를 입력하세요"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            />
+          </div>
+          
+          <div className={styles.filterGroup}>
+            <label>작성자 검색</label>
+            <input
+              type="text"
+              placeholder="작성자명을 입력하세요"
+              value={authorInput}
+              onChange={(e) => setAuthorInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            />
+          </div>
+          
+          <div className={styles.filterGroup}>
+            <label>정렬</label>
+            <select
+              value={filters.sort}
+              onChange={handleSortChange}
+            >
+              <option value="recent">최신순</option>
+              <option value="popular">인기순</option>
+            </select>
+          </div>
         </div>
-        <div className={styles.controlGroup}>
-          <button 
-            type="button" 
-            className={styles.searchBtn} 
-            onClick={handleSearch}
-          >
-            검색
+        
+        <div className={styles.filterActions}>
+          <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleSearch}>
+            🔍 검색
           </button>
-          <button
-            type="button"
-            className={styles.sortBtn}
-            onClick={toggleSort}
-            title={`현재: ${filter.sort === 'recent' ? '최신순' : '인기순'}`}
+          <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={handleReset}>
+            🔄 초기화
+          </button>
+          <button 
+            className={`${styles.btn} ${styles.btnOutline}`}
+            onClick={() => navigate('/posts/new')}
           >
-            {filter.sort === 'recent' ? '📅 최신순' : '👍 인기순'}
+            ✏️ 글쓰기
           </button>
         </div>
       </div>
 
-      {posts.length === 0 ? (
-        <div className={styles.noPost}>
-          <div className={styles.noPostIcon}>📝</div>
-          <p>게시글이 없습니다.</p>
-          {(filter.q || filter.author) && (
-            <button className={styles.resetBtn} onClick={resetFilters}>
-              전체 게시글 보기
-            </button>
-          )}
+      {/* 게시글 목록 */}
+      {loading ? (
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner}></div>
+          <p>게시글을 불러오는 중...</p>
+        </div>
+      ) : posts.length === 0 ? (
+        <div className={styles.emptyState}>
+          <div className={styles.emptyStateIcon}>📭</div>
+          <h3>게시글이 없습니다</h3>
+          <p>첫 번째 게시글을 작성해보세요!</p>
+          <button 
+            className={`${styles.btn} ${styles.btnPrimary}`}
+            onClick={() => navigate('/posts/new')}
+          >
+            ✏️ 첫 게시글 작성하기
+          </button>
         </div>
       ) : (
         <>
-          <ul className={styles.postListUl}>
-            {posts.map(post => (
-              <li key={post.id} className={styles.postItem}>
-                <div className={styles.postContent}>
-                  <span
-                    className={styles.postTitleLink}
-                    onClick={() => navigate(`/board/free/${post.id}`)}
-                    tabIndex={0}
-                    role="button"
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        navigate(`/board/free/${post.id}`);
-                      }
-                    }}
-                  >
+          <div className={styles.postList}>
+            {posts.map((post) => (
+              <article 
+                key={post.id}
+                className={styles.postCard}
+                onClick={() => navigate(`/posts/${post.id}`)}
+              >
+                <div className={styles.postHeader}>
+                  <h2 className={styles.postTitle}>
                     {post.title}
                     {post.files_count > 0 && (
-                      <span className={styles.attachmentIcon} title="첨부파일 있음">
-                        📎
-                      </span>
+                      <span className={styles.attachmentBadge}>📎</span>
                     )}
-                  </span>
-                  
+                  </h2>
                   <div className={styles.postMeta}>
-                    <span className={styles.postAuthor}>
-                      {post.author_nickname || post.author}
-                    </span>
-                    <span className={styles.postDate}>
-                      {new Date(post.created_at).toLocaleDateString('ko-KR', {
-                        year: '2-digit',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </span>
-                    <div className={styles.postStats}>
-                      {typeof post.views === 'number' && (
-                        <span className={styles.statItem}>
-                          👀 {post.views}
-                        </span>
-                      )}
-                      {typeof post.likes === 'number' && post.likes > 0 && (
-                        <span className={styles.statItem}>
-                          👍 {post.likes}
-                        </span>
-                      )}
-                      {typeof post.comments_count === 'number' && post.comments_count > 0 && (
-                        <span className={styles.statItem}>
-                          💬 {post.comments_count}
-                        </span>
-                      )}
-                    </div>
+                    <span className={styles.postAuthor}>👤 {post.author_nickname || post.author}</span>
+                    <span className={styles.postDate}>🕒 {formatDate(post.created_at)}</span>
                   </div>
                 </div>
-              </li>
+                
+                <div className={styles.postContent}>
+                  <p className={styles.postExcerpt}>
+                    {post.content ? post.content.substring(0, 150) + (post.content.length > 150 ? '...' : '') : '내용이 없습니다.'}
+                  </p>
+                </div>
+                
+                <div className={styles.postStats}>
+                  <div className={styles.statItem}>
+                    <span className={styles.statIcon}>👁️</span>
+                    <span className={styles.statValue}>{post.views || 0}</span>
+                  </div>
+                  <div className={styles.statItem}>
+                    <span className={styles.statIcon}>👍</span>
+                    <span className={styles.statValue}>{post.likes || 0}</span>
+                  </div>
+                  <div className={styles.statItem}>
+                    <span className={styles.statIcon}>💬</span>
+                    <span className={styles.statValue}>{post.comments_count || 0}</span>
+                  </div>
+                </div>
+              </article>
             ))}
-          </ul>
+          </div>
           
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            itemsPerPage={itemsPerPage}
-            totalItems={totalItems}
-          />
+          {renderPagination()}
         </>
       )}
     </div>
   );
 }
+
+export default PostList;

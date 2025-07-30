@@ -1,33 +1,74 @@
+@use './variables' as *;
+
 .loadingContainer {
-  display: flex;
+  @include flex-center;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  padding: $space-3xl;
+  gap: $space-md;
   min-height: 200px;
+
+  .loadingSpinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid $gray-200;
+    border-top: 4px solid $primary-500;
+    border-radius: $radius-full;
+    animation: spin 1s linear infinite;
+
+    [data-theme="dark"] & {
+      border-color: $gray-700;
+      border-top-color: $primary-400;
+    }
+  }
+
+  .loadingText {
+    color: $text-secondary;
+    font-weight: $font-medium;
+    font-size: $font-size-lg;
+    text-align: center;
+
+    [data-theme="dark"] & {
+      color: $dark-text-secondary;
+    }
+  }
+
+  @include mobile-only {
+    padding: $space-xl;
+    min-height: 150px;
+
+    .loadingSpinner {
+      width: 40px;
+      height: 40px;
+    }
+
+    .loadingText {
+      font-size: $font-size-base;
+    }
+  }
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  position: relative;
-  margin-bottom: 1rem;
-}
+/* 점들이 움직이는 로딩 애니메이션 */
+.loadingDots {
+  display: flex;
+  gap: $space-xs;
+  justify-content: center;
+  margin-top: $space-sm;
 
-.spinnerInner {
-  width: 100%;
-  height: 100%;
-  border: 3px solid var(--postform-input-border, #ede6b9);
-  border-top: 3px solid var(--primary, #3a60fa);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
+  .dot {
+    width: 8px;
+    height: 8px;
+    background: $primary-500;
+    border-radius: $radius-full;
+    animation: loadingDots 1.4s ease-in-out infinite both;
 
-.loadingMessage {
-  color: var(--text, #222);
-  font-size: 0.9rem;
-  margin: 0;
-  opacity: 0.8;
+    [data-theme="dark"] & {
+      background: $primary-400;
+    }
+
+    &:nth-child(1) { animation-delay: -0.32s; }
+    &:nth-child(2) { animation-delay: -0.16s; }
+    &:nth-child(3) { animation-delay: 0s; }
+  }
 }
 
 @keyframes spin {
@@ -35,12 +76,104 @@
   100% { transform: rotate(360deg); }
 }
 
-/* 다크모드 스타일 */
-[data-theme="dark"] .loadingMessage {
-  color: var(--text, #e6e6e6);
+@keyframes loadingDots {
+  0%, 80%, 100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-[data-theme="dark"] .spinnerInner {
-  border-color: var(--postform-input-border, #343844);
-  border-top-color: var(--primary, #4171e7);
+/* 인라인 로딩 (버튼 내부 등) */
+.inlineLoading {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-sm;
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: $radius-full;
+    animation: spin 1s linear infinite;
+  }
+}
+
+/* 오버레이 로딩 */
+.loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: $z-modal;
+  @include flex-center;
+
+  .overlayContent {
+    background: $bg-primary;
+    padding: $space-xl;
+    border-radius: $radius-xl;
+    box-shadow: $shadow-xl;
+    text-align: center;
+    max-width: 300px;
+    margin: $space-lg;
+
+    [data-theme="dark"] & {
+      background: $dark-bg-secondary;
+    }
+  }
+}
+
+/* 스켈레톤 로딩 */
+.skeleton {
+  background: linear-gradient(90deg, $gray-200 25%, $gray-100 50%, $gray-200 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: $radius-sm;
+
+  [data-theme="dark"] & {
+    background: linear-gradient(90deg, $gray-800 25%, $gray-700 50%, $gray-800 75%);
+    background-size: 200% 100%;
+  }
+
+  &.skeletonText {
+    height: 20px;
+    margin-bottom: $space-sm;
+
+    &:last-child {
+      margin-bottom: 0;
+      width: 60%;
+    }
+  }
+
+  &.skeletonTitle {
+    height: 32px;
+    margin-bottom: $space-md;
+  }
+
+  &.skeletonAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: $radius-full;
+  }
+
+  &.skeletonCard {
+    height: 200px;
+    margin-bottom: $space-lg;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }

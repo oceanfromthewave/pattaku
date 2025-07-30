@@ -7,11 +7,9 @@ import ScheduleCommentList from './ScheduleCommentList';
 import Loading from '../Loading';
 import { UPLOADS_URL } from '../../api/config';
 import styles from '../../styles/ScheduleDetail.module.scss';
-import classNames from 'classnames';
-import { formatDate } from '../../utils/data';
 
 export default function ScheduleDetail({ isLogin }) {
-  const { id } = useParams();
+  const { scheduleId } = useParams();
   const [schedule, setSchedule] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
@@ -19,11 +17,14 @@ export default function ScheduleDetail({ isLogin }) {
   const userId = localStorage.getItem('userId');
   const navigate = useNavigate();
 
+  // 이미지 슬라이더 상태
+  const [imgIdx, setImgIdx] = useState(0);
+
   useEffect(() => {
     const fetchSchedule = async () => {
       setLoading(true);
       try {
-        const data = await getScheduleById(id);
+        const data = await getScheduleById(scheduleId);
         setSchedule(data);
       } catch (error) {
         console.error('일정 로드 오류:', error);
@@ -35,7 +36,7 @@ export default function ScheduleDetail({ isLogin }) {
     };
 
     fetchSchedule();
-  }, [id]);
+  }, [scheduleId]);
 
   // 작성자 여부 확인
   const isAuthor = isLogin && schedule && (
@@ -49,9 +50,9 @@ export default function ScheduleDetail({ isLogin }) {
     
     setDeleting(true);
     try {
-      await deleteSchedule(id);
+      await deleteSchedule(scheduleId);
       notifySuccess('일정이 삭제되었습니다.');
-      navigate('/board/schedule');
+      navigate('/schedules');
     } catch (error) {
       console.error('일정 삭제 오류:', error);
       notifyError('일정 삭제에 실패했습니다.');
@@ -60,35 +61,43 @@ export default function ScheduleDetail({ isLogin }) {
     }
   };
 
-  // 이미지 슬라이더
-  const [imgIdx, setImgIdx] = useState(0);
-  const images = schedule?.images || [];
+  // 날짜 포맷팅
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'long'
+    });
+  };
 
-  // 이미지 URL을 절대주소로 변환
+  // 이미지 URL 처리
   const getImageUrl = (img) => {
     if (!img) return '';
     return img.startsWith('http') ? img : `${UPLOADS_URL}/${img.replace(/^\/?uploads\/?/, '')}`;
   };
 
-  // 썸네일 클릭 시 메인 변경
-  const handleThumbClick = (idx) => setImgIdx(idx);
-
   // 이미지 네비게이션
   const handlePrevImage = () => setImgIdx(i => Math.max(i - 1, 0));
   const handleNextImage = () => setImgIdx(i => Math.min(i + 1, images.length - 1));
+  const handleThumbClick = (idx) => setImgIdx(idx);
+
+  const images = schedule?.images || [];
 
   if (loading) return <Loading message="일정을 불러오는 중..." />;
+
   if (!schedule) {
     return (
-      <div className={styles['schedule-detail-wrap']}>
-        <div className={styles['schedule-not-found']}>
+      <div className="page-container">
+        <div className={styles.scheduleNotFound}>
           <h2>📅 일정을 찾을 수 없습니다</h2>
           <p>요청하신 일정이 존재하지 않거나 삭제되었습니다.</p>
           <button 
-            className={styles['btn-back']}
-            onClick={() => navigate('/board/schedule')}
+            className={`btn btn-primary ${styles.btnBack}`}
+            onClick={() => navigate('/schedules')}
           >
-            일정 목록으로 돌아가기
+            ← 일정 목록으로 돌아가기
           </button>
         </div>
       </div>
@@ -96,135 +105,146 @@ export default function ScheduleDetail({ isLogin }) {
   }
 
   return (
-    <div className={classNames(styles['schedule-detail-wrap'], 'schedule-detail-wrap')}>
-      <div className={styles['schedule-header']}>
-        <h1 className={styles['schedule-title']}>
-          📅 {schedule.title}
-        </h1>
-        <div className={styles['schedule-meta']}>
-          <span className={styles['schedule-date']}>
-            {formatDate(schedule.created_at)}
-          </span>
-          <span className={styles['schedule-author']}>
-            👤 {schedule.author_nickname || schedule.author}
-          </span>
-          {schedule.vote_count > 0 && (
-            <span className={styles['schedule-votes']}>
-              🗳️ {schedule.vote_count}명 참여
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* 이미지 슬라이더 */}
-      {images.length > 0 && (
-        <div className={styles['schedule-image-slider']}>
-          <div className={styles['image-container']}>
-            {images.length > 1 && (
-              <button
-                disabled={imgIdx === 0}
-                onClick={handlePrevImage}
-                className={classNames(styles['slider-btn'], styles['prev-btn'])}
-                aria-label="이전 이미지"
-              >
-                ◀
-              </button>
-            )}
-            
-            <img
-              src={getImageUrl(images[imgIdx])}
-              alt="일정 이미지"
-              className={styles['main-image']}
-            />
-            
-            {images.length > 1 && (
-              <button
-                disabled={imgIdx === images.length - 1}
-                onClick={handleNextImage}
-                className={classNames(styles['slider-btn'], styles['next-btn'])}
-                aria-label="다음 이미지"
-              >
-                ▶
-              </button>
-            )}
-            
-            {images.length > 1 && (
-              <div className={styles['image-counter']}>
-                {imgIdx + 1} / {images.length}
+    <div className="page-container">
+      <div className={styles.scheduleDetailWrap}>
+        {/* 헤더 */}
+        <div className={styles.scheduleHeader}>
+          <h1 className={styles.scheduleTitle}>
+            📅 {schedule.title}
+          </h1>
+          <div className={styles.scheduleMeta}>
+            <div className={styles.metaItem}>
+              <span className={styles.scheduleDate}>
+                🗓️ {formatDate(schedule.created_at)}
+              </span>
+            </div>
+            <div className={styles.metaItem}>
+              <span className={styles.scheduleAuthor}>
+                👤 {schedule.author_nickname || schedule.author}
+              </span>
+            </div>
+            {schedule.vote_count > 0 && (
+              <div className={styles.metaItem}>
+                <span className={styles.scheduleVotes}>
+                  🗳️ {schedule.vote_count}명 참여
+                </span>
               </div>
             )}
           </div>
-          
-          {images.length > 1 && (
-            <div className={styles['thumb-list']}>
-              {images.map((img, idx) => (
-                <img
-                  key={idx}
-                  src={getImageUrl(img)}
-                  alt={`썸네일 ${idx + 1}`}
-                  className={classNames(
-                    styles['thumb-img'], 
-                    { [styles.selected]: idx === imgIdx }
-                  )}
-                  onClick={() => handleThumbClick(idx)}
-                />
+        </div>
+
+        {/* 이미지 슬라이더 */}
+        {images.length > 0 && (
+          <div className={styles.scheduleImageSlider}>
+            <div className={styles.imageContainer}>
+              {images.length > 1 && (
+                <button
+                  disabled={imgIdx === 0}
+                  onClick={handlePrevImage}
+                  className={`${styles.sliderBtn} ${styles.prevBtn}`}
+                  aria-label="이전 이미지"
+                >
+                  ◀
+                </button>
+              )}
+              
+              <img
+                src={getImageUrl(images[imgIdx])}
+                alt="일정 이미지"
+                className={styles.mainImage}
+              />
+              
+              {images.length > 1 && (
+                <button
+                  disabled={imgIdx === images.length - 1}
+                  onClick={handleNextImage}
+                  className={`${styles.sliderBtn} ${styles.nextBtn}`}
+                  aria-label="다음 이미지"
+                >
+                  ▶
+                </button>
+              )}
+              
+              {images.length > 1 && (
+                <div className={styles.imageCounter}>
+                  {imgIdx + 1} / {images.length}
+                </div>
+              )}
+            </div>
+            
+            {images.length > 1 && (
+              <div className={styles.thumbList}>
+                {images.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={getImageUrl(img)}
+                    alt={`썸네일 ${idx + 1}`}
+                    className={`${styles.thumbImg} ${idx === imgIdx ? styles.selected : ''}`}
+                    onClick={() => handleThumbClick(idx)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 일정 내용 */}
+        {schedule.desc && (
+          <div className={styles.scheduleContent}>
+            <h3 className={styles.contentTitle}>📝 일정 설명</h3>
+            <div className={styles.scheduleDesc}>
+              {schedule.desc.split('\n').map((line, index) => (
+                <p key={index}>{line || '\u00A0'}</p>
               ))}
             </div>
-          )}
-        </div>
-      )}
-
-      {schedule.desc && (
-        <div className={styles['schedule-content']}>
-          <h3 className={styles['content-title']}>📝 일정 설명</h3>
-          <div className={styles['schedule-desc']}>
-            {schedule.desc.split('\n').map((line, index) => (
-              <p key={index}>{line}</p>
-            ))}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 참여 여부 투표 + 투표자 리스트 */}
-      <section className={styles['schedule-vote-section']}>
-        <h3 className={styles['section-title']}>
-          🗳️ 참여 여부 투표
-        </h3>
-        <ScheduleVoteBar scheduleId={id} isLogin={isLogin} showVoterList={true} />
-      </section>
+        {/* 참여 여부 투표 */}
+        <section className={styles.scheduleVoteSection}>
+          <h3 className={styles.sectionTitle}>
+            🗳️ 참여 여부 투표
+          </h3>
+          <ScheduleVoteBar scheduleId={scheduleId} isLogin={isLogin} showVoterList={true} />
+        </section>
 
-      {/* 댓글 */}
-      <section className={styles['schedule-comments-section']}>
-        <ScheduleCommentList scheduleId={id} isLogin={isLogin} currentUser={userId} type="schedule" />
-      </section>
+        {/* 댓글 */}
+        <section className={styles.scheduleCommentsSection}>
+          <h3 className={styles.sectionTitle}>
+            💬 댓글
+          </h3>
+          <ScheduleCommentList scheduleId={scheduleId} isLogin={isLogin} currentUser={userId} type="schedule" />
+        </section>
 
-      {/* 수정/삭제 버튼 (작성자만) */}
-      {isAuthor && (
-        <div className={styles['schedule-detail-buttons']}>
+        {/* 수정/삭제 버튼 (작성자만) */}
+        {isAuthor && (
+          <div className={styles.scheduleDetailButtons}>
+            <button 
+              className={styles.btnEdit}
+              onClick={() => navigate(`/schedules/${scheduleId}/edit`)}
+              disabled={deleting}
+            >
+              ✏️ 수정
+            </button>
+            <button 
+              className={styles.btnDelete}
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? '삭제 중...' : '🗑️ 삭제'}
+            </button>
+          </div>
+        )}
+        
+        {/* 뒤로가기 버튼 */}
+        <div className={styles.scheduleBackButton}>
           <button 
-            className={styles['btn-edit']} 
-            onClick={() => navigate(`/board/schedule/${id}/edit`)}
-            disabled={deleting}
+            className={styles.btnBack}
+            onClick={() => navigate('/schedules')}
           >
-            ✏️ 수정
-          </button>
-          <button 
-            className={styles['btn-delete']} 
-            onClick={handleDelete}
-            disabled={deleting}
-          >
-            {deleting ? '삭제 중...' : '🗑️ 삭제'}
+            ← 일정 목록으로
           </button>
         </div>
-      )}
-      
-      <div className={styles['schedule-back-button']}>
-        <button 
-          className={styles['btn-back']}
-          onClick={() => navigate('/board/schedule')}
-        >
-          ← 일정 목록으로
-        </button>
       </div>
     </div>
   );

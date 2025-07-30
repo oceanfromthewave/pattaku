@@ -1,106 +1,137 @@
-.paginationContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  margin: 2rem 0;
-}
-
-.paginationInfo {
-  font-size: 0.9rem;
-  color: var(--text, #222);
-  opacity: 0.7;
-}
+@use './variables' as *;
 
 .pagination {
   display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
+  gap: $space-xs;
+  margin: $space-xl 0;
+  flex-wrap: wrap;
 }
 
-.pageBtn {
-  min-width: 36px;
-  height: 36px;
-  border: 1px solid var(--postform-input-border, #ede6b9);
-  background: var(--postform-input-bg, #fffef4);
-  color: var(--text, #222);
-  border-radius: 6px;
+.paginationButton {
+  background: $bg-primary;
+  border: 1px solid $gray-300;
+  color: $text-primary;
+  padding: $space-sm $space-md;
+  border-radius: $radius-md;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-weight: $font-medium;
+  transition: all $transition-base;
+  min-width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
 
   &:hover:not(:disabled) {
-    background: var(--primary, #3a60fa);
-    color: white;
-    border-color: var(--primary, #3a60fa);
-    transform: translateY(-2px);
+    background: $primary-50;
+    border-color: $primary-300;
+    color: $primary-700;
+    transform: translateY(-1px);
   }
 
   &:disabled {
-    opacity: 0.4;
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none !important;
+    transform: none;
   }
 
   &.active {
-    background: var(--primary, #3a60fa);
+    background: $primary-500;
+    border-color: $primary-500;
     color: white;
-    border-color: var(--primary, #3a60fa);
-    font-weight: 700;
+    font-weight: $font-semibold;
   }
 
-  &.navBtn {
-    font-size: 1.2rem;
-    font-weight: 700;
+  [data-theme="dark"] & {
+    background: $dark-bg-secondary;
+    border-color: $gray-700;
+    color: $dark-text-primary;
+
+    &:hover:not(:disabled) {
+      background: $primary-900;
+      border-color: $primary-600;
+      color: $primary-200;
+    }
+
+    &.active {
+      background: $primary-500;
+      border-color: $primary-500;
+      color: white;
+    }
   }
-}
 
-.ellipsis {
-  color: var(--text, #222);
-  font-weight: 500;
-  padding: 0 0.5rem;
-  opacity: 0.6;
-}
-
-/* 다크모드 스타일 */
-[data-theme="dark"] .paginationInfo {
-  color: var(--text, #e6e6e6);
-}
-
-[data-theme="dark"] .pageBtn {
-  background: var(--postform-input-bg, #23242a);
-  border-color: var(--postform-input-border, #343844);
-  color: var(--text, #e6e6e6);
-
-  &.active {
-    background: var(--primary, #4171e7);
-    border-color: var(--primary, #4171e7);
+  @include mobile-only {
+    min-width: 35px;
+    height: 35px;
+    padding: $space-xs;
+    font-size: $font-size-sm;
   }
 }
 
-[data-theme="dark"] .ellipsis {
-  color: var(--text, #e6e6e6);
+.paginationInfo {
+  color: $text-secondary;
+  font-size: $font-size-sm;
+  margin: 0 $space-md;
+  white-space: nowrap;
+
+  [data-theme="dark"] & {
+    color: $dark-text-secondary;
+  }
+
+  @include mobile-only {
+    margin: $space-sm 0;
+    text-align: center;
+    width: 100%;
+  }
 }
 
-/* 모바일 최적화 */
-@media (max-width: 600px) {
-  .pagination {
-    gap: 0.2rem;
+.paginationEllipsis {
+  color: $text-disabled;
+  padding: $space-sm;
+  cursor: default;
+
+  [data-theme="dark"] & {
+    color: $dark-text-disabled;
   }
-  
-  .pageBtn {
+}
+
+/* 심플한 페이지네이션 (이전/다음만) */
+.simplePagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $space-md;
+
+  .paginationButton {
+    flex: 1;
+    max-width: 200px;
+
+    @include mobile-only {
+      flex: 1;
+      max-width: none;
+    }
+  }
+}
+
+/* 컴팩트 페이지네이션 */
+.compactPagination {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+
+  .paginationButton {
     min-width: 32px;
     height: 32px;
-    font-size: 0.8rem;
+    padding: $space-xs;
+    font-size: $font-size-sm;
   }
-  
-  .paginationInfo {
-    font-size: 0.8rem;
-  }
+}
+
+/* 로딩 상태 */
+.paginationLoading {
+  opacity: 0.6;
+  pointer-events: none;
 }

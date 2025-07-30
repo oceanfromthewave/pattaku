@@ -1,16 +1,35 @@
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import {
+  Container,
+  Paper,
+  Typography,
+  Box,
+  Button,
+  CircularProgress,
+  Divider,
+  IconButton,
+  ImageList,
+  ImageListItem,
+  Link,
+  Tooltip,
+  Badge,
+} from '@mui/material';
+import {
+  ThumbUp as ThumbUpIcon,
+  ThumbDown as ThumbDownIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Visibility as VisibilityIcon,
+} from '@mui/icons-material';
 import CommentList from './CommentList';
 import { notifySuccess, notifyError } from '../../utils/notify';
-import classNames from 'classnames';
-import styles from '../../styles/PostDetail.module.scss';
-import authFetch from '../../utils/authFetch';
-
+import { getPost, deletePost, likePost, dislikePost } from '../../api/postApi';
 
 const API_SERVER = import.meta.env.VITE_API_SERVER || '';
 const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL || (API_SERVER + '/uploads');
 
-export default function PostDetail({ isLogin }) {
+function PostDetail() {
   const { postId } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,185 +42,201 @@ export default function PostDetail({ isLogin }) {
   const userId = localStorage.getItem('userId');
 
   useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      authFetch(`${API_SERVER}/api/posts/${postId}`)
-    ])
-      .then(async ([resPost]) => {
-        if (!resPost.ok) throw new Error('게시글을 찾을 수 없습니다.');
-        const data = await resPost.json();
+    const fetchPost = async () => {
+      setLoading(true);
+      try {
+        const data = await getPost(postId);
         setPost(data);
         setLikeCount(data.likes || 0);
         setDislikeCount(data.dislikes || 0);
         setIsLiked(data.isLiked || false);
         setIsDisliked(data.isDisliked || false);
-      })
-      .catch(err => {
-        notifyError(err.message);
+      } catch (err) {
+        notifyError(err.message || 'Failed to load post.');
         setPost(null);
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPost();
   }, [postId]);
 
   const handleDelete = async () => {
-    if (!window.confirm('정말 게시글을 삭제하시겠습니까?')) return;
-    const token = localStorage.getItem('token');
+    if (!window.confirm('Are you sure you want to delete this post?')) return;
     try {
-      const res = await authFetch(`${API_SERVER}/api/posts/${postId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        notifySuccess('게시글이 삭제되었습니다.');
-        navigate('/board/free');
-      } else {
-        notifyError('삭제에 실패했습니다.');
-      }
-    } catch {
-      notifyError('네트워크 오류가 발생했습니다.');
+      await deletePost(postId);
+      notifySuccess('Post deleted successfully.');
+      navigate('/posts');
+    } catch (err) {
+      notifyError(err.message || 'Failed to delete post.');
     }
   };
 
-const handleLike = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    notifyError('로그인 후 좋아요/싫어요 할 수 있습니다.');
-    return;
-  }
-  try {
-    const res = await authFetch(`${API_SERVER}/api/posts/${postId}/like`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || '좋아요 처리 실패');
+  const handleLike = async () => {
+    try {
+      const data = await likePost(postId);
+      setLikeCount(data.likes);
+      setDislikeCount(data.dislikes);
+      setIsLiked(data.liked);
+      setIsDisliked(data.disliked);
+      notifySuccess(data.liked ? 'Liked!' : 'Like cancelled.');
+    } catch (err) {
+      notifyError(err.message || 'Failed to process like.');
+    }
+  };
 
-    setLikeCount(data.likes);
-    setDislikeCount(data.dislikes);
-    setIsLiked(data.liked);
-    setIsDisliked(data.disliked);
+  const handleDislike = async () => {
+    try {
+      const data = await dislikePost(postId);
+      setLikeCount(data.likes);
+      setDislikeCount(data.dislikes);
+      setIsLiked(data.liked);
+      setIsDisliked(data.disliked);
+      notifySuccess(data.disliked ? 'Disliked!' : 'Dislike cancelled.');
+    } catch (err) {
+      notifyError(err.message || 'Failed to process dislike.');
+    }
+  };
 
-    if (data.liked) notifySuccess('좋아요 처리됨!');
-    else notifySuccess('좋아요 취소됨');
-  } catch (err) {
-    notifyError('좋아요 처리 중 오류');
-  }
-};
-
-const handleDislike = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    notifyError('로그인 후 이용 가능합니다.');
-    return;
-  }
-  try {
-    const res = await authFetch(`${API_SERVER}/api/posts/${postId}/dislike`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || '싫어요 처리 실패');
-
-    setLikeCount(data.likes);
-    setDislikeCount(data.dislikes);
-    setIsLiked(data.liked);
-    setIsDisliked(data.disliked);
-
-    if (data.disliked) notifySuccess('싫어요 처리됨!');
-    else notifySuccess('싫어요 취소됨');
-  } catch (err) {
-    notifyError('싫어요 처리 중 오류');
-  }
-};
-
-
-  // 첨부파일 미리보기
   const renderAttachments = () => {
     if (!post?.files || post.files.length === 0) return null;
     return (
-      <div className={styles.attachments}>
+      <ImageList sx={{ width: '100%', height: 'auto' }} cols={3} rowHeight={164}>
         {post.files.map((file, idx) => {
-          // /uploads/로 오든, 파일명만 오든 확실히 절대경로로 만듦
           const fileUrl = file.url.startsWith('http')
             ? file.url
             : `${UPLOADS_URL}/${file.url.replace(/^\/?uploads\//, '')}`;
           return fileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-            <img
-              key={idx}
-              src={fileUrl}
-              alt={`첨부이미지${idx + 1}`}
-              className={styles.attachmentImg}
-              loading="lazy"
-            />
+            <ImageListItem key={idx}>
+              <img
+                srcSet={`${fileUrl}?w=164&h=164&fit=crop&auto=format 1x,
+                        ${fileUrl}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
+                src={`${fileUrl}?w=164&h=164&fit=crop&auto=format`}
+                alt={`Attachment ${idx + 1}`}
+                loading="lazy"
+                style={{ objectFit: 'contain' }}
+              />
+            </ImageListItem>
           ) : (
-            <a
-              key={idx}
-              href={fileUrl}
-              download
-              className={styles.attachmentFile}
-            >
-              📎 {file.name || '첨부파일'}
-            </a>
+            <ImageListItem key={idx}>
+              <Link href={fileUrl} download target="_blank" rel="noopener" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', border: '1px solid #eee', textDecoration: 'none', color: 'primary.main' }}>
+                <Typography variant="body2" sx={{ wordBreak: 'break-all', textAlign: 'center' }}>
+                  {file.name || 'Download File'}
+                </Typography>
+              </Link>
+            </ImageListItem>
           );
         })}
-      </div>
+      </ImageList>
     );
   };
 
-  if (loading) return <div className={styles['post-detail-wrap']}>불러오는 중...</div>;
-  if (!post) return <div className={styles['post-detail-wrap']}>게시글이 없습니다.</div>;
+  if (loading) {
+    return (
+      <Container maxWidth="md" sx={{ mt: 4, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography>Loading post...</Typography>
+      </Container>
+    );
+  }
 
-  const isAuthor = isLogin && post && String(post.user_id) === String(userId);
+  if (!post) {
+    return (
+      <Container maxWidth="md" sx={{ mt: 4, textAlign: 'center' }}>
+        <Typography>Post not found.</Typography>
+      </Container>
+    );
+  }
+
+  const isAuthor = String(post.user_id) === String(userId);
 
   return (
-    <div className={styles['post-detail-wrap']}>
-      <div className={styles['post-detail-header']}>
-        <h2 className={styles['post-detail-title']}>{post.title}</h2>
-        <div className={styles['post-detail-meta']}>
-          <span>
-            작성자: <b>{post.author_nickname || post.author}</b>
-          </span>
-          <span>&nbsp;|&nbsp;작성일: {new Date(post.created_at).toLocaleString()}</span>
-          <span>&nbsp;|&nbsp;조회수: {post.views ?? 0}</span>
-        </div>
-        <div className={styles['post-detail-actions']}>
-          <button
-            type="button"
-            className={classNames(styles['like-btn'], { [styles['liked']]: isLiked })}
-            onClick={handleLike}
-            aria-pressed={isLiked}
-          >
-            👍 좋아요 {likeCount}
-          </button>
-          <button
-            type="button"
-            className={classNames(styles['dislike-btn'], { [styles['disliked']]: isDisliked })}
-            onClick={handleDislike}
-            aria-pressed={isDisliked}
-          >
-            👎 싫어요 {dislikeCount}
-          </button>
-          {isAuthor && (
-            <span>
-              <button
-                className={styles['edit-btn']}
-                onClick={() => navigate(`/board/free/${postId}/edit`)}
-              >
-                수정
-              </button>
-              <button className={styles['delete-btn']} onClick={handleDelete}>
-                삭제
-              </button>
-            </span>
-          )}
-        </div>
-      </div>
-      <div className={styles['post-detail-body']}>
-        {post.content}
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Paper elevation={3} sx={{ p: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          {post.title}
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.secondary', mb: 2 }}>
+          <Typography variant="subtitle2">
+            By {post.author_nickname || post.author}
+          </Typography>
+          <Typography variant="subtitle2" sx={{ mx: 1 }}>
+            |
+          </Typography>
+          <Typography variant="subtitle2">
+            {new Date(post.created_at).toLocaleString()}
+          </Typography>
+          <Typography variant="subtitle2" sx={{ ml: 2 }}>
+            <VisibilityIcon sx={{ fontSize: 16, verticalAlign: 'middle', mr: 0.5 }} />
+            {post.views ?? 0}
+          </Typography>
+        </Box>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="body1" sx={{ minHeight: '100px', whiteSpace: 'pre-wrap' }}>
+          {post.content}
+        </Typography>
+
         {renderAttachments()}
-      </div>
-      <div className={styles['post-comment-divider']} />
-      <CommentList postId={post.id} isLogin={isLogin} currentUser={userId} />
-    </div>
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, my: 3 }}>
+          <Button
+            variant={isLiked ? 'contained' : 'outlined'}
+            startIcon={<ThumbUpIcon />}
+            onClick={handleLike}
+          >
+            <Badge badgeContent={likeCount} color="primary">
+              Like
+            </Badge>
+          </Button>
+          <Button
+            variant={isDisliked ? 'contained' : 'outlined'}
+            startIcon={<ThumbDownIcon />}
+            onClick={handleDislike}
+          >
+            <Badge badgeContent={dislikeCount} color="error">
+              Dislike
+            </Badge>
+          </Button>
+        </Box>
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 3 }}>
+          {isAuthor && (
+            <>
+              <Button
+                variant="outlined"
+                startIcon={<EditIcon />}
+                onClick={() => navigate(`/posts/${postId}/edit`)}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={handleDelete}
+              >
+                Delete
+              </Button>
+            </>
+          )}
+          <Button variant="outlined" onClick={() => navigate('/posts')}>
+            Back to List
+          </Button>
+        </Box>
+      </Paper>
+
+      <Box sx={{ mt: 4 }}>
+        <CommentList 
+          postId={post.id} 
+          currentUser={userId} 
+          isLogin={!!localStorage.getItem('token')}
+        />
+      </Box>
+    </Container>
   );
 }
+
+export default PostDetail;
+

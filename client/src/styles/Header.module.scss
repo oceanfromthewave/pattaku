@@ -1,0 +1,418 @@
+@use './variables' as *;
+
+/* Header 컴포넌트 스타일 */
+.appHeader {
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid $gray-200;
+  transition: all $transition-slow;
+
+  :global([data-theme="dark"]) & {
+    background: rgba(26, 26, 26, 0.95);
+    border-bottom-color: $gray-700;
+  }
+}
+
+.headerContent {
+  @include flex-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $space-md;
+  height: 70px;
+}
+
+/* 로고 */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+  text-decoration: none;
+  color: $text-primary;
+  font-weight: $font-bold;
+  font-size: $font-size-xl;
+  transition: all $transition-slow;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  :global([data-theme="dark"]) & {
+    color: $dark-text-primary;
+  }
+}
+
+.logoIcon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, $primary-400, $secondary-400);
+  border-radius: $radius-lg;
+  @include flex-center;
+  font-size: $font-size-lg;
+  box-shadow: $shadow-sm;
+  transition: all $transition-slow;
+
+  .logo:hover & {
+    box-shadow: $shadow-md;
+    transform: rotate(5deg);
+  }
+}
+
+/* 네비게이션 */
+.navMenu {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+
+  @include mobile-only {
+    display: none;
+  }
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: $space-xs;
+  padding: $space-sm $space-md;
+  text-decoration: none;
+  color: $text-secondary;
+  font-weight: $font-medium;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: $primary-500;
+    transition: all $transition-slow;
+    transform: translateX(-50%);
+  }
+
+  &:hover,
+  &.active {
+    color: $primary-600;
+    background: rgba($primary-500, 0.1);
+  }
+
+  &.active::before {
+    width: 80%;
+  }
+
+  :global([data-theme="dark"]) & {
+    color: $dark-text-secondary;
+
+    &:hover,
+    &.active {
+      color: $primary-400;
+      background: rgba($primary-500, 0.15);
+    }
+  }
+}
+
+/* 사용자 메뉴 */
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+}
+
+.themeToggleBtn {
+  background: none;
+  border: none;
+  padding: $space-sm;
+  border-radius: $radius-md;
+  cursor: pointer;
+  font-size: $font-size-lg;
+  transition: all $transition-slow;
+  position: relative;
+
+  &:hover {
+    background: $gray-100;
+    transform: rotate(15deg) scale(1.1);
+
+    :global([data-theme="dark"]) & {
+      background: $gray-800;
+    }
+  }
+}
+
+/* 알림 */
+.notificationWrapper {
+  position: relative;
+}
+
+.notificationBtn {
+  background: none;
+  border: none;
+  padding: $space-sm;
+  border-radius: $radius-md;
+  cursor: pointer;
+  font-size: $font-size-lg;
+  transition: all $transition-base;
+  position: relative;
+
+  &:hover {
+    background: $gray-100;
+
+    :global([data-theme="dark"]) & {
+      background: $gray-800;
+    }
+  }
+}
+
+.notificationBadge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: $error;
+  color: white;
+  font-size: $font-size-xs;
+  font-weight: $font-bold;
+  padding: 2px 6px;
+  border-radius: $radius-full;
+  min-width: 18px;
+  height: 18px;
+  @include flex-center;
+  transform: translate(25%, -25%);
+  box-shadow: $shadow-sm;
+}
+
+/* 사용자 프로필 */
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+
+  @include mobile-only {
+    .username {
+      display: none;
+    }
+  }
+}
+
+.profileLink {
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+  text-decoration: none;
+  color: $text-primary;
+  padding: $space-xs $space-sm;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+
+  &:hover {
+    background: $gray-100;
+
+    :global([data-theme="dark"]) & {
+      background: $gray-800;
+      color: $dark-text-primary;
+    }
+  }
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-full;
+  background: $primary-500;
+  color: white;
+  @include flex-center;
+  font-weight: $font-bold;
+  font-size: $font-size-sm;
+}
+
+.username {
+  font-weight: $font-medium;
+  color: $text-primary;
+
+  :global([data-theme="dark"]) & {
+    color: $dark-text-primary;
+  }
+}
+
+.logoutBtn {
+  @include button-outline;
+  padding: $space-xs $space-sm;
+  font-size: $font-size-sm;
+}
+
+/* 인증 버튼 */
+.authButtons {
+  display: flex;
+  gap: $space-sm;
+
+  @include mobile-only {
+    .btn:not(.btnPrimary) {
+      display: none;
+    }
+  }
+}
+
+.btn {
+  @include button-base;
+
+  &.btnPrimary {
+    @include button-primary;
+  }
+
+  &.btnOutline {
+    @include button-outline;
+  }
+}
+
+/* 모바일 메뉴 버튼 */
+.mobileMenuButton {
+  display: none;
+  background: none;
+  border: none;
+  padding: $space-sm;
+  cursor: pointer;
+  color: $text-primary;
+  font-size: $font-size-xl;
+  border-radius: $radius-md;
+  transition: all $transition-base;
+
+  &:hover {
+    background: $gray-100;
+
+    :global([data-theme="dark"]) & {
+      background: $gray-800;
+      color: $dark-text-primary;
+    }
+  }
+
+  @include mobile-only {
+    display: block;
+  }
+}
+
+/* 모바일 네비게이션 */
+.mobileNav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $bg-primary;
+  z-index: $z-modal;
+  padding: $space-lg;
+  transform: translateX(-100%);
+  transition: transform $transition-slow;
+
+  &.open {
+    transform: translateX(0);
+  }
+
+  :global([data-theme="dark"]) & {
+    background: $dark-bg-primary;
+  }
+}
+
+.mobileNavHeader {
+  @include flex-between;
+  margin-bottom: $space-xl;
+}
+
+.mobileCloseBtn {
+  background: none;
+  border: none;
+  padding: $space-sm;
+  cursor: pointer;
+  color: $text-primary;
+  font-size: $font-size-xl;
+  border-radius: $radius-md;
+
+  :global([data-theme="dark"]) & {
+    color: $dark-text-primary;
+  }
+}
+
+.mobileNavLinks {
+  display: flex;
+  flex-direction: column;
+  gap: $space-md;
+}
+
+.mobileNavLink {
+  padding: $space-md;
+  text-decoration: none;
+  color: $text-primary;
+  font-weight: $font-medium;
+  border-radius: $radius-md;
+  transition: background $transition-base;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: $font-family;
+  font-size: $font-size-base;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    background: $gray-100;
+  }
+
+  &.logout {
+    color: $error;
+  }
+
+  :global([data-theme="dark"]) & {
+    color: $dark-text-primary;
+
+    &:hover {
+      background: $gray-800;
+    }
+  }
+}
+
+.mobileDivider {
+  height: 1px;
+  background: $gray-200;
+  margin: $space-md 0;
+
+  :global([data-theme="dark"]) & {
+    background: $gray-700;
+  }
+}
+
+/* 모바일 오버레이 */
+.mobileOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: $z-modal - 1;
+  animation: fadeIn $transition-base ease-in-out;
+}
+
+/* 애니메이션 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 접근성 */
+.navLink,
+.themeToggleBtn,
+.notificationBtn,
+.mobileMenuButton,
+.mobileCloseBtn {
+  &:focus-visible {
+    outline: 2px solid $primary-500;
+    outline-offset: 2px;
+  }
+}

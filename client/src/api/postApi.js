@@ -49,3 +49,6 @@ export const dislikePost = async (id) => {
   const response = await apiClient.post(`/api/posts/${id}/dislike`);
   return response.data;
 };
+
+// getPost는 getPostById의 별칭 (하위 호환성)
+export const getPost = getPostById;
