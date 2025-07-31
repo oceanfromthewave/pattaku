@@ -15,7 +15,7 @@ function Home() {
     } else {
       notifyWarning(`${actionName}은 로그인 후 이용 가능합니다.`);
       setTimeout(() => {
-        navigate('/register');
+        navigate('/login');
       }, 1500); // 1.5초 후 회원가입 페이지로 이동
     }
   };

@@ -11,6 +11,7 @@ import EditPostForm from './components/Posts/EditPostForm';
 import ScheduleList from './components/Schedule/ScheduleList';
 import ScheduleDetail from './components/Schedule/ScheduleDetail';
 import ScheduleForm from './components/Schedule/ScheduleForm';
+import EditScheduleForm from './components/Schedule/EditScheduleForm';
 import MyPage from './components/MyPage/MyPage';
 import LoginForm from './components/Auth/LoginForm';
 import RegisterForm from './components/Auth/RegisterForm';
@@ -56,6 +57,7 @@ function App() {
               path="/schedules/:scheduleId" 
               element={<ScheduleDetail isLogin={isLoggedIn} />} 
             />
+            <Route path="/schedules/:scheduleId/edit" element={<EditScheduleForm />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="*" element={
               <div className="page-container">

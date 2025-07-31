@@ -25,7 +25,12 @@ router.post(
   upload.array("images", 5),
   scheduleController.createScheduleWithImages
 );
-router.put("/:id", auth, scheduleController.updateSchedule);
+router.put(
+  "/:id",
+  auth,
+  upload.array("images", 5),
+  scheduleController.updateSchedule
+);
 router.delete("/:id", auth, scheduleController.deleteSchedule);
 
 module.exports = router;

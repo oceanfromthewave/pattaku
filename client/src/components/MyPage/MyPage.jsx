@@ -154,25 +154,25 @@ export default function MyPage() {
 
     try {
       setUploadingImage(true);
-      console.log('🚀 이미지 업로드 시작:', file.name);
+      
       
       const response = await uploadProfileImage(file);
-      console.log('✅ 업로드 응답:', response);
+      
       
       notifySuccess('프로필 사진이 업로드되었습니다.');
       
       // 프로필 다시 로드
       const updatedProfile = await getMyProfile();
-      console.log('📝 업데이트된 프로필 데이터:', updatedProfile);
+      
       
       setProfile(updatedProfile);
       
       // AuthContext의 사용자 정보도 업데이트
       updateUserInfo({ profileImage: updatedProfile.profile_image });
-      console.log('🔄 AuthContext 업데이트됨:', updatedProfile.profile_image);
+      
       
     } catch (error) {
-      console.error('❌ 사진 업로드 오류:', error);
+      
       notifyError(getApiErrorMessage(error));
     } finally {
       setUploadingImage(false);
@@ -191,23 +191,23 @@ export default function MyPage() {
 
     try {
       setUploadingImage(true);
-      console.log('🗑️ 프로필 사진 삭제 시작');
+      
       
       await deleteProfileImage();
       notifySuccess('프로필 사진이 삭제되었습니다.');
       
       // 프로필 다시 로드
       const updatedProfile = await getMyProfile();
-      console.log('📝 삭제 후 프로필 데이터:', updatedProfile);
+      
       
       setProfile(updatedProfile);
       
       // AuthContext의 사용자 정보도 업데이트
       updateUserInfo({ profileImage: null });
-      console.log('🔄 AuthContext 업데이트됨: null');
+      
       
     } catch (error) {
-      console.error('❌ 사진 삭제 오류:', error);
+      
       notifyError(getApiErrorMessage(error));
     } finally {
       setUploadingImage(false);
@@ -232,7 +232,7 @@ export default function MyPage() {
                         alt="프로필 사진" 
                         className={styles.profileImage}
                         onLoad={() => {
-                          console.log('✅ 이미지 로드 성공:', profile.profile_image);
+                          
                         }}
                         onError={(e) => {
                           console.error('❌ 이미지 로드 실패:', {

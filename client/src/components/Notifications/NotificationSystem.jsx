@@ -42,18 +42,18 @@ export default function NotificationSystem({ userId }) {
   // 알림 클릭 처리
   const handleNotificationClick = (notification) => {
     try {
-      console.log('알림 클릭:', notification); // 디버깅용
+      
       
       // postId가 있는 경우 (댄글, 좋아요, 게시글 알림)
       if (notification.postId) {
-        console.log(`게시글로 이동: /posts/${notification.postId}`);
+        
         navigate(`/posts/${notification.postId}`);
         return;
       }
       
       // post_id가 있는 경우 (스네이크 케이스)
       if (notification.post_id) {
-        console.log(`게시글로 이동: /posts/${notification.post_id}`);
+        
         navigate(`/posts/${notification.post_id}`);
         return;
       }
@@ -61,7 +61,7 @@ export default function NotificationSystem({ userId }) {
       // scheduleId가 있는 경우
       if (notification.scheduleId || notification.schedule_id) {
         const scheduleId = notification.scheduleId || notification.schedule_id;
-        console.log(`일정으로 이동: /schedules/${scheduleId}`);
+        
         navigate(`/schedules/${scheduleId}`);
         return;
       }
@@ -69,13 +69,13 @@ export default function NotificationSystem({ userId }) {
       // 사용자 관련 알림
       if (notification.senderId || notification.sender_id) {
         const userId = notification.senderId || notification.sender_id;
-        console.log(`사용자 프로필로 이동: /users/${userId}`);
+        
         navigate(`/users/${userId}`);
         return;
       }
       
       // 기본적으로 홈으로 이동
-      console.log('기본 홈으로 이동');
+      
       navigate('/');
       
     } catch (error) {

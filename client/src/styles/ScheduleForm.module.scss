@@ -20,6 +20,453 @@
   }
 }
 
+/* 카드 스타일 (EditScheduleForm용) */
+.card {
+  @include card-base;
+  max-width: 720px;
+  width: 100%;
+  background: $bg-primary;
+  border-radius: $radius-xl;
+  box-shadow: $shadow-lg;
+  padding: $space-2xl;
+  border: 1px solid $gray-200;
+
+  [data-theme="dark"] & {
+    background: $dark-bg-secondary;
+    border-color: $gray-700;
+  }
+
+  @include mobile-only {
+    padding: $space-lg;
+    max-width: 100%;
+  }
+}
+
+/* 폼 헤더 */
+.formHeader {
+  text-align: center;
+  margin-bottom: $space-xl;
+}
+
+.formTitle {
+  font-size: $font-size-3xl;
+  font-weight: $font-extrabold;
+  background: linear-gradient(
+    135deg,
+    color.adjust($primary-600, $lightness: 0%),
+    color.adjust($accent, $lightness: 0%)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: $space-sm;
+  line-height: $leading-tight;
+
+  [data-theme="dark"] & {
+    background: linear-gradient(
+      135deg,
+      color.adjust($primary-400, $lightness: 0%),
+      color.adjust($accent, $lightness: 0%)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  @include mobile-only {
+    font-size: $font-size-2xl;
+  }
+}
+
+.formSubtitle {
+  font-size: $font-size-lg;
+  color: $text-secondary;
+  margin-bottom: $space-sm;
+  font-weight: $font-medium;
+
+  [data-theme="dark"] & {
+    color: $dark-text-secondary;
+  }
+
+  @include mobile-only {
+    font-size: $font-size-base;
+  }
+}
+
+/* 폼 관련 */
+.scheduleForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $space-xs;
+  margin-bottom: $space-lg;
+}
+
+.formLabel {
+  font-size: $font-size-base;
+  font-weight: $font-semibold;
+  color: $text-primary;
+
+  [data-theme="dark"] & {
+    color: $dark-text-primary;
+  }
+
+  .required {
+    color: $error;
+    font-weight: $font-bold;
+  }
+}
+
+.formInput,
+.formTextarea {
+  width: 100%;
+  padding: $space-md;
+  border: 1.5px solid $gray-200;
+  border-radius: $radius-md;
+  background: $bg-secondary;
+  color: $text-primary;
+  font-size: $font-size-base;
+  transition: border $transition-fast, box-shadow $transition-fast;
+
+  &:focus {
+    border-color: $primary-500;
+    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.12);
+    outline: none;
+  }
+
+  &::placeholder {
+    color: $text-secondary;
+    opacity: 0.8;
+  }
+
+  &:disabled {
+    background: $gray-100;
+    color: $gray-400;
+    cursor: not-allowed;
+  }
+
+  [data-theme="dark"] & {
+    background: $dark-bg-tertiary;
+    color: $dark-text-primary;
+    border-color: $gray-700;
+
+    &::placeholder {
+      color: $dark-text-secondary;
+    }
+
+    &:disabled {
+      background: $gray-800;
+      color: $gray-600;
+    }
+  }
+}
+
+.formTextarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: $leading-normal;
+}
+
+/* 파일 업로드 영역 */
+.fileUploadArea {
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileUploadBtn {
+  @include button-secondary;
+  align-self: flex-start;
+  padding: $space-sm $space-lg;
+  font-size: $font-size-sm;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  gap: $space-sm;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+}
+
+.fileUploadHint {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  line-height: 1.4;
+
+  [data-theme="dark"] & {
+    color: $dark-text-secondary;
+  }
+}
+
+/* 기존 이미지 */
+.existingImages {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: $space-md;
+  margin-top: $space-sm;
+
+  @include mobile-only {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: $space-sm;
+  }
+}
+
+.imagePreview {
+  position: relative;
+  background: $bg-primary;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+  overflow: hidden;
+  aspect-ratio: 1;
+
+  [data-theme="dark"] & {
+    background: $dark-bg-tertiary;
+    border-color: $gray-700;
+  }
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.removeImageBtn {
+  position: absolute;
+  top: $space-xs;
+  right: $space-xs;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(244, 67, 54, 0.9);
+  color: white;
+  cursor: pointer;
+  font-size: $font-size-xs;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: $error;
+    transform: scale(1.1);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+/* 새 파일 미리보기 */
+.newFilesPreviews {
+  margin-top: $space-lg;
+  padding-top: $space-lg;
+  border-top: 1px solid $gray-200;
+
+  [data-theme="dark"] & {
+    border-top-color: $gray-700;
+  }
+
+  h4 {
+    font-size: $font-size-base;
+    font-weight: $font-semibold;
+    color: $text-primary;
+    margin-bottom: $space-md;
+
+    [data-theme="dark"] & {
+      color: $dark-text-primary;
+    }
+  }
+}
+
+.fileList {
+  display: flex;
+  flex-direction: column;
+  gap: $space-sm;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: $space-md;
+  padding: $space-sm;
+  background: $bg-secondary;
+  border: 1px solid $gray-200;
+  border-radius: $radius-md;
+
+  [data-theme="dark"] & {
+    background: $dark-bg-tertiary;
+    border-color: $gray-700;
+  }
+
+  .previewImage {
+    width: 60px;
+    height: 60px;
+    border-radius: $radius-sm;
+    flex-shrink: 0;
+  }
+}
+
+.fileInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.fileName {
+  font-size: $font-size-sm;
+  font-weight: $font-medium;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+
+  [data-theme="dark"] & {
+    color: $dark-text-primary;
+  }
+}
+
+.fileSize {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+
+  [data-theme="dark"] & {
+    color: $dark-text-secondary;
+  }
+}
+
+.removeFileBtn {
+  padding: $space-xs;
+  border: none;
+  background: $error;
+  color: white;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  font-size: $font-size-xs;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: color.adjust($error, $lightness: -10%);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+/* 버튼 그룹 */
+.formActions {
+  display: flex;
+  gap: $space-md;
+  justify-content: flex-end;
+  margin-top: $space-xl;
+  padding-top: $space-lg;
+  border-top: 1px solid $gray-200;
+
+  [data-theme="dark"] & {
+    border-top-color: $gray-700;
+  }
+
+  @include mobile-only {
+    flex-direction: column;
+    gap: $space-sm;
+  }
+}
+
+.btnPrimary {
+  @include button-primary;
+  font-size: $font-size-base;
+  font-weight: $font-semibold;
+  border-radius: $radius-md;
+  padding: $space-sm $space-xl;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-xs;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: $shadow-lg;
+  }
+
+  @include mobile-only {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+.btnSecondary {
+  @include button-secondary;
+  font-size: $font-size-base;
+  font-weight: $font-semibold;
+  border-radius: $radius-md;
+  padding: $space-sm $space-xl;
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+
+  @include mobile-only {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* 빈 상태 */
+.emptyState {
+  text-align: center;
+  padding: $space-3xl $space-xl;
+  color: $text-secondary;
+
+  [data-theme="dark"] & {
+    color: $dark-text-secondary;
+  }
+
+  .emptyStateIcon {
+    font-size: $font-size-5xl;
+    margin-bottom: $space-lg;
+  }
+
+  h2 {
+    font-size: $font-size-xl;
+    font-weight: $font-semibold;
+    color: $text-primary;
+    margin-bottom: $space-md;
+
+    [data-theme="dark"] & {
+      color: $dark-text-primary;
+    }
+  }
+}
+
 /* 폼 카드 */
 .formCard {
   @include card-base;

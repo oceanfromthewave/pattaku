@@ -15,11 +15,13 @@ exports.login = async (req, res) => {
     return res.status(500).json({ error: "DB 오류" });
   }
   if (!user)
-    return res.status(401).json({ error: "존재하지 않는 사용자입니다." });
+    // 401 → 400으로 변경
+    return res.status(400).json({ error: "존재하지 않는 사용자입니다." });
 
   const match = await bcrypt.compare(password, user.password);
   if (!match)
-    return res.status(401).json({ error: "비밀번호가 일치하지 않습니다." });
+    // 401 → 400으로 변경
+    return res.status(400).json({ error: "비밀번호가 일치하지 않습니다." });
 
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
@@ -32,12 +34,11 @@ exports.login = async (req, res) => {
     jwtSecret,
     { expiresIn: "2h" }
   );
-  // id 포함하여 반환
   res.json({
     token,
     userId: user.id,
     username: user.username,
     nickname: user.nickname,
-    profileImage: user.profile_image, // 프로필 이미지 추가
+    profileImage: user.profile_image,
   });
 };

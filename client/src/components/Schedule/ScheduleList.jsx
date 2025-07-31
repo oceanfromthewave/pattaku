@@ -30,7 +30,7 @@ export default function ScheduleList({ refreshCount }) {
     if (isLoggedIn) {
       navigate(`/schedules/${scheduleId}`);
     } else {
-      notifyWarning('일정 상세보기는 회원가입 후 이용 가능합니다.');
+      notifyWarning('일정 상세보기는 로그인 후 이용 가능합니다.');
       setTimeout(() => {
         navigate('/register');
       }, 1500);
@@ -42,7 +42,7 @@ export default function ScheduleList({ refreshCount }) {
     if (isLoggedIn) {
       navigate('/schedules/new');
     } else {
-      notifyWarning('일정 등록은 회원가입 후 이용 가능합니다.');
+      notifyWarning('일정 등록은 로그인 후 이용 가능합니다.');
       setTimeout(() => {
         navigate('/register');
       }, 1500);

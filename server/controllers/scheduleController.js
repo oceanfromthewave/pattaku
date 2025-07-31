@@ -116,13 +116,16 @@ exports.createScheduleWithImages = async (req, res) => {
   }
 };
 
-// 일정 수정 (권한: 본인만)
+// 일정 수정 (권한: 본인만) - 이미지 업로드 지원
 exports.updateSchedule = async (req, res) => {
   const id = req.params.id;
   const user_id = req.user.id;
-  const { title, date, desc } = req.body;
-  if (!title || !date)
-    return res.status(400).json({ error: "제목과 날짜는 필수입니다." });
+  const { title, desc, existingImages } = req.body;
+  
+  if (!title) {
+    return res.status(400).json({ error: "제목은 필수입니다." });
+  }
+  
   // 권한 체크
   const owner = await scheduleModel.getOwnerAsync(id);
   if (!owner) return res.status(404).json({ error: "일정이 없음" });
@@ -130,9 +133,33 @@ exports.updateSchedule = async (req, res) => {
     return res.status(403).json({ error: "수정 권한 없음" });
 
   try {
-    await scheduleModel.updateAsync(id, { title, date, desc });
+    // 기존 이미지 처리
+    let finalImages = [];
+    if (existingImages) {
+      try {
+        finalImages = JSON.parse(existingImages);
+      } catch (e) {
+        console.error('기존 이미지 파싱 오류:', e);
+        finalImages = [];
+      }
+    }
+    
+    // 새로 업로드된 이미지 추가
+    const newImageUrls = (req.files || []).map(
+      (file) => `/uploads/${path.basename(file.path)}`
+    );
+    finalImages = [...finalImages, ...newImageUrls];
+    
+    // 일정 정보 업데이트
+    await scheduleModel.updateWithImagesAsync(id, { 
+      title, 
+      desc, 
+      imageUrls: finalImages 
+    });
+    
     res.json({ message: "일정 수정 성공" });
   } catch (err) {
+    console.error('일정 수정 오류:', err);
     res.status(500).json({ error: "일정 수정 실패" });
   }
 };

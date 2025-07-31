@@ -49,7 +49,7 @@ function LoginForm() {
 
     setLoading(true);
     try {
-      console.log('로그인 시도:', formData);
+      
       const response = await loginUser(formData);
       
       // AuthContext를 통해 로그인 처리
@@ -59,7 +59,6 @@ function LoginForm() {
       
       navigate('/');
     } catch (error) {
-      console.error('로그인 에러:', error);
       
       // 서버 연결 문제 체크
       if (error.message.includes('ERR_CONNECTION_REFUSED') || 

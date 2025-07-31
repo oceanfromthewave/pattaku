@@ -24,7 +24,11 @@ export const createSchedule = async (formData) => {
 
 // 스케줄 수정
 export const updateSchedule = async (id, scheduleData) => {
-  const response = await apiClient.put(`/api/schedules/${id}`, scheduleData);
+  const response = await apiClient.put(`/api/schedules/${id}`, scheduleData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
   return response.data;
 };
 

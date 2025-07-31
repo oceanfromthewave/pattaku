@@ -71,6 +71,26 @@ exports.updateAsync = async (id, { title, date, desc }) => {
   );
 };
 
+// 이미지와 함께 수정
+exports.updateWithImagesAsync = async (id, { title, desc, imageUrls }) => {
+  // 일정 정보 업데이트
+  await db.query(
+    "UPDATE schedules SET title = ?, `desc` = ? WHERE id = ?",
+    [title, desc, id]
+  );
+  
+  // 기존 이미지 삭제
+  await db.query("DELETE FROM schedule_images WHERE schedule_id = ?", [id]);
+  
+  // 새 이미지 삽입
+  if (imageUrls && imageUrls.length > 0) {
+    await db.query(
+      "INSERT INTO schedule_images (schedule_id, image_url) VALUES ?",
+      [imageUrls.map((image_url) => [id, image_url])]
+    );
+  }
+};
+
 // 삭제 (이미지까지 삭제)
 exports.deleteAsync = async (id) => {
   await db.query("DELETE FROM schedule_images WHERE schedule_id = ?", [id]);
