@@ -26,8 +26,11 @@ export const AuthProvider = ({ children }) => {
       setIsLoggedIn(true);
       if (userInfoStr) {
         try {
-          setUserInfo(JSON.parse(userInfoStr));
-        } catch {
+          const parsedUserInfo = JSON.parse(userInfoStr);
+          setUserInfo(parsedUserInfo);
+          console.log('🔄 로그인 상태 복원:', parsedUserInfo);
+        } catch (error) {
+          console.error('유저 정보 파싱 오류:', error);
           setUserInfo({ nickname: '사용자' });
         }
       }
@@ -39,22 +42,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   // 로그인 함수
-  const login = (token, userId, username, nickname) => {
+  const login = (token, userId, username, nickname, profileImage = null) => {
+    const userInfo = {
+      id: userId,
+      username: username,
+      nickname: nickname,
+      profileImage: profileImage
+    };
+    
     localStorage.setItem('token', token);
     localStorage.setItem('userId', userId);
     localStorage.setItem('username', username);
-    localStorage.setItem('userInfo', JSON.stringify({
-      id: userId,
-      username: username,
-      nickname: nickname
-    }));
+    localStorage.setItem('userInfo', JSON.stringify(userInfo));
     
     setIsLoggedIn(true);
-    setUserInfo({
-      id: userId,
-      username: username,
-      nickname: nickname
-    });
+    setUserInfo(userInfo);
   };
 
   // 로그아웃 함수
@@ -80,6 +82,15 @@ export const AuthProvider = ({ children }) => {
     window.location.href = '/login';
   };
 
+  // 사용자 정보 업데이트 (프로필 사진 변경 등)
+  const updateUserInfo = (updatedInfo) => {
+    const currentUserInfo = userInfo || {};
+    const newUserInfo = { ...currentUserInfo, ...updatedInfo };
+    
+    setUserInfo(newUserInfo);
+    localStorage.setItem('userInfo', JSON.stringify(newUserInfo));
+  };
+
   // 컴포넌트 마운트시 인증 상태 확인
   useEffect(() => {
     checkAuthState();
@@ -94,6 +105,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     checkAuthState,
+    updateUserInfo,
     showTokenExpired,
     showTokenExpiredModal,
     handleTokenExpiredConfirm

@@ -2,6 +2,9 @@ const userModel = require("../models/userModel");
 const postModel = require("../models/postModel");
 const commentModel = require("../models/commentModel");
 const bcrypt = require("bcrypt");
+const path = require("path");
+const fs = require("fs");
+const { deleteOldProfileImage } = require("../config/multerConfig");
 
 exports.getAllUsers = async (req, res) => {
   // 관리자만 허용 예시(추후 권한체크 미들웨어에서 처리)
@@ -172,5 +175,75 @@ exports.getMyStats = async (req, res) => {
   } catch (err) {
     console.error("통계 조회 에러:", err);
     res.status(500).json({ error: "통계 조회 실패" });
+  }
+};
+
+// 프로필 이미지 업로드
+exports.uploadProfileImage = async (req, res) => {
+  const userId = req.user?.id;
+  
+  if (!userId) return res.status(401).json({ error: "로그인 필요" });
+  
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "이미지 파일이 필요합니다." });
+    }
+
+    // 기존 프로필 이미지 삭제
+    const oldImagePath = await userModel.getProfileImageAsync(userId);
+    if (oldImagePath) {
+      deleteOldProfileImage(oldImagePath);
+    }
+
+    // 새 이미지 경로 생성 (정적 파일 서빙을 위한 URL)
+    const imageUrl = `/uploads/profiles/${req.file.filename}`;
+    
+    // 데이터베이스에 이미지 경로 저장
+    await userModel.updateProfileImageAsync(userId, imageUrl);
+    
+    res.json({ 
+      message: "프로필 사진이 업로드되었습니다.",
+      imageUrl: imageUrl
+    });
+  } catch (err) {
+    console.error("이미지 업로드 에러:", err);
+    
+    // 업로드된 파일 삭제 (에러 발생시)
+    if (req.file) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (deleteErr) {
+        console.error("임시 파일 삭제 실패:", deleteErr);
+      }
+    }
+    
+    res.status(500).json({ error: "이미지 업로드 실패" });
+  }
+};
+
+// 프로필 이미지 삭제
+exports.deleteProfileImage = async (req, res) => {
+  const userId = req.user?.id;
+  
+  if (!userId) return res.status(401).json({ error: "로그인 필요" });
+  
+  try {
+    // 현재 프로필 이미지 경로 조회
+    const currentImagePath = await userModel.getProfileImageAsync(userId);
+    
+    if (!currentImagePath) {
+      return res.status(400).json({ error: "삭제할 프로필 사진이 없습니다." });
+    }
+    
+    // 데이터베이스에서 이미지 경로 삭제
+    await userModel.deleteProfileImageAsync(userId);
+    
+    // 실제 파일 삭제
+    deleteOldProfileImage(currentImagePath);
+    
+    res.json({ message: "프로필 사진이 삭제되었습니다." });
+  } catch (err) {
+    console.error("이미지 삭제 에러:", err);
+    res.status(500).json({ error: "이미지 삭제 실패" });
   }
 };

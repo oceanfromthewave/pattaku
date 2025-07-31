@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { getProfileImageUrl } from '../utils/imageUtils';
 import NotificationSystem from './Notifications/NotificationSystem';
 import styles from '../styles/Header.module.scss';
 
@@ -98,7 +99,20 @@ function Header() {
               <div className={styles.userProfile}>
                 <Link to="/mypage" className={styles.profileLink}>
                   <div className={styles.avatar}>
-                    {userInfo?.nickname?.charAt(0) || '👤'}
+                    {userInfo?.profileImage ? (
+                      <img 
+                        src={getProfileImageUrl(userInfo.profileImage)} 
+                        alt="프로필" 
+                        className={styles.avatarImage}
+                        onError={(e) => {
+                          console.error('❌ 헤더 이미지 로드 실패:', userInfo.profileImage);
+                          e.target.style.display = 'none';
+                          e.target.parentNode.textContent = userInfo?.nickname?.charAt(0) || '👤';
+                        }}
+                      />
+                    ) : (
+                      userInfo?.nickname?.charAt(0) || '👤'
+                    )}
                   </div>
                   <span className={styles.username}>{userInfo?.nickname || '사용자'}</span>
                 </Link>

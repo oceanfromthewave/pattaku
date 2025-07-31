@@ -53,7 +53,7 @@ function LoginForm() {
       const response = await loginUser(formData);
       
       // AuthContext를 통해 로그인 처리
-      login(response.token, response.userId, response.username, response.nickname);
+      login(response.token, response.userId, response.username, response.nickname, response.profileImage);
       
       notifySuccess(`${response.nickname || response.username}님, 환영합니다!`);
       

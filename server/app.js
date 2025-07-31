@@ -31,11 +31,22 @@ app.set("socketHandler", socketHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// CORS 설정
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
-// 이미지 업로드 폴더 정적 제공
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// 이미지 업로드 폴더 정적 제공 (CORS 헤더 추가)
+app.use("/uploads", (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+}, express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);

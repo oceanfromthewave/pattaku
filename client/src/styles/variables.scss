@@ -511,3 +511,13 @@ $gray-150: #eaeaea;
 $shadow-md: 0 4px 12px rgba(0,0,0,0.08);
 $shadow-lg: 0 8px 24px rgba(0,0,0,0.14);
 $shadow-xl: 0 16px 40px rgba(0,0,0,0.18);
+
+// 추가 변수들 (MyPage에서 사용)
+$primary: $primary-500;
+$dark-primary: $primary-400;
+$surface: $bg-primary;
+$dark-surface: $dark-bg-secondary;
+$border: $border-color;
+$dark-border: $gray-700;
+$font-size-md: $font-size-base;
+$transition-base: $transition-base;

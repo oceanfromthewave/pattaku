@@ -115,3 +115,30 @@ exports.getUserStatsAsync = async (userId) => {
     commentLikes: commentLikes[0].count,
   };
 };
+
+// 프로필 이미지 업데이트
+exports.updateProfileImageAsync = async (userId, profileImagePath) => {
+  const [result] = await db.query(
+    "UPDATE users SET profile_image = ? WHERE id = ?",
+    [profileImagePath, userId]
+  );
+  return result.affectedRows;
+};
+
+// 현재 프로필 이미지 경로 조회
+exports.getProfileImageAsync = async (userId) => {
+  const [rows] = await db.query(
+    "SELECT profile_image FROM users WHERE id = ?",
+    [userId]
+  );
+  return rows[0]?.profile_image || null;
+};
+
+// 프로필 이미지 삭제
+exports.deleteProfileImageAsync = async (userId) => {
+  const [result] = await db.query(
+    "UPDATE users SET profile_image = NULL WHERE id = ?",
+    [userId]
+  );
+  return result.affectedRows;
+};

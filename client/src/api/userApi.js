@@ -20,6 +20,25 @@ export const changePassword = async (passwordData) => {
   return response.data;
 };
 
+// 프로필 사진 업로드
+export const uploadProfileImage = async (imageFile) => {
+  const formData = new FormData();
+  formData.append('profileImage', imageFile);
+  
+  const response = await apiClient.post('/api/users/profile/image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+// 프로필 사진 삭제
+export const deleteProfileImage = async () => {
+  const response = await apiClient.delete('/api/users/profile/image');
+  return response.data;
+};
+
 // 내가 쓴 글 목록
 export const getMyPosts = async (params = {}) => {
   const response = await apiClient.get('/api/users/posts', { params });

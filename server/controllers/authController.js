@@ -38,5 +38,6 @@ exports.login = async (req, res) => {
     userId: user.id,
     username: user.username,
     nickname: user.nickname,
+    profileImage: user.profile_image, // 프로필 이미지 추가
   });
 };
