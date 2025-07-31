@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import classNames from 'classnames';
 import { getScheduleById, deleteSchedule } from '../../api/scheduleApi';
 import { notifyError, notifySuccess } from '../../utils/notify';
 import ScheduleVoteBar from './ScheduleVoteBar';
@@ -89,24 +90,28 @@ export default function ScheduleDetail({ isLogin }) {
 
   if (!schedule) {
     return (
-      <div className="page-container">
-        <div className={styles.scheduleNotFound}>
-          <h2>📅 일정을 찾을 수 없습니다</h2>
-          <p>요청하신 일정이 존재하지 않거나 삭제되었습니다.</p>
-          <button 
-            className={`btn btn-primary ${styles.btnBack}`}
-            onClick={() => navigate('/schedules')}
-          >
-            ← 일정 목록으로 돌아가기
-          </button>
+      <div className={styles.scheduleDetailRoot}>
+        <div className={styles.card}>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyStateIcon}>📅</div>
+            <h2>일정을 찾을 수 없습니다</h2>
+            <p>요청하신 일정이 존재하지 않거나 삭제되었습니다.</p>
+            <button 
+              className={classNames('btn', styles.btnPrimary)}
+              onClick={() => navigate('/schedules')}
+            >
+              ← 일정 목록으로 돌아가기
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="page-container">
-      <div className={styles.scheduleDetailWrap}>
+    <div className={styles.scheduleDetailRoot}>
+      {/* 메인 카드 */}
+      <div className={styles.card}>
         {/* 헤더 */}
         <div className={styles.scheduleHeader}>
           <h1 className={styles.scheduleTitle}>
@@ -122,25 +127,6 @@ export default function ScheduleDetail({ isLogin }) {
               <span className={styles.scheduleAuthor}>
                 👤 {schedule.author_nickname || schedule.author}
               </span>
-                      {/* 수정/삭제 버튼 (작성자만) */}
-        {isAuthor && (
-          <div className={styles.scheduleDetailButtons}>
-            <button 
-              className={styles.btnEdit}
-              onClick={() => navigate(`/schedules/${scheduleId}/edit`)}
-              disabled={deleting}
-            >
-              ✏️ 수정
-            </button>
-            <button 
-              className={styles.btnDelete}
-              onClick={handleDelete}
-              disabled={deleting}
-            >
-              {deleting ? '삭제 중...' : '🗑️ 삭제'}
-            </button>
-          </div>
-        )}
             </div>
             {schedule.vote_count > 0 && (
               <div className={styles.metaItem}>
@@ -152,15 +138,35 @@ export default function ScheduleDetail({ isLogin }) {
           </div>
         </div>
 
+        {/* 수정/삭제 버튼 (작성자만) */}
+        {isAuthor && (
+          <div className={styles.scheduleActions}>
+            <button 
+              className={classNames('btn', styles.btnSecondary)}
+              onClick={() => navigate(`/schedules/${scheduleId}/edit`)}
+              disabled={deleting}
+            >
+              ✏️ 수정
+            </button>
+            <button 
+              className={classNames('btn', styles.btnDanger)}
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? '삭제 중...' : '🗑️ 삭제'}
+            </button>
+          </div>
+        )}
+
         {/* 이미지 슬라이더 */}
         {images.length > 0 && (
-          <div className={styles.scheduleImageSlider}>
+          <div className={styles.imageSlider}>
             <div className={styles.imageContainer}>
               {images.length > 1 && (
                 <button
                   disabled={imgIdx === 0}
                   onClick={handlePrevImage}
-                  className={`${styles.sliderBtn} ${styles.prevBtn}`}
+                  className={classNames(styles.sliderBtn, styles.prevBtn)}
                   aria-label="이전 이미지"
                 >
                   ◀
@@ -177,7 +183,7 @@ export default function ScheduleDetail({ isLogin }) {
                 <button
                   disabled={imgIdx === images.length - 1}
                   onClick={handleNextImage}
-                  className={`${styles.sliderBtn} ${styles.nextBtn}`}
+                  className={classNames(styles.sliderBtn, styles.nextBtn)}
                   aria-label="다음 이미지"
                 >
                   ▶
@@ -198,7 +204,9 @@ export default function ScheduleDetail({ isLogin }) {
                     key={idx}
                     src={getImageUrl(img)}
                     alt={`썸네일 ${idx + 1}`}
-                    className={`${styles.thumbImg} ${idx === imgIdx ? styles.selected : ''}`}
+                    className={classNames(styles.thumbImg, {
+                      [styles.selected]: idx === imgIdx
+                    })}
                     onClick={() => handleThumbClick(idx)}
                   />
                 ))}
@@ -218,34 +226,36 @@ export default function ScheduleDetail({ isLogin }) {
             </div>
           </div>
         )}
+      </div>
 
-        {/* 참여 여부 투표 */}
-        <section className={styles.scheduleVoteSection}>
+      {/* 참여 투표 카드 */}
+      <div className={styles.card}>
+        <div className={styles.sectionHeader}>
           <h3 className={styles.sectionTitle}>
             🗳️ 참여 여부 투표
           </h3>
-          <ScheduleVoteBar scheduleId={scheduleId} isLogin={isLogin} showVoterList={true} />
-        </section>
+        </div>
+        <ScheduleVoteBar scheduleId={scheduleId} isLogin={isLogin} showVoterList={true} />
+      </div>
 
-        {/* 댓글 */}
-        <section className={styles.scheduleCommentsSection}>
+      {/* 댓글 카드 */}
+      <div className={styles.card}>
+        <div className={styles.sectionHeader}>
           <h3 className={styles.sectionTitle}>
             💬 댓글
           </h3>
-          <ScheduleCommentList scheduleId={scheduleId} isLogin={isLogin} currentUser={userId} type="schedule" />
-        </section>
-
-
-        
-        {/* 뒤로가기 버튼 */}
-        <div className={styles.scheduleBackButton}>
-          <button 
-            className={styles.btnBack}
-            onClick={() => navigate('/schedules')}
-          >
-            ← 일정 목록으로
-          </button>
         </div>
+        <ScheduleCommentList scheduleId={scheduleId} isLogin={isLogin} currentUser={userId} type="schedule" />
+      </div>
+
+      {/* 뒤로가기 버튼 */}
+      <div className={styles.backButtonContainer}>
+        <button 
+          className={classNames('btn', styles.btnOutline)}
+          onClick={() => navigate('/schedules')}
+        >
+          ← 일정 목록으로
+        </button>
       </div>
     </div>
   );

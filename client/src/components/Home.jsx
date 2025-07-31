@@ -1,8 +1,35 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { notifyWarning } from '../utils/notify';
 import styles from '../styles/Home.module.scss';
 
 function Home() {
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+
+  // 로그인 체크 후 페이지 이동 또는 회원가입 유도
+  const handleProtectedNavigation = (targetPath, actionName) => {
+    if (isLoggedIn) {
+      navigate(targetPath);
+    } else {
+      notifyWarning(`${actionName}은 로그인 후 이용 가능합니다.`);
+      setTimeout(() => {
+        navigate('/register');
+      }, 1500); // 1.5초 후 회원가입 페이지로 이동
+    }
+  };
+
+  // 버튼 클릭 핸들러
+  const handleNewPostClick = (e) => {
+    e.preventDefault();
+    handleProtectedNavigation('/posts/new', '게시글 작성');
+  };
+
+  const handleNewScheduleClick = (e) => {
+    e.preventDefault();
+    handleProtectedNavigation('/schedules/new', '일정 등록');
+  };
   return (
     <div className={styles.homeRoot}>
       <div className={styles.homeContainer}>
@@ -64,29 +91,47 @@ function Home() {
         <section className={styles.quickActions}>
           <h2 className={styles.sectionTitle}>🚀 빠른 시작</h2>
           <div className={styles.actionGrid}>
-            <Link to="/posts/new" className={styles.actionCard}>
+            <button onClick={handleNewPostClick} className={styles.actionCard}>
               <span className={styles.actionIcon}>✏️</span>
               <h3 className={styles.actionTitle}>첫 게시글 작성</h3>
               <p className={styles.actionDescription}>
-                지금 바로 첫 게시글을 작성해보세요
+                {isLoggedIn 
+                  ? '지금 바로 첫 게시글을 작성해보세요' 
+                  : '회원가입 후 게시글을 작성해보세요'
+                }
               </p>
-            </Link>
+            </button>
             
-            <Link to="/schedules/new" className={styles.actionCard}>
+            <button onClick={handleNewScheduleClick} className={styles.actionCard}>
               <span className={styles.actionIcon}>📋</span>
               <h3 className={styles.actionTitle}>일정 등록</h3>
               <p className={styles.actionDescription}>
-                새로운 모임 일정을 등록해보세요
+                {isLoggedIn 
+                  ? '새로운 모임 일정을 등록해보세요' 
+                  : '회원가입 후 일정을 등록해보세요'
+                }
               </p>
-            </Link>
+            </button>
             
-            <Link to="/register" className={styles.actionCard}>
-              <span className={styles.actionIcon}>🎉</span>
-              <h3 className={styles.actionTitle}>회원가입</h3>
-              <p className={styles.actionDescription}>
-                아직 회원이 아니신가요? 지금 가입하세요
-              </p>
-            </Link>
+            {!isLoggedIn && (
+              <Link to="/register" className={styles.actionCard}>
+                <span className={styles.actionIcon}>🎉</span>
+                <h3 className={styles.actionTitle}>회원가입</h3>
+                <p className={styles.actionDescription}>
+                  아직 회원이 아니신가요? 지금 가입하세요
+                </p>
+              </Link>
+            )}
+            
+            {isLoggedIn && (
+              <Link to="/mypage" className={styles.actionCard}>
+                <span className={styles.actionIcon}>👤</span>
+                <h3 className={styles.actionTitle}>마이페이지</h3>
+                <p className={styles.actionDescription}>
+                  내 정보와 작성한 컨텐츠를 확인해보세요
+                </p>
+              </Link>
+            )}
           </div>
         </section>
       </div>

@@ -155,23 +155,32 @@
   padding: $space-sm;
   border-radius: $radius-md;
   cursor: pointer;
-  font-size: $font-size-lg;
   transition: all $transition-base;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
 
   &:hover {
     background: $gray-100;
+    transform: scale(1.05);
 
     :global([data-theme="dark"]) & {
       background: $gray-800;
     }
   }
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .notificationBadge {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: -2px;
+  right: -2px;
   background: $error;
   color: white;
   font-size: $font-size-xs;
@@ -181,8 +190,16 @@
   min-width: 18px;
   height: 18px;
   @include flex-center;
-  transform: translate(25%, -25%);
   box-shadow: $shadow-sm;
+  z-index: 1;
+  
+  // 애니메이션 추가
+  animation: bounce 0.6s ease-in-out;
+
+  @keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
 }
 
 /* 사용자 프로필 */

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { loginUser } from '../../api/authApi';
 import { notifySuccess, notifyError } from '../../utils/notify';
 import styles from '../../styles/LoginForm.module.scss';
 
-function LoginForm({ onLoginSuccess }) {
+function LoginForm() {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -12,6 +13,7 @@ function LoginForm({ onLoginSuccess }) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,22 +52,10 @@ function LoginForm({ onLoginSuccess }) {
       console.log('로그인 시도:', formData);
       const response = await loginUser(formData);
       
-      // 로그인 정보 저장
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('userId', response.userId);
-      localStorage.setItem('username', response.username);
-      localStorage.setItem('userInfo', JSON.stringify({
-        id: response.userId,
-        username: response.username,
-        nickname: response.nickname
-      }));
+      // AuthContext를 통해 로그인 처리
+      login(response.token, response.userId, response.username, response.nickname);
       
       notifySuccess(`${response.nickname || response.username}님, 환영합니다!`);
-      
-      // 로그인 상태 업데이트
-      if (onLoginSuccess) {
-        onLoginSuccess();
-      }
       
       navigate('/');
     } catch (error) {

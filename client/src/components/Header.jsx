@@ -1,31 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import NotificationSystem from './Notifications/NotificationSystem';
 import styles from '../styles/Header.module.scss';
 
 function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
+  const { isLoggedIn, userInfo, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // 로그인 상태 확인
-    const token = localStorage.getItem('token');
-    const userInfoStr = localStorage.getItem('userInfo');
-    
-    if (token) {
-      setIsLoggedIn(true);
-      if (userInfoStr) {
-        try {
-          setUserInfo(JSON.parse(userInfoStr));
-        } catch {
-          setUserInfo({ nickname: '사용자' });
-        }
-      }
-    }
-
     // 다크모드 상태 확인
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -36,11 +22,7 @@ function Header() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userInfo');
-    localStorage.removeItem('userId');
-    setIsLoggedIn(false);
-    setUserInfo(null);
+    logout();
     navigate('/');
   };
 
@@ -108,12 +90,7 @@ function Header() {
 
             {/* 알림 (로그인시에만) */}
             {isLoggedIn && (
-              <div className={styles.notificationWrapper}>
-                <button className={styles.notificationBtn} title="알림">
-                  🔔
-                  <span className={styles.notificationBadge}>3</span>
-                </button>
-              </div>
+              <NotificationSystem userId={userInfo?.id} />
             )}
 
             {/* 사용자 메뉴 */}

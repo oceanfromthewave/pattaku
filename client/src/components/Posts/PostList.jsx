@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { getPosts } from '../../api/postApi';
-import { notifyError } from '../../utils/notify';
+import { notifyError, notifyWarning } from '../../utils/notify';
 import styles from '../../styles/PostList.module.scss';
 
 function PostList() {
+  const { isLoggedIn } = useAuth();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ q: '', author: '', sort: 'recent' });
@@ -14,6 +16,30 @@ function PostList() {
   const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
   const itemsPerPage = 10;
+
+  // 로그인 체크 후 네비게이션
+  const handlePostClick = (postId) => {
+    if (isLoggedIn) {
+      navigate(`/posts/${postId}`);
+    } else {
+      notifyWarning('게시글 상세보기는 로그인 후 이용 가능합니다.');
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
+    }
+  };
+
+  // 글쓰기 버튼 체크
+  const handleWriteClick = () => {
+    if (isLoggedIn) {
+      navigate('/posts/new');
+    } else {
+      notifyWarning('게시글 작성은 로그인 후 이용 가능합니다.');
+      setTimeout(() => {
+        navigate('/login');
+      }, 1500);
+    }
+  };
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -181,7 +207,7 @@ function PostList() {
           </button>
           <button
             className={`${styles.btn} btnOutline`}
-            onClick={() => navigate('/posts/new')}
+            onClick={handleWriteClick}
           >
             ✏️ 글쓰기
           </button>
@@ -202,7 +228,7 @@ function PostList() {
             <p>첫 번째 게시글을 작성해보세요!</p>
             <button
               className={`${styles.btn} btnPrimary`}
-              onClick={() => navigate('/posts/new')}
+              onClick={handleWriteClick}
             >
               ✏️ 첫 게시글 작성하기
             </button>
@@ -213,10 +239,10 @@ function PostList() {
               key={post.id}
               className={styles.postCard}
               tabIndex={0}
-              onClick={() => navigate(`/posts/${post.id}`)}
+              onClick={() => handlePostClick(post.id)}
               onKeyDown={e => {
                 if (e.key === 'Enter' || e.key === ' ') {
-                  navigate(`/posts/${post.id}`);
+                  handlePostClick(post.id);
                 }
               }}
             >

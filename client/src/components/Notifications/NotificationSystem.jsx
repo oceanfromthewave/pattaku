@@ -1,9 +1,9 @@
 
-import { Bell, BellRing, X, CheckCheck } from 'lucide-react';
+import { Bell, BellRing, X, CheckCheck, MessageCircle, Heart, UserPlus, Calendar, FileText } from 'lucide-react';
 import useNotificationSocket from './useNotificationSocket';
 import { markAsRead as apiMarkAsRead } from '../../api/notificationApi';
 import styles from '../../styles/NotificationSystem.module.scss';
-import '../../styles/Header.scss';
+import headerStyles from '../../styles/Header.module.scss';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,24 +19,96 @@ export default function NotificationSystem({ userId }) {
     deleteNotification
   } = useNotificationSocket(userId);
 
+  // 알림 타입에 따른 아이콘 반환
+  const getNotificationIcon = (type) => {
+    const iconProps = { width: '20px', height: '20px' };
+    
+    switch (type) {
+      case 'comment':
+        return <MessageCircle {...iconProps} style={{ color: '#10b981' }} />;
+      case 'like':
+        return <Heart {...iconProps} style={{ color: '#ef4444' }} />;
+      case 'follow':
+        return <UserPlus {...iconProps} style={{ color: '#3b82f6' }} />;
+      case 'schedule':
+        return <Calendar {...iconProps} style={{ color: '#8b5cf6' }} />;
+      case 'post':
+        return <FileText {...iconProps} style={{ color: '#f59e0b' }} />;
+      default:
+        return <Bell {...iconProps} style={{ color: '#6b7280' }} />;
+    }
+  };
+
+  // 알림 클릭 처리
+  const handleNotificationClick = (notification) => {
+    try {
+      console.log('알림 클릭:', notification); // 디버깅용
+      
+      // postId가 있는 경우 (댄글, 좋아요, 게시글 알림)
+      if (notification.postId) {
+        console.log(`게시글로 이동: /posts/${notification.postId}`);
+        navigate(`/posts/${notification.postId}`);
+        return;
+      }
+      
+      // post_id가 있는 경우 (스네이크 케이스)
+      if (notification.post_id) {
+        console.log(`게시글로 이동: /posts/${notification.post_id}`);
+        navigate(`/posts/${notification.post_id}`);
+        return;
+      }
+      
+      // scheduleId가 있는 경우
+      if (notification.scheduleId || notification.schedule_id) {
+        const scheduleId = notification.scheduleId || notification.schedule_id;
+        console.log(`일정으로 이동: /schedules/${scheduleId}`);
+        navigate(`/schedules/${scheduleId}`);
+        return;
+      }
+      
+      // 사용자 관련 알림
+      if (notification.senderId || notification.sender_id) {
+        const userId = notification.senderId || notification.sender_id;
+        console.log(`사용자 프로필로 이동: /users/${userId}`);
+        navigate(`/users/${userId}`);
+        return;
+      }
+      
+      // 기본적으로 홈으로 이동
+      console.log('기본 홈으로 이동');
+      navigate('/');
+      
+    } catch (error) {
+      console.error('알림 네비게이션 오류:', error);
+      // 오류 발생시 홈으로 이동
+      navigate('/');
+    }
+  };
+
   return (
-    <div className="notification-icon-wrapper">
-      <button className="notification-icon" aria-label="알림" onClick={() => setOpen(v => !v)} style={{ position: 'relative' }}>
-        {unreadCount > 0 ? (
-          <BellRing style={{ width: 24, height: 24, color: '#4076fa' }} />
-        ) : (
-          <Bell style={{ width: 24, height: 24 }} />
-        )}
+    <div className={styles['notification-icon-wrapper']}>
+      <button 
+        className={`${headerStyles.notificationBtn} ${styles['notification-icon']}`} 
+        aria-label="알림" 
+        onClick={() => setOpen(v => !v)} 
+        style={{ position: 'relative' }}
+      >
+        {/* 벨 아이콘 */}
+        <span style={{ fontSize: '20px' }}>🔔</span>
+        
+        {/* 알림 배지 */}
         {unreadCount > 0 && (
-          <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+          <span className={`${headerStyles.notificationBadge} ${styles['notification-badge']}`}>
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
         )}
       </button>
       {open && (
         <div className={styles['notification-dropdown']} style={{ marginTop: 8 }}>
           <div className={styles['notification-header']}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Bell className="w-5 h-5 text-blue-600" />
-              <h3 style={{ fontWeight: 600 }}>알림</h3>
+              <BellRing style={{ width: '20px', height: '20px', color: '#4076fa' }} />
+              <h3 style={{ fontWeight: 600, margin: 0 }}>알림</h3>
               <span style={{
                 padding: '0.25rem 0.5rem',
                 borderRadius: '0.5rem',
@@ -49,18 +121,24 @@ export default function NotificationSystem({ userId }) {
               </span>
             </div>
             {unreadCount > 0 && (
-              <button onClick={markAllAsRead} style={{ fontSize: '0.9rem', color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                <CheckCheck className="w-4 h-4" />
+              <button 
+                onClick={markAllAsRead} 
+                className={styles['mark-all-read-btn']}
+                title="모든 알림 읽음 처리"
+              >
+                <CheckCheck style={{ width: '16px', height: '16px' }} />
                 모두 읽음
               </button>
             )}
           </div>
           <div className={styles['notification-list']}>
             {notifications.length === 0 ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
-                <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p style={{ fontSize: '1.1rem', fontWeight: 500 }}>새로운 알림이 없습니다</p>
-                <p style={{ fontSize: '0.9rem', color: '#94a3b8', marginTop: '0.5rem' }}>활동이 있으면 여기에 표시됩니다</p>
+              <div className={styles['empty-state']}>
+                <div className={styles.icon}>
+                  <Bell style={{ width: '48px', height: '48px', opacity: 0.3 }} />
+                </div>
+                <h4>새로운 알림이 없습니다</h4>
+                <p>활동이 있으면 여기에 표시됩니다</p>
               </div>
             ) : (
               notifications.map((notification) => (
@@ -70,40 +148,50 @@ export default function NotificationSystem({ userId }) {
                     styles['notification-item'] +
                     (!notification.read ? ' unread' : '')
                   }
-                  onClick={() => {
-                    if (!notification.read) markAsRead(notification.id);
-                    setOpen(false);
-                  }}
                 >
                   <div style={{ display: 'flex', alignItems: 'start', gap: '0.75rem', width: '100%' }}>
-                    <div className={styles['notification-content']} style={{ flex: 1, cursor: 'pointer' }}
+                    {/* 알림 아이콘 */}
+                    <div className={styles['notification-icon']}>
+                      {getNotificationIcon(notification.type)}
+                    </div>
+                    
+                    {/* 알림 컨텐츠 */}
+                    <div 
+                      className={styles['notification-content']} 
+                      style={{ flex: 1, cursor: 'pointer' }}
                       onClick={async () => {
                         if (!notification.read) {
                           markAsRead(notification.id);
-                          try { await apiMarkAsRead(notification.id); } catch { /* ignore */ }
+                          try { 
+                            await apiMarkAsRead(notification.id); 
+                          } catch { 
+                            /* ignore */ 
+                          }
                         }
                         setOpen(false);
-                        if (notification.postId) {
-                          navigate(`/posts/${notification.postId}`);
-                        }
+                        handleNotificationClick(notification);
                       }}
                     >
-                      <p className="notification-title">{notification.title}</p>
-                      <p className="notification-message">{notification.message}</p>
-                      <p className="notification-time">
+                      <p className={styles['notification-title']}>{notification.title}</p>
+                      <p className={styles['notification-message']}>{notification.message}</p>
+                      <p className={styles['notification-time']}>
                         <span>{formatTime(notification.createdAt || notification.created_at)}</span>
                         {!notification.read && (
-                          <span style={{ width: '0.375rem', height: '0.375rem', background: '#3b82f6', borderRadius: '9999px', display: 'inline-block', marginLeft: '0.25rem' }}></span>
+                          <span className={styles['unread-dot']}></span>
                         )}
                       </p>
                     </div>
+                    
+                    {/* 삭제 버튼 */}
                     <div className={styles['notification-actions']}>
                       <button
-                        onClick={e => { e.stopPropagation(); deleteNotification(notification.id); }}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', borderRadius: '50%' }}
+                        onClick={e => { 
+                          e.stopPropagation(); 
+                          deleteNotification(notification.id); 
+                        }}
                         title="삭제"
                       >
-                        <X className="w-4 h-4 text-red-400 hover:text-red-600" />
+                        <X style={{ width: '16px', height: '16px' }} />
                       </button>
                     </div>
                   </div>

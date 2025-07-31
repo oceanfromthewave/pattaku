@@ -1,0 +1,86 @@
+@use './variables' as *;
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.modalContent {
+  background: $bg-primary;
+  border-radius: $radius-lg;
+  padding: $space-xl;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: $shadow-xl;
+  animation: fadeInScale 0.3s ease-out;
+
+  :global([data-theme="dark"]) & {
+    background: $dark-bg-primary;
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modalHeader {
+  text-align: center;
+  margin-bottom: $space-xl;
+}
+
+.warningIcon {
+  font-size: 3rem;
+  margin-bottom: $space-lg;
+}
+
+.modalHeader h2 {
+  color: $text-primary;
+  margin: 0;
+  font-size: $font-size-2xl;
+  font-weight: $font-semibold;
+
+  :global([data-theme="dark"]) & {
+    color: $dark-text-primary;
+  }
+}
+
+.modalBody {
+  text-align: center;
+  margin-bottom: $space-xl;
+}
+
+.modalBody p {
+  color: $text-secondary;
+  margin: $space-sm 0;
+  line-height: $leading-normal;
+
+  :global([data-theme="dark"]) & {
+    color: $dark-text-secondary;
+  }
+}
+
+.modalFooter {
+  text-align: center;
+}
+
+.confirmBtn {
+  @include button-primary;
+  padding: $space-md $space-xl;
+  font-size: $font-size-base;
+  min-width: 120px;
+}

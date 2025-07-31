@@ -47,7 +47,7 @@ body {
 .main-content {
   flex: 1;
   // padding-top: var(--space-lg);
-  padding-bottom: var(--space-2xl);
+  // padding-bottom: var(--space-2xl);
   background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
   min-height: calc(100vh - 70px);
   transition: background var(--transition-slow);

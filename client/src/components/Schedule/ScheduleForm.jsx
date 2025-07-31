@@ -1,8 +1,10 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import classNames from 'classnames';
 import { createSchedule } from '../../api/scheduleApi';
 import { notifySuccess, notifyError } from '../../utils/notify';
 import imageCompression from 'browser-image-compression';
+import styles from '../../styles/ScheduleForm.module.scss';
 
 export default function ScheduleForm() {
   const [form, setForm] = useState({ title: '', date: '', desc: '' });
@@ -67,45 +69,25 @@ export default function ScheduleForm() {
 
   // 이미지 미리보기
   const renderPreview = (file, i) => (
-    <div key={i} style={{
-      position: 'relative',
-      width: '120px',
-      height: '120px',
-      borderRadius: 'var(--border-radius-md)',
-      overflow: 'hidden',
-      border: '1px solid var(--border-color)'
-    }}>
+    <div key={i} className={styles.previewBox}>
       <img 
         src={URL.createObjectURL(file)} 
         alt={`미리보기${i+1}`} 
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover'
-        }}
+        className={styles.previewImg}
         onLoad={e => URL.revokeObjectURL(e.target.src)} 
       />
+      <div className={styles.fileDetails}>
+        <div className={styles.fileName}>{file.name}</div>
+        <div className={styles.fileSize}>
+          {(file.size / 1024 / 1024).toFixed(1)}MB
+        </div>
+      </div>
       <button 
         type="button" 
         onClick={() => removeImg(i)} 
+        className={styles.delBtn}
         aria-label="이미지 삭제"
-        style={{
-          position: 'absolute',
-          top: 'var(--spacing-xs)',
-          right: 'var(--spacing-xs)',
-          width: '24px',
-          height: '24px',
-          borderRadius: '50%',
-          border: 'none',
-          background: 'var(--error)',
-          color: 'white',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: 'var(--font-size-sm)',
-          fontWeight: 'bold'
-        }}
+        disabled={loading}
       >
         ×
       </button>
@@ -174,196 +156,147 @@ export default function ScheduleForm() {
   const minDate = tomorrow.toISOString().split('T')[0];
 
   return (
-    <div className="page-container">
-      <div className="container" style={{ maxWidth: '800px' }}>
-        <div className="card">
-          <div className="card-header">
-            <h2 className="card-title">📅 새 일정 등록</h2>
-            <p className="card-subtitle">다함께 참여할 일정을 만들어보세요</p>
-          </div>
-          
-          <div className="card-body">
-            <form onSubmit={handleSubmit}>
-              {/* 일정 제목 */}
-              <div className="form-group">
-                <label className="form-label">일정 제목</label>
+    <div className={styles.scheduleFormRoot}>
+      <div className={styles.formCard}>
+        {/* 헤더 */}
+        <div className={styles.formHeader}>
+          <h1 className={styles.formTitle}>📅 새 일정 등록</h1>
+          <p className={styles.formSubtitle}>다함께 참여할 일정을 만들어보세요</p>
+        </div>
+        
+        {/* 폼 */}
+        <div className={styles.formBody}>
+          <form onSubmit={handleSubmit}>
+            {/* 일정 제목 */}
+            <div className={styles.formGroup}>
+              <label htmlFor="title" className={styles.formLabel}>일정 제목</label>
+              <input
+                id="title"
+                className={styles.formInput}
+                name="title"
+                placeholder="일정 제목을 입력하세요"
+                value={form.title}
+                onChange={handleChange}
+                required
+                maxLength={50}
+                disabled={loading}
+              />
+              <div className={styles.charCount}>
+                {form.title.length}/50
+              </div>
+            </div>
+
+            {/* 일정 날짜 */}
+            <div className={styles.formGroup}>
+              <label htmlFor="date" className={styles.formLabel}>일정 날짜</label>
+              <input
+                id="date"
+                className={styles.formInput}
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleChange}
+                min={minDate}
+                required
+                disabled={loading}
+              />
+              <div className={styles.fieldHint}>
+                오늘 이후의 날짜를 선택하세요
+              </div>
+            </div>
+
+            {/* 일정 설명 */}
+            <div className={styles.formGroup}>
+              <label htmlFor="desc" className={styles.formLabel}>일정 설명</label>
+              <textarea
+                id="desc"
+                className={styles.formTextarea}
+                name="desc"
+                placeholder="일정에 대한 상세 설명을 입력하세요"
+                value={form.desc}
+                onChange={handleChange}
+                maxLength={200}
+                rows={4}
+                required
+                disabled={loading}
+              />
+              <div className={styles.charCount}>
+                {form.desc.length}/200
+              </div>
+            </div>
+
+            {/* 이미지 첨부 */}
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>이미지 첨부 (선택사항)</label>
+              <div 
+                className={classNames(styles.attachBox, {
+                  [styles.dragOver]: dragOver
+                })}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => fileRef.current?.click()}
+              >
                 <input
-                  className="form-input"
-                  name="title"
-                  placeholder="일정 제목을 입력하세요"
-                  value={form.title}
-                  onChange={handleChange}
-                  required
-                  maxLength={50}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  ref={fileRef}
                   disabled={loading}
+                  className={styles.fileInput}
                 />
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'flex-end', 
-                  marginTop: 'var(--spacing-xs)',
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--text-muted)'
-                }}>
-                  {form.title.length}/50
+                
+                <div className={styles.attachIcon}>🖼️</div>
+                <div className={styles.attachDesc}>
+                  이미지를 여기로 드래그하거나 클릭하여 선택하세요
                 </div>
-              </div>
-
-              {/* 일정 날짜 */}
-              <div className="form-group">
-                <label className="form-label">일정 날짜</label>
-                <input
-                  className="form-input"
-                  type="date"
-                  name="date"
-                  value={form.date}
-                  onChange={handleChange}
-                  min={minDate}
-                  required
-                  disabled={loading}
-                />
-                <div style={{ 
-                  marginTop: 'var(--spacing-xs)',
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--text-muted)'
-                }}>
-                  오늘 이후의 날짜를 선택하세요
-                </div>
-              </div>
-
-              {/* 일정 설명 */}
-              <div className="form-group">
-                <label className="form-label">일정 설명</label>
-                <textarea
-                  className="form-textarea"
-                  name="desc"
-                  placeholder="일정에 대한 상세 설명을 입력하세요"
-                  value={form.desc}
-                  onChange={handleChange}
-                  maxLength={200}
-                  rows={4}
-                  required
-                  disabled={loading}
-                />
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'flex-end', 
-                  marginTop: 'var(--spacing-xs)',
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--text-muted)'
-                }}>
-                  {form.desc.length}/200
-                </div>
-              </div>
-
-              {/* 이미지 첨부 */}
-              <div className="form-group">
-                <label className="form-label">이미지 첨부 (선택사항)</label>
-                <div 
-                  style={{
-                    border: dragOver ? '2px dashed var(--primary-500)' : '2px dashed var(--border-color)',
-                    borderRadius: 'var(--border-radius-lg)',
-                    padding: 'var(--spacing-xl)',
-                    textAlign: 'center',
-                    background: dragOver ? 'var(--primary-50)' : 'var(--bg-secondary)',
-                    transition: 'all var(--transition-fast)',
-                    cursor: 'pointer'
-                  }}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => fileRef.current?.click()}
-                >
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    ref={fileRef}
-                    disabled={loading}
-                    style={{ display: 'none' }}
-                  />
-                  
-                  <div style={{ 
-                    fontSize: 'var(--font-size-2xl)', 
-                    marginBottom: 'var(--spacing-sm)',
-                    color: 'var(--text-muted)'
-                  }}>
-                    🖼️
-                  </div>
-                  <p style={{ marginBottom: 'var(--spacing-sm)' }}>
-                    이미지를 여기로 드래그하거나 클릭하여 선택하세요
-                  </p>
-                  <p style={{ 
-                    fontSize: 'var(--font-size-sm)', 
-                    color: 'var(--text-muted)' 
-                  }}>
-                    JPG, PNG, GIF 등 이미지 파일만 지원 (최대 10MB)
-                  </p>
-                  
-                  {images.length > 0 && (
-                    <div style={{ 
-                      marginTop: 'var(--spacing-md)',
-                      fontSize: 'var(--font-size-sm)',
-                      color: 'var(--text-secondary)'
-                    }}>
-                      {images.length}개 이미지 선택됨 
-                      ({(images.reduce((acc, img) => acc + img.size, 0) / 1024 / 1024).toFixed(1)}MB)
-                    </div>
-                  )}
+                <div className={styles.attachSubDesc}>
+                  JPG, PNG, GIF 등 이미지 파일만 지원 (최대 10MB)
                 </div>
                 
-                {/* 이미지 미리보기 */}
                 {images.length > 0 && (
-                  <div style={{ 
-                    marginTop: 'var(--spacing-md)',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 'var(--spacing-md)'
-                  }}>
-                    {images.map(renderPreview)}
+                  <div className={styles.attachStatus}>
+                    {images.length}개 이미지 선택됨 
+                    ({(images.reduce((acc, img) => acc + img.size, 0) / 1024 / 1024).toFixed(1)}MB)
                   </div>
                 )}
               </div>
               
-              {/* 버튼 그룹 */}
-              <div style={{ 
-                display: 'flex', 
-                gap: 'var(--spacing-sm)', 
-                justifyContent: 'flex-end',
-                marginTop: 'var(--spacing-xl)' 
-              }}>
-                <button 
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => navigate('/schedules')}
-                  disabled={loading}
-                >
-                  취소
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn btn-primary"
-                  disabled={loading || !form.title.trim() || !form.date || !form.desc.trim()}
-                >
-                  {loading ? (
-                    <>
-                      <span style={{
-                        width: '16px',
-                        height: '16px',
-                        border: '2px solid transparent',
-                        borderTop: '2px solid currentColor',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }}></span>
-                      등록 중...
-                    </>
-                  ) : (
-                    <>📅 일정 등록</>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
+              {/* 이미지 미리보기 */}
+              {images.length > 0 && (
+                <div className={styles.previewWrap}>
+                  {images.map(renderPreview)}
+                </div>
+              )}
+            </div>
+            
+            {/* 버튼 그룹 */}
+            <div className={styles.buttonGroup}>
+              <button 
+                type="button"
+                className={classNames('btn', styles.btnSecondary)}
+                onClick={() => navigate('/schedules')}
+                disabled={loading}
+              >
+                취소
+              </button>
+              <button 
+                type="submit" 
+                className={classNames('btn', styles.btnPrimary)}
+                disabled={loading || !form.title.trim() || !form.date || !form.desc.trim()}
+              >
+                {loading ? (
+                  <>
+                    <div className={styles.spinner}></div>
+                    등록 중...
+                  </>
+                ) : (
+                  <>📅 일정 등록</>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

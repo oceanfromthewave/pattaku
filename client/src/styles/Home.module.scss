@@ -98,12 +98,15 @@
   display: flex;
   gap: $space-md;
   justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
+  width: 100%;
 
   @include mobile-only {
     flex-direction: column;
+    align-items: center;
     width: 100%;
-    max-width: 300px;
+    max-width: 100%;
   }
 }
 
@@ -115,6 +118,10 @@
   border-radius: $radius-lg;
   min-width: 160px;
   transition: all $transition-slow;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   &.primary {
     @include button-primary;
@@ -137,13 +144,13 @@
 
   @include mobile-only {
     width: 100%;
+    max-width: 280px;
     justify-content: center;
   }
 }
 
 .featuresSection {
   width: 100%;
-  margin-bottom: $space-2xl;
 }
 
 .sectionTitle {
@@ -167,7 +174,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: $space-xl;
-  margin-bottom: $space-2xl;
+  // margin-bottom: $space-2xl;
 
   @include mobile-only {
     grid-template-columns: 1fr;
@@ -318,6 +325,9 @@
   transition: all $transition-slow;
   text-decoration: none;
   color: inherit;
+  background: none;
+  width: 100%;
+  font-family: inherit;
 
   &:hover {
     transform: translateY(-4px);

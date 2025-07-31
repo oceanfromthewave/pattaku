@@ -1,93 +1,328 @@
-@use './main.scss' as *;
 @use './variables' as *;
 @use "sass:color";
 
+/* 투표 바 */
 .voteBar {
   display: flex;
-  gap: 16px;
+  gap: $space-lg;
   align-items: flex-start;
-  margin: 18px 0 8px 0;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: center;
+  padding: $space-md 0;
+
+  @include mobile-only {
+    flex-direction: column;
+    gap: $space-md;
+  }
 }
+
+/* 투표 아이템 */
 .voteItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 90px;
-  margin-right: 8px;
+  min-width: 120px;
+  flex: 1;
+
+  @include mobile-only {
+    min-width: unset;
+    width: 100%;
+  }
 }
 
+/* 투표 버튼 */
 .voteBtn {
-  background: var(--primary-color);
-  color: #fff;
-  border: none;
-  border-radius: 9px;
-  font-weight: 800;
-  font-size: 1.07em;
-  padding: 12px 26px;
-  margin-bottom: 3px;
-  cursor: pointer;
-  box-shadow: var(--shadow-elevation-2);
-  transition: background 0.18s, box-shadow 0.18s, color 0.18s, border 0.18s;
+  @include button-base;
+  background: $bg-secondary;
+  color: $text-primary;
+  border: 2px solid $gray-200;
+  font-weight: $font-bold;
+  font-size: $font-size-base;
+  padding: $space-md $space-lg;
+  margin-bottom: $space-xs;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  transition: all $transition-base;
   letter-spacing: 0.02em;
+  min-width: 120px;
+  width: 100%;
 
   &:hover:not(:disabled) {
-    background: var(--primary-color-dark);
+    background: $primary-500;
+    color: white;
+    border-color: $primary-500;
+    transform: translateY(-2px);
+    box-shadow: $shadow-md;
   }
+
   &:disabled {
-    background: var(--disabled-bg-color);
-    color: var(--disabled-text-color);
+    opacity: 0.6;
     cursor: not-allowed;
-    opacity: 0.62;
+    transform: none;
+  }
+
+  &.selected {
+    background: $primary-500;
+    color: white;
+    border-color: $primary-600;
+    box-shadow: $shadow-md;
+    font-weight: $font-extrabold;
+    
+    &:hover {
+      background: $primary-600;
+      transform: translateY(-1px);
+    }
   }
 
   [data-theme="dark"] & {
-    background: var(--primary-color-dark);
-    color: var(--dark-text-color);
-    &:hover:not(:disabled) { background: var(--primary-color); }
-    &:disabled { background: var(--dark-disabled-bg-color); color: var(--dark-disabled-text-color); }
+    background: $dark-bg-tertiary;
+    color: $dark-text-primary;
+    border-color: $gray-700;
+
+    &:hover:not(:disabled) {
+      background: $primary-400;
+      border-color: $primary-400;
+    }
+
+    &.selected {
+      background: $primary-400;
+      border-color: $primary-500;
+      
+      &:hover {
+        background: $primary-500;
+      }
+    }
+  }
+
+  @include mobile-only {
+    min-width: unset;
+    padding: $space-sm $space-md;
+    font-size: $font-size-sm;
   }
 }
 
-.selected {
-  background: var(--accent-color-light) !important;
-  color: var(--text-color) !important;
-  font-weight: 900;
-  border: 2.6px solid var(--primary-color);
-
-  [data-theme="dark"] & {
-    background: var(--accent-color-dark) !important;
-    color: var(--dark-text-color) !important;
-    border: 2.6px solid var(--primary-color-dark);
-  }
-}
-.loginMsg {
-  font-size: 0.97em;
-  color: var(--text-secondary-color);
-  margin-left: 14px;
-  align-self: flex-end;
-
-  [data-theme="dark"] & {
-    color: var(--dark-text-secondary-color);
-  }
-}
+/* 닉네임 목록 */
 .nicknameList {
-  margin-top: 4px;
-  font-size: 0.99em;
-  color: var(--primary-color);
-  background: var(--hover-bg-color);
-  padding: 2px 7px;
-  border-radius: 6px;
-  min-height: 1.1em;
+  margin-top: $space-xs;
+  font-size: $font-size-sm;
+  color: $primary-600;
+  background: color.adjust($primary-100, $lightness: 5%);
+  padding: $space-xs $space-sm;
+  border-radius: $radius-md;
   text-align: center;
   word-break: break-all;
   white-space: pre-line;
-  box-shadow: var(--shadow-elevation-1);
+  box-shadow: $shadow-sm;
+  border: 1px solid color.adjust($primary-200, $lightness: 5%);
+  font-weight: $font-medium;
+  line-height: $leading-normal;
 
   [data-theme="dark"] & {
-    color: var(--primary-color-dark);
-    background: var(--dark-hover-bg-color);
-    box-shadow: var(--shadow-elevation-2);
+    color: $primary-200;
+    background: color.adjust($primary-900, $lightness: 5%);
+    border-color: color.adjust($primary-800, $lightness: 5%);
+  }
+
+  @include mobile-only {
+    font-size: $font-size-xs;
+    padding: $space-xs;
+  }
+}
+
+/* 로그인 메시지 */
+.loginMsg {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  align-self: center;
+  margin-top: $space-md;
+  text-align: center;
+  font-weight: $font-medium;
+
+  [data-theme="dark"] & {
+    color: $dark-text-secondary;
+  }
+
+  @include mobile-only {
+    margin-top: $space-sm;
+    font-size: $font-size-xs;
+  }
+}
+
+/* 투표 상태별 버튼 색상 */
+.voteItem:nth-child(1) .voteBtn {
+  // 참여 버튼
+  &:hover:not(:disabled):not(.selected) {
+    background: $success;
+    border-color: $success;
+  }
+  
+  &.selected {
+    background: $success;
+    border-color: color.adjust($success, $lightness: -10%);
+    
+    &:hover {
+      background: color.adjust($success, $lightness: -10%);
+    }
+  }
+
+  [data-theme="dark"] & {
+    &:hover:not(:disabled):not(.selected) {
+      background: color.adjust($success, $lightness: 10%);
+      border-color: color.adjust($success, $lightness: 10%);
+    }
+    
+    &.selected {
+      background: color.adjust($success, $lightness: 10%);
+      border-color: $success;
+      
+      &:hover {
+        background: $success;
+      }
+    }
+  }
+}
+
+.voteItem:nth-child(2) .voteBtn {
+  // 불참 버튼
+  &:hover:not(:disabled):not(.selected) {
+    background: $error;
+    border-color: $error;
+  }
+  
+  &.selected {
+    background: $error;
+    border-color: color.adjust($error, $lightness: -10%);
+    
+    &:hover {
+      background: color.adjust($error, $lightness: -10%);
+    }
+  }
+
+  [data-theme="dark"] & {
+    &:hover:not(:disabled):not(.selected) {
+      background: color.adjust($error, $lightness: 10%);
+      border-color: color.adjust($error, $lightness: 10%);
+    }
+    
+    &.selected {
+      background: color.adjust($error, $lightness: 10%);
+      border-color: $error;
+      
+      &:hover {
+        background: $error;
+      }
+    }
+  }
+}
+
+.voteItem:nth-child(3) .voteBtn {
+  // 보류 버튼
+  &:hover:not(:disabled):not(.selected) {
+    background: $warning;
+    border-color: $warning;
+  }
+  
+  &.selected {
+    background: $warning;
+    border-color: color.adjust($warning, $lightness: -10%);
+    
+    &:hover {
+      background: color.adjust($warning, $lightness: -10%);
+    }
+  }
+
+  [data-theme="dark"] & {
+    &:hover:not(:disabled):not(.selected) {
+      background: color.adjust($warning, $lightness: 10%);
+      border-color: color.adjust($warning, $lightness: 10%);
+    }
+    
+    &.selected {
+      background: color.adjust($warning, $lightness: 10%);
+      border-color: $warning;
+      
+      &:hover {
+        background: $warning;
+      }
+    }
+  }
+}
+
+/* 투표 상태별 닉네임 리스트 색상 */
+.voteItem:nth-child(1) .nicknameList {
+  // 참여 닉네임
+  color: color.adjust($success, $lightness: -20%);
+  background: color.adjust($success, $lightness: 40%);
+  border-color: color.adjust($success, $lightness: 20%);
+
+  [data-theme="dark"] & {
+    color: color.adjust($success, $lightness: 20%);
+    background: color.adjust($success, $lightness: -40%);
+    border-color: color.adjust($success, $lightness: -20%);
+  }
+}
+
+.voteItem:nth-child(2) .nicknameList {
+  // 불참 닉네임
+  color: color.adjust($error, $lightness: -20%);
+  background: color.adjust($error, $lightness: 40%);
+  border-color: color.adjust($error, $lightness: 20%);
+
+  [data-theme="dark"] & {
+    color: color.adjust($error, $lightness: 20%);
+    background: color.adjust($error, $lightness: -40%);
+    border-color: color.adjust($error, $lightness: -20%);
+  }
+}
+
+.voteItem:nth-child(3) .nicknameList {
+  // 보류 닉네임
+  color: color.adjust($warning, $lightness: -20%);
+  background: color.adjust($warning, $lightness: 40%);
+  border-color: color.adjust($warning, $lightness: 20%);
+
+  [data-theme="dark"] & {
+    color: color.adjust($warning, $lightness: 20%);
+    background: color.adjust($warning, $lightness: -40%);
+    border-color: color.adjust($warning, $lightness: -20%);
+  }
+}
+
+/* 애니메이션 */
+.voteItem {
+  @include fade-in;
+  animation-delay: 0.1s;
+}
+
+/* 접근성 */
+.voteBtn {
+  &:focus-visible {
+    outline: 2px solid $primary-500;
+    outline-offset: 2px;
+  }
+}
+
+/* 로딩 상태 */
+.voteBtn:disabled {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }

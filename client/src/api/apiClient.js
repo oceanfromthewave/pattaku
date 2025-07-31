@@ -1,6 +1,14 @@
 import axios from 'axios';
 import { API_BASE_URL } from './config';
 
+// AuthContext에서 토큰 만료 함수를 가져오기 위한 전역 변수
+let showTokenExpiredFunction = null;
+
+// AuthContext에서 호출할 함수 등록
+export const setTokenExpiredHandler = (handler) => {
+  showTokenExpiredFunction = handler;
+};
+
 // Axios 인스턴스 생성
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -38,10 +46,15 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('username');
       localStorage.removeItem('userInfo');
       
-      // 현재 경로가 로그인이나 회원가입 페이지가 아닌 경우에만 리다이렉트
-      const currentPath = window.location.pathname;
-      if (currentPath !== '/login' && currentPath !== '/register') {
-        window.location.href = '/login';
+      // AuthContext의 showTokenExpired 함수 호출
+      if (showTokenExpiredFunction) {
+        showTokenExpiredFunction();
+      } else {
+        // 폴백: 함수가 등록되지 않은 경우 바로 리다이렉트
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/login' && currentPath !== '/register') {
+          window.location.href = '/login';
+        }
       }
     }
     

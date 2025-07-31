@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import { useAuth } from './contexts/AuthContext';
 import Header from './components/Header';
 import Home from './components/Home';
 import PostList from './components/Posts/PostList';
@@ -14,22 +15,15 @@ import MyPage from './components/MyPage/MyPage';
 import LoginForm from './components/Auth/LoginForm';
 import RegisterForm from './components/Auth/RegisterForm';
 import ErrorBoundary from './components/ErrorBoundary';
+import TokenExpiredModal from './components/TokenExpiredModal';
 import './styles/main.scss';
 import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn, showTokenExpiredModal, handleTokenExpiredConfirm } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // 로그인 상태 확인
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-    
-    if (token && userId) {
-      setIsLoggedIn(true);
-    }
-
     // 다크모드 상태 확인
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -38,17 +32,6 @@ function App() {
     setIsDarkMode(isDark);
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   }, []);
-
-  // 로그인 상태 업데이트 함수
-  const updateAuthState = () => {
-    const token = localStorage.getItem('token');
-    
-    if (token) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
-  };
 
   return (
     <div className="app-container">
@@ -60,7 +43,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route 
               path="/login" 
-              element={<LoginForm onLoginSuccess={updateAuthState} />} 
+              element={<LoginForm />} 
             />
             <Route path="/register" element={<RegisterForm />} />
             <Route path="/posts" element={<PostList />} />
@@ -110,6 +93,12 @@ function App() {
         style={{
           zIndex: 9999,
         }}
+      />
+
+      {/* 토큰 만료 모달 */}
+      <TokenExpiredModal
+        isOpen={showTokenExpiredModal}
+        onConfirm={handleTokenExpiredConfirm}
       />
     </div>
   );

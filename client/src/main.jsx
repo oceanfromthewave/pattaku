@@ -5,6 +5,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import App from './App';
 import theme from './styles/theme';
+import { AuthProvider } from './contexts/AuthContext';
 import './styles/main.scss';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -12,7 +13,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </Router>
     </ThemeProvider>
   </React.StrictMode>

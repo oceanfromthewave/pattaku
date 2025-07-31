@@ -321,6 +321,7 @@ $radius-full: 9999px;
 @mixin button-base {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: $space-sm;
   padding: $btn-padding-y $btn-padding-x;
   border: none;
@@ -334,6 +335,7 @@ $radius-full: 9999px;
   white-space: nowrap;
   line-height: 1;
   min-height: $btn-height;
+  text-align: center;
 }
 
 @mixin button-primary {

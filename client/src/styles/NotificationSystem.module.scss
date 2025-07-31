@@ -1,8 +1,28 @@
+@use './variables' as *;
+
 .notification-icon-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  margin-left: 8px;
+}
+
+.notification-icon {
+  // Header 스타일과 일치하도록 기본 스타일 제거
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  
+  // 벨 아이콘 스타일링
+  span {
+    transition: all $transition-base;
+    display: block;
+  }
+  
+  &:hover span {
+    transform: rotate(15deg) scale(1.1);
+  }
 }
 
 .notification-dropdown {
@@ -10,40 +30,94 @@
   right: 0;
   top: 2.5rem;
   width: 24rem;
-  background: var(--card-bg-color);
-  color: var(--text-color);
-  border-radius: 1rem;
-  box-shadow: var(--shadow-elevation-3);
-  border: 1px solid var(--border-color);
-  z-index: 100;
+  max-width: 90vw;
+  background: $bg-primary;
+  color: $text-primary;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  border: 1px solid $gray-200;
+  z-index: 1000;
   overflow: hidden;
-  animation: dropdown-fade-in 0.2s;
+  animation: dropdown-fade-in 0.2s ease-out;
 
-  [data-theme="dark"] & {
-    background: var(--dark-card-bg-color);
-    border-color: var(--dark-border-color);
-    color: var(--dark-text-color);
+  :global([data-theme="dark"]) & {
+    background: $dark-bg-primary;
+    border-color: $gray-700;
+    color: $dark-text-primary;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   }
 }
 
 @keyframes dropdown-fade-in {
-  from { opacity: 0; transform: translateY(-10px);}
-  to { opacity: 1; transform: translateY(0);}
+  from { 
+    opacity: 0; 
+    transform: translateY(-10px) scale(0.95);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+  }
 }
 
 .notification-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
-  background: var(--header-bg-color);
-  color: var(--text-color);
-  border-bottom: 1px solid var(--border-color);
+  padding: $space-lg;
+  background: $gray-50;
+  color: $text-primary;
+  border-bottom: 1px solid $gray-200;
+  font-weight: $font-semibold;
 
-  [data-theme="dark"] & {
-    background: var(--dark-header-bg-color);
-    color: var(--dark-text-color);
-    border-bottom-color: var(--dark-border-color);
+  h3 {
+    margin: 0;
+    font-size: $font-size-lg;
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $primary-600;
+    font-size: $font-size-sm;
+    font-weight: $font-medium;
+    padding: $space-xs $space-sm;
+    border-radius: $radius-sm;
+    transition: all $transition-base;
+    display: flex;
+    align-items: center;
+    gap: $space-xs;
+
+    &:hover {
+      background: rgba($primary-500, 0.05);
+      color: $primary-700;
+    }
+  }
+
+  .mark-all-read-btn {
+    background: rgba($primary-500, 0.1) !important;
+    color: $primary-600 !important;
+    
+    &:hover {
+      background: rgba($primary-500, 0.15) !important;
+      color: $primary-700 !important;
+      transform: translateY(-1px);
+    }
+  }
+
+  :global([data-theme="dark"]) & {
+    background: $gray-800;
+    color: $dark-text-primary;
+    border-bottom-color: $gray-700;
+
+    button {
+      color: $primary-400;
+
+      &:hover {
+        background: $gray-700;
+        color: $primary-300;
+      }
+    }
   }
 }
 
@@ -51,80 +125,109 @@
   max-height: 20rem;
   overflow-y: auto;
   background: inherit;
+
+  // 스크롤바 스타일링
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $gray-300;
+    border-radius: $radius-full;
+
+    :global([data-theme="dark"]) & {
+      background: $gray-600;
+    }
+  }
 }
 
 .notification-item {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  gap: $space-md;
+  padding: $space-lg;
+  border-bottom: 1px solid $gray-100;
   background: inherit;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all $transition-base;
+  position: relative;
+
   &:hover {
-    background: var(--hover-bg-color);
+    background: $gray-50;
   }
+
   &.unread {
-    background: var(--unread-bg-color);
-    border-left: 4px solid var(--primary-color);
-  }
+    background: rgba($primary-500, 0.05);
+    border-left: 4px solid $primary-500;
 
-  [data-theme="dark"] & {
-    border-bottom-color: var(--dark-border-color);
     &:hover {
-      background: var(--dark-hover-bg-color);
-    }
-    &.unread {
-      background: var(--dark-unread-bg-color);
-      border-left-color: var(--primary-color-dark);
+      background: rgba($primary-500, 0.1);
     }
   }
-}
 
-.notification-avatar {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--background-color);
-  box-shadow: var(--shadow-elevation-1);
+  &:last-child {
+    border-bottom: none;
+  }
 
-  [data-theme="dark"] & {
-    border-color: var(--dark-background-color);
+  :global([data-theme="dark"]) & {
+    border-bottom-color: $gray-700;
+
+    &:hover {
+      background: $gray-800;
+    }
+
+    &.unread {
+      background: rgba($primary-500, 0.1);
+      border-left-color: $primary-400;
+
+      &:hover {
+        background: rgba($primary-500, 0.15);
+      }
+    }
   }
 }
 
 .notification-content {
   flex: 1;
   min-width: 0;
+
   .notification-title {
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    color: var(--text-color);
+    font-weight: $font-semibold;
+    margin-bottom: $space-xs;
+    color: $text-primary;
+    font-size: $font-size-sm;
+    line-height: 1.4;
 
-    [data-theme="dark"] & {
-      color: var(--dark-text-color);
+    :global([data-theme="dark"]) & {
+      color: $dark-text-primary;
     }
   }
+
   .notification-message {
-    font-size: 0.95rem;
-    color: var(--text-secondary-color);
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    line-height: 1.4;
+    margin-bottom: $space-sm;
 
-    [data-theme="dark"] & {
-      color: var(--dark-text-secondary-color);
+    :global([data-theme="dark"]) & {
+      color: $dark-text-secondary;
     }
   }
+
   .notification-time {
-    font-size: 0.8rem;
-    color: var(--text-disabled-color);
-    margin-top: 0.5rem;
+    font-size: $font-size-xs;
+    color: $text-disabled;
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: $space-xs;
+    font-weight: $font-medium;
 
-    [data-theme="dark"] & {
-      color: var(--dark-text-disabled-color);
+    :global([data-theme="dark"]) & {
+      color: $dark-text-disabled;
     }
   }
 }
@@ -132,28 +235,108 @@
 .notification-actions {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: $space-xs;
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: $space-xs;
+    border-radius: $radius-sm;
+    transition: all $transition-base;
+    color: $text-disabled;
+
+    &:hover {
+      background: rgba($error, 0.1);
+      color: $error-dark;
+    }
+
+    :global([data-theme="dark"]) & {
+      color: $dark-text-disabled;
+
+      &:hover {
+        background: rgba($error, 0.1);
+        color: $error-light;
+      }
+    }
+  }
 }
 
 .notification-badge {
-  position: absolute;
-  top: -0.5rem;
-  right: -0.5rem;
-  background: var(--error-color);
-  color: white;
-  font-size: 0.75rem;
-  font-weight: bold;
-  border-radius: 9999px;
-  width: 1.25rem;
-  height: 1.25rem;
+  // Header의 notificationBadge와 일치하도록 추가 스타일링
+  animation: pulse 2s infinite;
+  font-family: $font-family;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: translate(25%, -25%) scale(1);
+  }
+  50% { 
+    transform: translate(25%, -25%) scale(1.1);
+  }
+}
+
+// 빈 상태 스타일
+.empty-state {
+  padding: $space-xl;
+  text-align: center;
+  color: $text-disabled;
+
+  .icon {
+    font-size: 3rem;
+    margin-bottom: $space-md;
+    opacity: 0.5;
+  }
+
+  h4 {
+    font-size: $font-size-lg;
+    font-weight: $font-semibold;
+    margin-bottom: $space-xs;
+    color: $text-secondary;
+  }
+
+  p {
+    font-size: $font-size-sm;
+    margin: 0;
+  }
+
+  :global([data-theme="dark"]) & {
+    color: $dark-text-disabled;
+
+    h4 {
+      color: $dark-text-secondary;
+    }
+  }
+}
+
+// 알림 아이콘 스타일
+.notification-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-full;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-elevation-1);
-  animation: bounce 1s infinite;
+  background: $gray-50;
+  flex-shrink: 0;
+
+  :global([data-theme="dark"]) & {
+    background: $gray-800;
+  }
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0);}
-  50% { transform: translateY(-4px);}
+// 읽지 않음 표시 점
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  background: $primary-500;
+  border-radius: $radius-full;
+  display: inline-block;
+  margin-left: $space-xs;
+  animation: pulse 2s infinite;
+
+  :global([data-theme="dark"]) & {
+    background: $primary-400;
+  }
 }
