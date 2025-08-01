@@ -74,6 +74,18 @@ export default function ScheduleDetail({ isLogin }) {
     });
   };
 
+  // 일정 날짜 범위 텍스트
+  let scheduleDateText = '';
+  if (schedule?.start_date) {
+    if (schedule?.end_date && schedule.end_date !== schedule.start_date) {
+      scheduleDateText = `${formatDate(schedule.start_date)} ~ ${formatDate(schedule.end_date)}`;
+    } else {
+      scheduleDateText = formatDate(schedule.start_date);
+    }
+  } else {
+    scheduleDateText = formatDate(schedule?.created_at);
+  }
+
   // 이미지 URL 처리
   const getImageUrl = (img) => {
     if (!img) return '';
@@ -109,18 +121,6 @@ export default function ScheduleDetail({ isLogin }) {
     );
   }
 
-  // 일정 날짜 범위 텍스트
-  let scheduleDateText = '';
-  if (schedule.start_date) {
-    if (schedule.end_date && schedule.end_date !== schedule.start_date) {
-      scheduleDateText = `${formatDate(schedule.start_date)} ~ ${formatDate(schedule.end_date)}`;
-    } else {
-      scheduleDateText = formatDate(schedule.start_date);
-    }
-  } else {
-    scheduleDateText = formatDate(schedule.created_at);
-  }
-
   return (
     <div className={styles.scheduleDetailRoot}>
       {/* 메인 카드 */}
@@ -131,11 +131,6 @@ export default function ScheduleDetail({ isLogin }) {
             📅 {schedule.title}
           </h1>
           <div className={styles.scheduleMeta}>
-            <div className={styles.metaItem}>
-              <span className={styles.scheduleDate}>
-                🗓️ {scheduleDateText}
-              </span>
-            </div>
             <div className={styles.metaItem}>
               <span className={styles.scheduleAuthor}>
                 👤 {schedule.author_nickname || schedule.author}
@@ -228,17 +223,26 @@ export default function ScheduleDetail({ isLogin }) {
           </div>
         )}
 
-        {/* 일정 내용 */}
-        {schedule.desc && (
-          <div className={styles.scheduleContent}>
-            <h3 className={styles.contentTitle}>📝 일정 설명</h3>
-            <div className={styles.scheduleDesc}>
-              {schedule.desc.split('\n').map((line, index) => (
-                <p key={index}>{line || '\u00A0'}</p>
-              ))}
+        {/* 일정 날짜 + 일정 내용 */}
+        <div className={styles.scheduleContent}>
+          <h3 className={styles.contentTitle}>📝 일정 설명</h3>
+          <div className={styles.scheduleDateDescBox}>
+            <div className={styles.scheduleDateBox}>
+              <strong>일정 날짜</strong>
+              <div className={styles.scheduleDateText}>
+                {scheduleDateText}
+              </div>
             </div>
+            {schedule.desc && (
+              <div className={styles.scheduleDesc}>
+                <strong>일정 내용</strong>
+                {schedule.desc.split('\n').map((line, index) => (
+                  <p key={index}>{line || '\u00A0'}</p>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* 참여 투표 카드 */}

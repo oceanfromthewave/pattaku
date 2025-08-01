@@ -225,3 +225,33 @@
     color: $dark-text-secondary;
   }
 }
+
+.scheduleDateDescBox {
+  margin-bottom: 24px;
+}
+
+.scheduleDateBox {
+  margin-bottom: 16px;
+  font-size: 1.1em;
+  color: #3a60fa;
+  strong {
+    display: inline-block;
+    margin-bottom: 4px;
+    color: #222;
+  }
+  .scheduleDateText {
+    color: #222;
+    font-weight: 600;
+  }
+}
+.scheduleDesc {
+  margin-top: 10px;
+  p {
+    margin-bottom: 6px;
+  }
+  strong {
+    display: inline-block;
+    margin-bottom: 4px;
+    color: #222;
+  }
+}
