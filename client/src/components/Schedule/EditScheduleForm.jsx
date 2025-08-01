@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { getScheduleById, updateSchedule } from '../../api/scheduleApi';
 import { notifySuccess, notifyError } from '../../utils/notify';
+import { UPLOADS_URL } from '../../api/config';
 import Loading from '../Loading';
 import styles from '../../styles/ScheduleForm.module.scss';
 
@@ -210,7 +211,7 @@ export default function EditScheduleForm() {
                 {existingImages.map((img, index) => (
                   <div key={index} className={styles.imagePreview}>
                     <img 
-                      src={img.startsWith('http') ? img : `http://localhost:5000/uploads/${img.replace(/^\/?uploads\/?/, '')}`}
+  src={img.startsWith('http') ? img : `${UPLOADS_URL}/${img.replace(/^\/?uploads\/?/, '')}`}
                       alt={`기존 이미지 ${index + 1}`}
                       className={styles.previewImage}
                     />

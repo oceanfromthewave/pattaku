@@ -3,6 +3,7 @@ import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { loginUser } from '../../api/authApi';
 import { notifySuccess, notifyError } from '../../utils/notify';
+import { API_BASE_URL } from '../../api/config';
 import styles from '../../styles/LoginForm.module.scss';
 
 function LoginForm() {
