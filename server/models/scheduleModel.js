@@ -24,7 +24,7 @@ exports.getImagesAsync = async (scheduleId) => {
     `SELECT image_url FROM schedule_images WHERE schedule_id = ?`,
     [scheduleId]
   );
-  return rows.map(row => row.image_url);
+  return rows.map((row) => row.image_url);
 };
 
 // 상세 조회 (이미지, 작성자 포함)
@@ -48,12 +48,25 @@ exports.getByIdAsync = async (id) => {
 };
 
 // 등록 (이미지 경로 배열 저장)
-exports.createAsync = async ({ user_id, title, date, desc, imageUrls }) => {
+exports.createAsync = async ({
+  user_id,
+  title,
+  desc,
+  start_date,
+  end_date,
+  imageUrls,
+  date, // 혹시 date로만 올 때도 대비
+}) => {
+  // date만 넘어왔으면 start_date, end_date에 복사
+  const sDate = start_date || date;
+  const eDate = end_date || date;
+
   const [result] = await db.query(
-    "INSERT INTO schedules (user_id, title, date, `desc`) VALUES (?, ?, ?, ?)",
-    [user_id, title, date, desc]
+    "INSERT INTO schedules (user_id, title, start_date, end_date, `desc`) VALUES (?, ?, ?, ?, ?)",
+    [user_id, title, sDate, eDate, desc]
   );
   const scheduleId = result.insertId;
+
   if (imageUrls && imageUrls.length > 0) {
     await db.query(
       "INSERT INTO schedule_images (schedule_id, image_url) VALUES ?",
@@ -74,14 +87,15 @@ exports.updateAsync = async (id, { title, date, desc }) => {
 // 이미지와 함께 수정
 exports.updateWithImagesAsync = async (id, { title, desc, imageUrls }) => {
   // 일정 정보 업데이트
-  await db.query(
-    "UPDATE schedules SET title = ?, `desc` = ? WHERE id = ?",
-    [title, desc, id]
-  );
-  
+  await db.query("UPDATE schedules SET title = ?, `desc` = ? WHERE id = ?", [
+    title,
+    desc,
+    id,
+  ]);
+
   // 기존 이미지 삭제
   await db.query("DELETE FROM schedule_images WHERE schedule_id = ?", [id]);
-  
+
   // 새 이미지 삽입
   if (imageUrls && imageUrls.length > 0) {
     await db.query(

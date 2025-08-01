@@ -113,11 +113,17 @@ exports.createScheduleWithImages = async (req, res) => {
     const imageUrls = (req.files || []).map(
       (file) => `/uploads/${path.basename(file.path)}`
     );
+
+    // date를 start_date, end_date 모두에 사용 (기간 기능 필요하면 폼 따로 받아야 함)
+    const start_date = date;
+    const end_date = date;
+
     const id = await scheduleModel.createAsync({
       user_id,
       title,
-      date,
       desc,
+      start_date,
+      end_date,
       imageUrls,
     });
     res.status(201).json({ message: "일정 등록 성공", id });
