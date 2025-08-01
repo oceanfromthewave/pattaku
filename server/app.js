@@ -18,6 +18,7 @@ const SocketHandler = require("./socketHandler");
 const app = express();
 const server = http.createServer(app);
 
+// Socket.io CORS
 const io = new Server(server, {
   cors: {
     origin: [
@@ -29,6 +30,7 @@ const io = new Server(server, {
       "https://pattaku.s3-website-ap-southeast-2.amazonaws.com",
     ],
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
@@ -37,7 +39,7 @@ app.set("socketHandler", socketHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// CORS 설정
+// ------------------- CORS 설정 -------------------
 app.use(
   cors({
     origin: [
@@ -53,6 +55,11 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// [★매우중요] 모든 프리플라이트(OPTIONS) 요청 허용 (Preflight CORS)
+app.options("*", cors());
+
+// ------------------- 바디파서 -------------------
 app.use(express.json());
 
 // ----- [★ 중요] 업로드 파일에 ORB(Cross-Origin-Resource-Policy) 헤더 적용 -----
@@ -66,7 +73,7 @@ app.use(
   })
 );
 
-// 라우터 등록
+// ------------------- 라우터 등록 -------------------
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/auth", authRoutes);
