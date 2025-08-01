@@ -8,10 +8,11 @@
     "build": "vite build",
     "build:production": "cross-env NODE_ENV=production vite build --mode production",
     "build:s3": "npm run build:production",
-    "deploy": "npm run build:s3 && aws s3 sync ./dist s3://pattaku --delete",
+    "deploy": "npm run build:s3 && aws s3 sync ./dist s3://pattaku --delete --region ap-southeast-2",
+    "deploy:force": "npm run clean && npm run build:production && aws s3 sync ./dist s3://pattaku --delete --region ap-southeast-2 --cache-control no-cache",
     "lint": "eslint .",
     "preview": "vite preview",
-    "clean": "rm -rf dist",
+    "clean": "if exist dist rmdir /s /q dist",
     "rebuild": "npm run clean && npm run build:production"
   },
   "dependencies": {
