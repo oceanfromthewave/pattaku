@@ -214,17 +214,19 @@
 /* 일정 목록 그리드 */
 .scheduleList {
   width: 100%;
-  max-width: 1200px;
+  max-width: 900px; /* 1200px에서 900px로 축소 */
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: $space-xl;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 320px)); /* 카드 최대 너비 320px로 제한 */
+  gap: $space-lg; /* gap 축소 */
+  justify-content: center; /* 카드들을 중앙 정렬 */
   margin-bottom: $space-2xl;
 
   @include mobile-only {
     grid-template-columns: 1fr;
     gap: $space-lg;
     max-width: 100%;
+    padding: 0 $space-md;
   }
 }
 
@@ -241,6 +243,8 @@
   flex-direction: column;
   overflow: hidden;
   min-height: 280px;
+  max-width: 320px; /* 카드 최대 너비 제한 */
+  width: 100%;
 
   &:hover {
     transform: translateY(-5px);
@@ -259,6 +263,7 @@
 
   @include mobile-only {
     min-height: 240px;
+    max-width: 100%;
   }
 }
 
@@ -457,8 +462,12 @@
     padding-left: $space-sm;
     padding-right: $space-sm;
   }
+}
 
+/* 태블릿 사이즈에서 2열 유지 */
+@media (min-width: 768px) and (max-width: 1024px) {
   .scheduleList {
-    padding: 0 $space-sm;
+    grid-template-columns: repeat(2, minmax(280px, 320px));
+    max-width: 700px;
   }
 }
