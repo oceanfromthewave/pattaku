@@ -64,6 +64,7 @@ export default function ScheduleDetail({ isLogin }) {
 
   // 날짜 포맷팅
   const formatDate = (dateString) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
@@ -108,6 +109,18 @@ export default function ScheduleDetail({ isLogin }) {
     );
   }
 
+  // 일정 날짜 범위 텍스트
+  let scheduleDateText = '';
+  if (schedule.start_date) {
+    if (schedule.end_date && schedule.end_date !== schedule.start_date) {
+      scheduleDateText = `${formatDate(schedule.start_date)} ~ ${formatDate(schedule.end_date)}`;
+    } else {
+      scheduleDateText = formatDate(schedule.start_date);
+    }
+  } else {
+    scheduleDateText = formatDate(schedule.created_at);
+  }
+
   return (
     <div className={styles.scheduleDetailRoot}>
       {/* 메인 카드 */}
@@ -120,7 +133,7 @@ export default function ScheduleDetail({ isLogin }) {
           <div className={styles.scheduleMeta}>
             <div className={styles.metaItem}>
               <span className={styles.scheduleDate}>
-                🗓️ {formatDate(schedule.created_at)}
+                🗓️ {scheduleDateText}
               </span>
             </div>
             <div className={styles.metaItem}>
