@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:production": "copy .env.production .env && vite build",
-    "deploy": "npm run build:production && aws s3 sync ./dist s3://pattaku --delete",
+    "build:production": "cross-env NODE_ENV=production VITE_API_URL=https://pattaku.onrender.com VITE_UPLOADS_URL=https://pattaku.onrender.com/uploads VITE_WS_URL=wss://pattaku.onrender.com vite build",
+    "build:s3": "npm run build:production",
+    "deploy": "npm run build:s3 && aws s3 sync ./dist s3://pattaku --delete",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -33,6 +34,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
+    "cross-env": "^7.0.3",
     "eslint": "^9.30.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",

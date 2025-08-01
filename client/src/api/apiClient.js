@@ -12,7 +12,7 @@ export const setTokenExpiredHandler = (handler) => {
 // Axios 인스턴스 생성
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // 30초로 증가
   headers: {
     'Content-Type': 'application/json',
   },
@@ -25,6 +25,12 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // 개발환경에서만 요청 로그
+    if (import.meta.env.DEV) {
+      console.log('API 요청:', `${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    }
+    
     return config;
   },
   (error) => {
@@ -35,9 +41,25 @@ apiClient.interceptors.request.use(
 
 // 응답 인터셉터 - 에러 처리
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // 개발환경에서만 응답 로그
+    if (import.meta.env.DEV) {
+      console.log('API 응답 성공:', response.status, response.config.url);
+    }
+    return response;
+  },
   (error) => {
-    console.error('API 응답 오류:', error);
+    const requestUrl = error.config?.url || 'unknown';
+    const requestMethod = error.config?.method?.toUpperCase() || 'unknown';
+    
+    console.error('API 응답 오류:', {
+      method: requestMethod,
+      url: requestUrl,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      message: error.message,
+      fullUrl: `${API_BASE_URL}${requestUrl}`
+    });
     
     if (error.response?.status === 401) {
       // 토큰 만료 또는 인증 실패
