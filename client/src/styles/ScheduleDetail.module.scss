@@ -3,539 +3,197 @@
 
 /* 루트 */
 .scheduleDetailRoot {
-  width: 100vw;
   min-height: calc(100vh - 70px);
+  background: linear-gradient(120deg, $primary-50 50%, $primary-100 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(120deg, $primary-50 50%, $primary-100 100%);
-  padding-top: $space-3xl;
-  transition: background $transition-slow;
-
-  [data-theme="dark"] & {
-    background: linear-gradient(120deg, $dark-bg-primary 50%, $dark-bg-secondary 100%);
-  }
-
+  padding: 54px 0 40px 0;
   @include mobile-only {
-    padding-top: $space-xl;
-    min-height: calc(100vh - 60px);
+    padding: 24px 0 12px 0;
+  }
+  [data-theme="dark"] & {
+    background: linear-gradient(120deg, $dark-bg-primary 60%, $dark-bg-secondary 100%);
   }
 }
 
-/* 카드 공통 스타일 */
+/* 카드 */
 .card {
-  @include card-base;
-  margin: 0 auto $space-xl auto;
-  border: 1px solid $gray-200;
-  box-shadow: $shadow-lg;
-  max-width: 720px;
   background: $bg-primary;
-
+  border-radius: 22px;
+  box-shadow: 0 8px 40px 0 rgba(32,44,92,0.09), 0 1.5px 7px 0 rgba(60,60,60,0.06);
+  border: none;
+  max-width: 410px;
+  width: 96vw;
+  margin: 0 auto 34px auto;
+  padding: 34px 30px 28px 30px;
+  position: relative;
+  transition: box-shadow 0.25s, transform 0.2s;
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: $shadow-xl;
-    border-color: $primary-300;
+    box-shadow: 0 10px 56px 0 rgba(32,44,92,0.17), 0 2px 8px 0 rgba(60,60,60,0.10);
+    transform: translateY(-4px) scale(1.012);
   }
-
   [data-theme="dark"] & {
     background: $dark-bg-secondary;
-    border-color: $gray-700;
-
-    &:hover {
-      border-color: $primary-400;
-    }
   }
-
   @include mobile-only {
-    padding: $space-lg;
-    max-width: 100%;
-    margin-left: $space-sm;
-    margin-right: $space-sm;
+    padding: 18px 10px 16px 10px;
+    max-width: 99vw;
   }
 }
 
-/* 헤더 */
+/* 구분선 */
+.card hr {
+  border: none;
+  border-top: 1px solid $gray-200;
+  margin: 24px 0 28px 0;
+  opacity: 0.35;
+  [data-theme="dark"] & {
+    border-top: 1px solid $gray-700;
+  }
+}
+
+/* 헤더(닉네임/프로필/작성자) */
 .scheduleHeader {
   text-align: center;
-  margin-bottom: $space-xl;
-  padding-bottom: $space-lg;
-  border-bottom: 1px solid $gray-200;
-
-  [data-theme="dark"] & {
-    border-bottom-color: $gray-700;
+  margin-bottom: 22px;
+  .avatar {
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    background: $primary-400;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.3em;
+    font-weight: 900;
+    color: #fff;
+    user-select: none;
+    box-shadow: 0 1.5px 5px 0 rgba(60,60,60,0.13);
   }
-}
-
-.scheduleTitle {
-  font-size: $font-size-3xl;
-  font-weight: $font-extrabold;
-  background: linear-gradient(
-    135deg,
-    color.adjust($primary-600, $lightness: 0%),
-    color.adjust($accent, $lightness: 0%)
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: $space-md;
-  line-height: $leading-tight;
-
-  [data-theme="dark"] & {
-    background: linear-gradient(
-      135deg,
-      color.adjust($primary-400, $lightness: 0%),
-      color.adjust($accent, $lightness: 0%)
-    );
+  .scheduleTitle {
+    font-size: 2em;
+    font-weight: 800;
+    margin: 3px 0 2px 0;
+    letter-spacing: -1.1px;
+    background: linear-gradient(135deg, $primary-600, $accent 90%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-
+  .author {
+    color: $primary-300;
+    font-size: 1.05em;
+    font-weight: 500;
+    margin-top: 2px;
+    display: flex; align-items: center;
+    gap: 4px;
+    [data-theme="dark"] & {
+      color: $primary-400;
+    }
+  }
   @include mobile-only {
-    font-size: $font-size-2xl;
-  }
-}
-
-.scheduleMeta {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: $space-lg;
-  font-size: $font-size-base;
-  color: $text-secondary;
-
-  [data-theme="dark"] & {
-    color: $dark-text-secondary;
-  }
-
-  @include mobile-only {
-    flex-direction: column;
-    gap: $space-sm;
-    text-align: center;
-  }
-}
-
-.metaItem {
-  display: flex;
-  align-items: center;
-  gap: $space-xs;
-  font-weight: $font-medium;
-}
-
-.scheduleDate {
-  color: $primary-500;
-  font-weight: $font-semibold;
-}
-
-.scheduleAuthor {
-  color: $text-primary;
-  font-weight: $font-medium;
-
-  [data-theme="dark"] & {
-    color: $dark-text-primary;
-  }
-}
-
-.scheduleVotes {
-  background: color.adjust($success, $lightness: 40%);
-  color: color.adjust($success, $lightness: -20%);
-  padding: $space-xs $space-sm;
-  border-radius: $radius-sm;
-  font-weight: $font-semibold;
-
-  [data-theme="dark"] & {
-    background: color.adjust($success, $lightness: -40%);
-    color: color.adjust($success, $lightness: 20%);
+    .avatar { width: 38px; height: 38px; font-size: 1.8em; }
+    .scheduleTitle { font-size: 1.25em; }
   }
 }
 
 /* 액션 버튼 */
 .scheduleActions {
-  display: flex;
-  gap: $space-md;
-  justify-content: center;
-  margin-bottom: $space-xl;
-  padding-bottom: $space-lg;
-  border-bottom: 1px solid $gray-200;
-
-  [data-theme="dark"] & {
-    border-bottom-color: $gray-700;
+  display: flex; gap: 12px; justify-content: center; margin-bottom: 22px;
+  .btn {
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: 600;
+    box-shadow: 0 2px 9px 0 rgba(44,44,77,0.07);
+    padding: 10px 22px;
+    min-width: 110px;
+    transition: box-shadow 0.18s, background 0.15s, transform 0.14s;
+    &:hover { transform: translateY(-1.5px) scale(1.045);}
   }
-
-  @include mobile-only {
-    flex-direction: column;
-  }
-
-  .btnSecondary {
-    @include button-secondary;
-    font-size: $font-size-base;
-    font-weight: $font-semibold;
-    border-radius: $radius-md;
-    min-width: 120px;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: $shadow-md;
-    }
-
-    @include mobile-only {
-      width: 100%;
-    }
-  }
-
-  .btnDanger {
-    @include button-base;
-    background: $error;
-    color: white;
-    border: 1px solid $error;
-    font-size: $font-size-base;
-    font-weight: $font-semibold;
-    border-radius: $radius-md;
-    min-width: 120px;
-
-    &:hover:not(:disabled) {
-      background: color.adjust($error, $lightness: -10%);
-      transform: translateY(-1px);
-      box-shadow: $shadow-md;
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    @include mobile-only {
-      width: 100%;
-    }
-
-    [data-theme="dark"] & {
-      background: color.adjust($error, $lightness: -10%);
-      border-color: color.adjust($error, $lightness: -10%);
-      
-      &:hover:not(:disabled) {
-        background: $error;
-      }
-    }
-  }
+  .btnSecondary { background: $primary-50; color: $primary-600; border: 1.5px solid $primary-300; }
+  .btnDanger { background: $error; color: #fff; border: 1.5px solid $error; }
+  @include mobile-only { flex-direction: column; gap: 9px; .btn { width: 100%; } }
 }
 
-/* 이미지 슬라이더 */
-.imageSlider {
-  margin-bottom: $space-xl;
-  border-radius: $radius-lg;
-  overflow: hidden;
-  box-shadow: $shadow-md;
-}
-
-.imageContainer {
-  position: relative;
-  width: 100%;
-  background: $bg-secondary;
-
-  [data-theme="dark"] & {
-    background: $dark-bg-tertiary;
-  }
-}
-
-.mainImage {
-  width: 100%;
-  height: 400px;
-  object-fit: cover;
-  display: block;
-
-  @include mobile-only {
-    height: 250px;
-  }
-}
-
-.sliderBtn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  border: none;
-  padding: $space-sm $space-md;
-  cursor: pointer;
-  font-size: $font-size-lg;
-  border-radius: $radius-md;
-  transition: all $transition-base;
-  backdrop-filter: blur(4px);
-
-  &:hover:not(:disabled) {
-    background: rgba(0, 0, 0, 0.9);
-    transform: translateY(-50%) scale(1.05);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: translateY(-50%) scale(1);
-  }
-
-  &.prevBtn {
-    left: $space-md;
-  }
-
-  &.nextBtn {
-    right: $space-md;
-  }
-
-  @include mobile-only {
-    padding: $space-xs $space-sm;
-    font-size: $font-size-base;
-  }
-}
-
-.imageCounter {
-  position: absolute;
-  bottom: $space-md;
-  right: $space-md;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: $space-xs $space-sm;
-  border-radius: $radius-md;
-  font-size: $font-size-sm;
-  font-weight: $font-medium;
-  backdrop-filter: blur(4px);
-}
-
-.thumbList {
-  display: flex;
-  gap: $space-sm;
-  margin-top: $space-md;
-  justify-content: center;
-  flex-wrap: wrap;
-  padding: $space-sm;
-  background: $bg-secondary;
-
-  [data-theme="dark"] & {
-    background: $dark-bg-tertiary;
-  }
-}
-
-.thumbImg {
-  width: 80px;
-  height: 60px;
-  object-fit: cover;
-  border-radius: $radius-sm;
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: all $transition-base;
-
-  &:hover {
-    transform: scale(1.05);
-    border-color: color.adjust($primary-500, $lightness: 20%);
-  }
-
-  &.selected {
-    border-color: $primary-500;
-    transform: scale(1.1);
-  }
-
-  [data-theme="dark"] & {
-    &:hover {
-      border-color: color.adjust($primary-400, $lightness: 20%);
-    }
-    &.selected {
-      border-color: $primary-400;
-    }
-  }
-
-  @include mobile-only {
-    width: 60px;
-    height: 45px;
-  }
-}
-
-/* 일정 내용 */
-.scheduleContent {
-  margin-bottom: $space-xl;
-}
-
-.contentTitle {
-  font-size: $font-size-xl;
-  font-weight: $font-semibold;
-  color: $text-primary;
-  margin-bottom: $space-md;
-  display: flex;
-  align-items: center;
-  gap: $space-sm;
-
-  [data-theme="dark"] & {
-    color: $dark-text-primary;
-  }
-
-  @include mobile-only {
-    font-size: $font-size-lg;
-  }
-}
-
-.scheduleDesc {
-  background: $bg-secondary;
-  padding: $space-lg;
-  border-radius: $radius-lg;
-  border-left: 4px solid $primary-500;
-  line-height: $leading-relaxed;
-
-  p {
-    margin-bottom: $space-sm;
+/* 일정 설명 전체박스 */
+.scheduleDescSection {
+  margin-top: 0;
+  padding: 0 0 10px 0;
+  .sectionTitle {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 1.25em;
+    font-weight: 800;
+    margin-bottom: 18px;
     color: $text-primary;
-
-    &:last-child {
-      margin-bottom: 0;
+    svg, .icon { font-size: 1.2em; color: $primary-400; }
+    [data-theme="dark"] & { color: $dark-text-primary; }
+  }
+  .scheduleDateBox {
+    margin-bottom: 13px;
+    font-size: 1.05em;
+    color: $primary-500;
+    strong {
+      font-weight: 700;
+      margin-right: 8px;
+      color: $primary-400;
+      letter-spacing: -0.2px;
     }
-
+    .dateText {
+      color: $text-primary;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
     [data-theme="dark"] & {
-      color: $dark-text-primary;
+      color: $primary-300;
+      .dateText { color: $dark-text-primary; }
     }
   }
-
-  [data-theme="dark"] & {
-    background: $dark-bg-tertiary;
-    border-left-color: $primary-400;
-  }
-
-  @include mobile-only {
-    padding: $space-md;
-  }
-}
-
-/* 섹션 헤더 */
-.sectionHeader {
-  margin-bottom: $space-lg;
-  text-align: center;
-}
-
-.sectionTitle {
-  font-size: $font-size-xl;
-  font-weight: $font-semibold;
-  color: $text-primary;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: $space-sm;
-
-  [data-theme="dark"] & {
-    color: $dark-text-primary;
-  }
-
-  @include mobile-only {
-    font-size: $font-size-lg;
+  .descCard {
+    background: $primary-50;
+    border-radius: 15px;
+    padding: 18px 20px;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-left: 4px solid $primary-400;
+    box-shadow: 0 1px 10px 0 rgba(54,70,120,0.06);
+    min-height: 54px;
+    .descTitle {
+      font-weight: 700;
+      color: $primary-500;
+      font-size: 1.1em;
+      margin-bottom: 5px;
+      letter-spacing: -0.6px;
+    }
+    .descContent {
+      color: $text-primary;
+      font-size: 1em;
+      line-height: 1.65;
+      word-break: break-word;
+      white-space: pre-line;
+      [data-theme="dark"] & { color: $dark-text-primary; }
+    }
+    [data-theme="dark"] & {
+      background: $dark-bg-tertiary;
+      border-left-color: $primary-300;
+    }
   }
 }
 
 /* 뒤로가기 버튼 */
 .backButtonContainer {
   text-align: center;
-  margin-bottom: $space-xl;
-}
-
-.btnOutline {
-  @include button-outline;
-  font-size: $font-size-base;
-  font-weight: $font-medium;
-  border-radius: $radius-md;
-  min-width: 160px;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: $shadow-sm;
-  }
-
-  @include mobile-only {
-    width: 100%;
-    max-width: 300px;
+  margin-bottom: 18px;
+  .btnOutline {
+    border-radius: 10px;
+    font-weight: 700;
+    min-width: 170px;
+    font-size: 1em;
   }
 }
 
-.btnPrimary {
-  @include button-primary;
-  font-size: $font-size-base;
-  font-weight: $font-semibold;
-  border-radius: $radius-md;
-  min-width: 200px;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: $shadow-md;
-  }
-
-  @include mobile-only {
-    width: 100%;
-    max-width: 300px;
-  }
-}
-
-/* 빈 상태 */
-.emptyState {
-  text-align: center;
-  padding: $space-3xl;
-  color: $text-secondary;
-
-  .emptyStateIcon {
-    font-size: $font-size-4xl;
-    margin-bottom: $space-md;
-    opacity: 0.5;
-  }
-
-  h2 {
-    font-size: $font-size-2xl;
-    color: $text-primary;
-    margin-bottom: $space-md;
-
-    [data-theme="dark"] & {
-      color: $dark-text-primary;
-    }
-  }
-
-  p {
-    margin-bottom: $space-lg;
-    font-size: $font-size-lg;
-
-    [data-theme="dark"] & {
-      color: $dark-text-secondary;
-    }
-  }
-
-  [data-theme="dark"] & {
-    color: $dark-text-secondary;
-  }
-}
-
-/* 애니메이션 */
-.card {
-  @include slide-up;
-  animation-delay: 0.1s;
-}
-
-.imageSlider {
-  @include fade-in;
-  animation-delay: 0.2s;
-}
-
-/* 접근성 */
-.sliderBtn,
-.thumbImg,
-.btnSecondary,
-.btnDanger,
-.btnOutline,
-.btnPrimary {
-  &:focus-visible {
-    outline: 2px solid $primary-500;
-    outline-offset: 2px;
-  }
-}
-
-/* 반응형 최적화 */
+/* 반응형 */
 @include mobile-only {
-  .scheduleDetailRoot {
-    padding-left: $space-sm;
-    padding-right: $space-sm;
-  }
-
-  .scheduleMeta {
-    font-size: $font-size-sm;
-  }
+  .card { padding: 11vw 2vw 18vw 2vw; }
+  .scheduleDescSection { .descCard { padding: 14px 8px; } }
 }

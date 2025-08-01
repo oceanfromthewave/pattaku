@@ -17,8 +17,6 @@ export default function ScheduleDetail({ isLogin }) {
   const username = localStorage.getItem('username');
   const userId = localStorage.getItem('userId');
   const navigate = useNavigate();
-
-  // 이미지 슬라이더 상태
   const [imgIdx, setImgIdx] = useState(0);
 
   useEffect(() => {
@@ -35,11 +33,10 @@ export default function ScheduleDetail({ isLogin }) {
         setLoading(false);
       }
     };
-
     fetchSchedule();
   }, [scheduleId]);
 
-  // 작성자 여부 확인
+  // 작성자 여부
   const isAuthor = isLogin && schedule && (
     String(schedule.user_id) === String(userId) || 
     schedule.author === username
@@ -48,7 +45,6 @@ export default function ScheduleDetail({ isLogin }) {
   // 삭제 처리
   const handleDelete = async () => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
-    
     setDeleting(true);
     try {
       await deleteSchedule(scheduleId);
@@ -86,18 +82,17 @@ export default function ScheduleDetail({ isLogin }) {
     scheduleDateText = formatDate(schedule?.created_at);
   }
 
-  // 이미지 URL 처리
+  // 이미지 URL
   const getImageUrl = (img) => {
     if (!img) return '';
     return img.startsWith('http') ? img : `${UPLOADS_URL}/${img.replace(/^\/?uploads\/?/, '')}`;
   };
 
   // 이미지 네비게이션
+  const images = schedule?.images || [];
   const handlePrevImage = () => setImgIdx(i => Math.max(i - 1, 0));
   const handleNextImage = () => setImgIdx(i => Math.min(i + 1, images.length - 1));
   const handleThumbClick = (idx) => setImgIdx(idx);
-
-  const images = schedule?.images || [];
 
   if (loading) return <Loading message="일정을 불러오는 중..." />;
 
@@ -127,26 +122,20 @@ export default function ScheduleDetail({ isLogin }) {
       <div className={styles.card}>
         {/* 헤더 */}
         <div className={styles.scheduleHeader}>
-          <h1 className={styles.scheduleTitle}>
-            📅 {schedule.title}
-          </h1>
-          <div className={styles.scheduleMeta}>
-            <div className={styles.metaItem}>
-              <span className={styles.scheduleAuthor}>
-                👤 {schedule.author_nickname || schedule.author}
-              </span>
-            </div>
-            {schedule.vote_count > 0 && (
-              <div className={styles.metaItem}>
-                <span className={styles.scheduleVotes}>
-                  🗳️ {schedule.vote_count}명 참여
-                </span>
-              </div>
-            )}
+          {/* 썸네일/아바타/이니셜 */}
+          <div className={styles.avatar}>
+            {schedule.title?.charAt(0) || "📅"}
+          </div>
+          <div className={styles.scheduleTitle}>
+            {schedule.title}
+          </div>
+          <div className={styles.author}>
+            <span>👤</span>
+            {schedule.author_nickname || schedule.author}
           </div>
         </div>
 
-        {/* 수정/삭제 버튼 (작성자만) */}
+        {/* 액션 버튼 (작성자만) */}
         {isAuthor && (
           <div className={styles.scheduleActions}>
             <button 
@@ -166,6 +155,8 @@ export default function ScheduleDetail({ isLogin }) {
           </div>
         )}
 
+        <hr />
+
         {/* 이미지 슬라이더 */}
         {images.length > 0 && (
           <div className={styles.imageSlider}>
@@ -180,13 +171,11 @@ export default function ScheduleDetail({ isLogin }) {
                   ◀
                 </button>
               )}
-              
               <img
                 src={getImageUrl(images[imgIdx])}
                 alt="일정 이미지"
                 className={styles.mainImage}
               />
-              
               {images.length > 1 && (
                 <button
                   disabled={imgIdx === images.length - 1}
@@ -197,14 +186,12 @@ export default function ScheduleDetail({ isLogin }) {
                   ▶
                 </button>
               )}
-              
               {images.length > 1 && (
                 <div className={styles.imageCounter}>
                   {imgIdx + 1} / {images.length}
                 </div>
               )}
             </div>
-            
             {images.length > 1 && (
               <div className={styles.thumbList}>
                 {images.map((img, idx) => (
@@ -223,24 +210,24 @@ export default function ScheduleDetail({ isLogin }) {
           </div>
         )}
 
-        {/* 일정 날짜 + 일정 내용 */}
-        <div className={styles.scheduleContent}>
-          <h3 className={styles.contentTitle}>📝 일정 설명</h3>
-          <div className={styles.scheduleDateDescBox}>
-            <div className={styles.scheduleDateBox}>
-              <strong>일정 날짜</strong>
-              <div className={styles.scheduleDateText}>
-                {scheduleDateText}
-              </div>
+        {/* 일정 설명 영역 */}
+        <div className={styles.scheduleDescSection}>
+          <div className={styles.sectionTitle}>
+            <span role="img" aria-label="설명">📝</span> 일정 설명
+          </div>
+          <div className={styles.scheduleDateBox}>
+            <strong>일정 날짜</strong>
+            <span className={styles.dateText}>{scheduleDateText}</span>
+          </div>
+          <div className={styles.descCard}>
+            <div className={styles.descTitle}>일정 내용</div>
+            <div className={styles.descContent}>
+              {schedule.desc ? (
+                schedule.desc.split('\n').map((line, idx) => <p key={idx}>{line || '\u00A0'}</p>)
+              ) : (
+                <span className={styles.textSecondary}>내용이 없습니다.</span>
+              )}
             </div>
-            {schedule.desc && (
-              <div className={styles.scheduleDesc}>
-                <strong>일정 내용</strong>
-                {schedule.desc.split('\n').map((line, index) => (
-                  <p key={index}>{line || '\u00A0'}</p>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>
