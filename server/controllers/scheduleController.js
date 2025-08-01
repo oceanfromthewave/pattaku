@@ -12,7 +12,7 @@ exports.getSchedules = async (req, res) => {
     // 검색 조건 구성
     let whereClause = "WHERE 1=1";
     let queryParams = [];
-    
+
     if (search) {
       whereClause += " AND (s.title LIKE ? OR s.desc LIKE ?)";
       queryParams.push(`%${search}%`, `%${search}%`);
@@ -20,7 +20,7 @@ exports.getSchedules = async (req, res) => {
 
     // 정렬 조건
     let orderClause = "ORDER BY s.created_at DESC";
-    if (sort === 'old') {
+    if (sort === "old") {
       orderClause = "ORDER BY s.created_at ASC";
     }
 
@@ -31,7 +31,10 @@ exports.getSchedules = async (req, res) => {
       LEFT JOIN users u ON s.user_id = u.id
       ${whereClause}
     `;
-    const countResult = await scheduleModel.getAllWithPaginationAsync(countQuery, queryParams);
+    const countResult = await scheduleModel.getAllWithPaginationAsync(
+      countQuery,
+      queryParams
+    );
     const total = countResult[0].total;
 
     // 스케줄 목록 조회 (이미지 및 투표 수 포함)
@@ -52,27 +55,29 @@ exports.getSchedules = async (req, res) => {
       ${orderClause}
       LIMIT ? OFFSET ?
     `;
-    
+
     const schedules = await scheduleModel.getAllWithPaginationAsync(
-      schedulesQuery, 
+      schedulesQuery,
       [...queryParams, limit, offset]
     );
-    
+
     // 각 스케줄에 이미지 추가
     for (const schedule of schedules) {
       const images = await scheduleModel.getImagesAsync(schedule.id);
-      schedule.images = images.map(image => `${req.protocol}://${req.get('host')}${image}`);
+      schedule.images = images.map(
+        (image) => `${req.protocol}://${req.get("host")}${image}`
+      );
     }
-    
+
     const totalPages = Math.ceil(total / limit);
-    
+
     res.json({
       schedules,
       currentPage: page,
       totalPages,
       total,
       hasNext: page < totalPages,
-      hasPrev: page > 1
+      hasPrev: page > 1,
     });
   } catch (err) {
     console.error(err);
@@ -93,16 +98,21 @@ exports.getScheduleDetail = async (req, res) => {
 
 // 일정 등록 + 이미지(여러장)
 exports.createScheduleWithImages = async (req, res) => {
-  const { title, date, desc } = req.body;
-  const user_id = req.user.id;
-  if (!title || !date) {
-    return res.status(400).json({ error: "제목과 날짜는 필수입니다." });
-  }
-  // 업로드된 이미지 파일 URL 배열 추출 (확장자까지)
-  const imageUrls = (req.files || []).map(
-    (file) => `/uploads/${path.basename(file.path)}`
-  );
   try {
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files);
+    console.log("USER:", req.user);
+
+    const { title, date, desc } = req.body;
+    const user_id = req.user?.id;
+    if (!user_id) return res.status(401).json({ error: "로그인 필요" });
+    if (!title || !date) {
+      return res.status(400).json({ error: "제목과 날짜는 필수입니다." });
+    }
+    // 업로드된 이미지 파일 URL 배열 추출 (확장자까지)
+    const imageUrls = (req.files || []).map(
+      (file) => `/uploads/${path.basename(file.path)}`
+    );
     const id = await scheduleModel.createAsync({
       user_id,
       title,
@@ -112,6 +122,7 @@ exports.createScheduleWithImages = async (req, res) => {
     });
     res.status(201).json({ message: "일정 등록 성공", id });
   } catch (err) {
+    console.error("등록 에러:", err);
     res.status(500).json({ error: "일정 등록 실패" });
   }
 };
@@ -121,11 +132,11 @@ exports.updateSchedule = async (req, res) => {
   const id = req.params.id;
   const user_id = req.user.id;
   const { title, desc, existingImages } = req.body;
-  
+
   if (!title) {
     return res.status(400).json({ error: "제목은 필수입니다." });
   }
-  
+
   // 권한 체크
   const owner = await scheduleModel.getOwnerAsync(id);
   if (!owner) return res.status(404).json({ error: "일정이 없음" });
@@ -139,27 +150,27 @@ exports.updateSchedule = async (req, res) => {
       try {
         finalImages = JSON.parse(existingImages);
       } catch (e) {
-        console.error('기존 이미지 파싱 오류:', e);
+        console.error("기존 이미지 파싱 오류:", e);
         finalImages = [];
       }
     }
-    
+
     // 새로 업로드된 이미지 추가
     const newImageUrls = (req.files || []).map(
       (file) => `/uploads/${path.basename(file.path)}`
     );
     finalImages = [...finalImages, ...newImageUrls];
-    
+
     // 일정 정보 업데이트
-    await scheduleModel.updateWithImagesAsync(id, { 
-      title, 
-      desc, 
-      imageUrls: finalImages 
+    await scheduleModel.updateWithImagesAsync(id, {
+      title,
+      desc,
+      imageUrls: finalImages,
     });
-    
+
     res.json({ message: "일정 수정 성공" });
   } catch (err) {
-    console.error('일정 수정 오류:', err);
+    console.error("일정 수정 오류:", err);
     res.status(500).json({ error: "일정 수정 실패" });
   }
 };
