@@ -114,6 +114,12 @@ function Header() {
             >
               📅 일정
             </Link>
+            <Link 
+              to="/chat" 
+              className={`${styles.navLink} ${isActivePath('/chat') ? styles.active : ''}`}
+            >
+              💬 채팅
+            </Link>
           </nav>
 
           {/* 우측 메뉴 */}
@@ -205,6 +211,13 @@ function Header() {
             onClick={closeMobileMenu}
           >
             📅 일정
+          </Link>
+          <Link 
+            to="/chat" 
+            className={styles.mobileNavLink}
+            onClick={closeMobileMenu}
+          >
+            💬 채팅
           </Link>
           
           {isLoggedIn ? (

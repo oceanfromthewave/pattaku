@@ -13,7 +13,9 @@ const scheduleRoutes = require("./routes/schedule");
 const scheduleVoteRoutes = require("./routes/scheduleVote");
 const scheduleCommentRoutes = require("./routes/scheduleComment");
 const notificationRoutes = require("./routes/notificationRoutes");
+const chatRoutes = require("./routes/chatRoutes");
 const SocketHandler = require("./socketHandler");
+const ChatSocketHandler = require("./socket/chatSocketHandler");
 
 const app = express();
 const server = http.createServer(app);
@@ -35,7 +37,9 @@ const io = new Server(server, {
 });
 
 const socketHandler = new SocketHandler(io);
+const chatSocketHandler = new ChatSocketHandler(io);
 app.set("socketHandler", socketHandler);
+app.set("chatSocketHandler", chatSocketHandler);
 
 const PORT = process.env.PORT || 5000;
 
@@ -82,6 +86,7 @@ app.use("/api/schedules", scheduleRoutes);
 app.use("/api/schedules", scheduleVoteRoutes);
 app.use("/api/schedules", scheduleCommentRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/chat", chatRoutes);
 
 // --- WebSocket(ws) 서버 추가 ---
 const WebSocket = require("ws");

@@ -53,11 +53,12 @@ exports.registerUser = async (req, res) => {
 exports.getMyProfile = async (req, res) => {
   const userId = req.user?.id;
   if (!userId) return res.status(401).json({ error: "로그인 필요" });
-  
+
   try {
     const user = await userModel.findByIdAsync(userId);
-    if (!user) return res.status(404).json({ error: "사용자를 찾을 수 없습니다." });
-    
+    if (!user)
+      return res.status(404).json({ error: "사용자를 찾을 수 없습니다." });
+
     // 비밀번호 제외하고 반환
     const { password, ...userInfo } = user;
     res.json(userInfo);
@@ -71,17 +72,17 @@ exports.getMyProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   const userId = req.user?.id;
   const { nickname, email } = req.body;
-  
+
   if (!userId) return res.status(401).json({ error: "로그인 필요" });
   if (!nickname) return res.status(400).json({ error: "닉네임은 필수입니다." });
-  
+
   try {
     // 닉네임 중복 체크 (본인 제외)
     const existingUser = await userModel.findByNicknameAsync(nickname);
     if (existingUser && existingUser.id !== userId) {
       return res.status(409).json({ error: "이미 사용중인 닉네임입니다." });
     }
-    
+
     // 이메일 중복 체크 (본인 제외)
     if (email) {
       const existingEmail = await userModel.findByEmailAsync(email);
@@ -89,7 +90,7 @@ exports.updateProfile = async (req, res) => {
         return res.status(409).json({ error: "이미 사용중인 이메일입니다." });
       }
     }
-    
+
     await userModel.updateProfileAsync(userId, { nickname, email });
     res.json({ message: "프로필이 업데이트되었습니다." });
   } catch (err) {
@@ -102,26 +103,34 @@ exports.updateProfile = async (req, res) => {
 exports.changePassword = async (req, res) => {
   const userId = req.user?.id;
   const { currentPassword, newPassword } = req.body;
-  
+
   if (!userId) return res.status(401).json({ error: "로그인 필요" });
   if (!currentPassword || !newPassword) {
-    return res.status(400).json({ error: "현재 비밀번호와 새 비밀번호를 입력해주세요." });
+    return res
+      .status(400)
+      .json({ error: "현재 비밀번호와 새 비밀번호를 입력해주세요." });
   }
-  
+
   try {
     const user = await userModel.findByIdAsync(userId);
-    if (!user) return res.status(404).json({ error: "사용자를 찾을 수 없습니다." });
-    
+    if (!user)
+      return res.status(404).json({ error: "사용자를 찾을 수 없습니다." });
+
     // 현재 비밀번호 확인
-    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    const isValidPassword = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
     if (!isValidPassword) {
-      return res.status(400).json({ error: "현재 비밀번호가 올바르지 않습니다." });
+      return res
+        .status(400)
+        .json({ error: "현재 비밀번호가 올바르지 않습니다." });
     }
-    
+
     // 새 비밀번호 해시화
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     await userModel.updatePasswordAsync(userId, hashedNewPassword);
-    
+
     res.json({ message: "비밀번호가 변경되었습니다." });
   } catch (err) {
     console.error("비밀번호 변경 에러:", err);
@@ -134,9 +143,9 @@ exports.getMyPosts = async (req, res) => {
   const userId = req.user?.id;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  
+
   if (!userId) return res.status(401).json({ error: "로그인 필요" });
-  
+
   try {
     const result = await postModel.getByUserIdAsync(userId, page, limit);
     res.json(result);
@@ -151,9 +160,9 @@ exports.getMyComments = async (req, res) => {
   const userId = req.user?.id;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  
+
   if (!userId) return res.status(401).json({ error: "로그인 필요" });
-  
+
   try {
     const result = await commentModel.getByUserIdAsync(userId, page, limit);
     res.json(result);
@@ -163,28 +172,32 @@ exports.getMyComments = async (req, res) => {
   }
 };
 
-
-
 // 잘못된 프로필 이미지 경로 정리 (관리용)
 exports.cleanupInvalidProfileImages = async (req, res) => {
   try {
     const users = await userModel.getAllAsync();
     let cleanedCount = 0;
-    
+
     for (const user of users) {
       if (user.profileImage) {
-        const imagePath = path.join(__dirname, '..', user.profileImage.replace(/^//, ''));
+        const imagePath = path.join(
+          __dirname,
+          "..",
+          user.profileImage.replace(/^\/+/, "")
+        );
         if (!fs.existsSync(imagePath)) {
-          console.log(`🧹 정리 중: 사용자 ${user.id} - 존재하지 않는 이미지 ${user.profileImage}`);
+          console.log(
+            `🧹 정리 중: 사용자 ${user.id} - 존재하지 않는 이미지 ${user.profileImage}`
+          );
           await userModel.deleteProfileImageAsync(user.id);
           cleanedCount++;
         }
       }
     }
-    
-    res.json({ 
+
+    res.json({
       message: "프로필 이미지 정리 완료",
-      cleanedCount: cleanedCount
+      cleanedCount: cleanedCount,
     });
   } catch (err) {
     console.error("프로필 이미지 정리 에러:", err);
@@ -195,9 +208,9 @@ exports.cleanupInvalidProfileImages = async (req, res) => {
 // 활동 통계
 exports.getMyStats = async (req, res) => {
   const userId = req.user?.id;
-  
+
   if (!userId) return res.status(401).json({ error: "로그인 필요" });
-  
+
   try {
     const stats = await userModel.getUserStatsAsync(userId);
     res.json(stats);
@@ -210,9 +223,9 @@ exports.getMyStats = async (req, res) => {
 // 프로필 이미지 업로드
 exports.uploadProfileImage = async (req, res) => {
   const userId = req.user?.id;
-  
+
   if (!userId) return res.status(401).json({ error: "로그인 필요" });
-  
+
   try {
     if (!req.file) {
       return res.status(400).json({ error: "이미지 파일이 필요합니다." });
@@ -226,17 +239,17 @@ exports.uploadProfileImage = async (req, res) => {
 
     // 새 이미지 경로 생성 (정적 파일 서빙을 위한 URL)
     const imageUrl = `/uploads/profiles/${req.file.filename}`;
-    
+
     // 데이터베이스에 이미지 경로 저장
     await userModel.updateProfileImageAsync(userId, imageUrl);
-    
-    res.json({ 
+
+    res.json({
       message: "프로필 사진이 업로드되었습니다.",
-      imageUrl: imageUrl
+      imageUrl: imageUrl,
     });
   } catch (err) {
     console.error("이미지 업로드 에러:", err);
-    
+
     // 업로드된 파일 삭제 (에러 발생시)
     if (req.file) {
       try {
@@ -245,7 +258,7 @@ exports.uploadProfileImage = async (req, res) => {
         console.error("임시 파일 삭제 실패:", deleteErr);
       }
     }
-    
+
     res.status(500).json({ error: "이미지 업로드 실패" });
   }
 };
@@ -253,23 +266,23 @@ exports.uploadProfileImage = async (req, res) => {
 // 프로필 이미지 삭제
 exports.deleteProfileImage = async (req, res) => {
   const userId = req.user?.id;
-  
+
   if (!userId) return res.status(401).json({ error: "로그인 필요" });
-  
+
   try {
     // 현재 프로필 이미지 경로 조회
     const currentImagePath = await userModel.getProfileImageAsync(userId);
-    
+
     if (!currentImagePath) {
       return res.status(400).json({ error: "삭제할 프로필 사진이 없습니다." });
     }
-    
+
     // 데이터베이스에서 이미지 경로 삭제
     await userModel.deleteProfileImageAsync(userId);
-    
+
     // 실제 파일 삭제
     deleteOldProfileImage(currentImagePath);
-    
+
     res.json({ message: "프로필 사진이 삭제되었습니다." });
   } catch (err) {
     console.error("이미지 삭제 에러:", err);
