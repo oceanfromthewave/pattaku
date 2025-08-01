@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:production": "cp .env.production .env && vite build",
+    "build:production": "copy .env.production .env && vite build",
     "deploy": "npm run build:production && aws s3 sync ./dist s3://pattaku --delete",
     "lint": "eslint .",
     "preview": "vite preview"
