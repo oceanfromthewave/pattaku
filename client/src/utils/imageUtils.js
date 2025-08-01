@@ -39,6 +39,31 @@ export const getProfileImageUrl = (imagePath) => {
 };
 
 /**
+ * 프로필 이미지 URL 유효성 검사 및 대체 처리
+ * @param {string} imagePath - 원본 이미지 경로  
+ * @returns {Promise<string|null>} - 유효한 이미지 URL 또는 null
+ */
+export const validateProfileImageUrl = async (imagePath) => {
+  if (!imagePath) return null;
+  
+  const url = getProfileImageUrl(imagePath);
+  if (!url) return null;
+  
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    if (response.ok) {
+      return url;
+    } else {
+      console.warn('⚠️ 프로필 이미지 접근 불가:', url, 'Status:', response.status);
+      return null;
+    }
+  } catch (error) {
+    console.warn('⚠️ 프로필 이미지 검증 실패:', url, error.message);
+    return null;
+  }
+};
+
+/**
  * 이미지 로드 오류 시 기본 이미지 또는 플레이스홀더 반환
  * @param {string} imagePath - 원본 이미지 경로
  * @returns {string} - 대체 이미지 URL 또는 null

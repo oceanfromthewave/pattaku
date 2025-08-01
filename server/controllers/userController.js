@@ -163,6 +163,35 @@ exports.getMyComments = async (req, res) => {
   }
 };
 
+
+
+// 잘못된 프로필 이미지 경로 정리 (관리용)
+exports.cleanupInvalidProfileImages = async (req, res) => {
+  try {
+    const users = await userModel.getAllAsync();
+    let cleanedCount = 0;
+    
+    for (const user of users) {
+      if (user.profileImage) {
+        const imagePath = path.join(__dirname, '..', user.profileImage.replace(/^//, ''));
+        if (!fs.existsSync(imagePath)) {
+          console.log(`🧹 정리 중: 사용자 ${user.id} - 존재하지 않는 이미지 ${user.profileImage}`);
+          await userModel.deleteProfileImageAsync(user.id);
+          cleanedCount++;
+        }
+      }
+    }
+    
+    res.json({ 
+      message: "프로필 이미지 정리 완료",
+      cleanedCount: cleanedCount
+    });
+  } catch (err) {
+    console.error("프로필 이미지 정리 에러:", err);
+    res.status(500).json({ error: "정리 작업 실패" });
+  }
+};
+
 // 활동 통계
 exports.getMyStats = async (req, res) => {
   const userId = req.user?.id;

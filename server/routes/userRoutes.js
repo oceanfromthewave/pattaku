@@ -21,4 +21,7 @@ router.get("/stats", auth, userController.getMyStats);
 router.post("/profile/image", auth, uploadProfileImage.single('profileImage'), userController.uploadProfileImage);
 router.delete("/profile/image", auth, userController.deleteProfileImage);
 
+// 관리용 - 잘못된 프로필 이미지 정리
+router.post("/cleanup-images", userController.cleanupInvalidProfileImages);
+
 module.exports = router;

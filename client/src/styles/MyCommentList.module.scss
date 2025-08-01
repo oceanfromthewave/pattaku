@@ -157,52 +157,52 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* 비었을 때 */
-  .emptyState {
-    text-align: center;
-    padding: 3rem 0 2rem 0;
-    color: $text-secondary;
-
-    .emptyIcon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      opacity: 0.5;
-    }
-    .emptyText {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-      color: $text-primary;
-    }
-    .emptySub {
-      font-size: 0.97rem;
-      margin-bottom: 1.3rem;
-      opacity: 0.88;
-    }
-    .writeBtn {
-      background: $primary-500;
-      color: white;
-      font-weight: 600;
-      font-size: $font-size-base;
-      padding: 0.7em 1.6em;
-      border-radius: $radius-lg;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6em;
-      text-decoration: none;
-      transition: background 0.13s, transform 0.12s;
-      box-shadow: $shadow-md;
-      &:hover {
-        background: $primary-600;
-        transform: translateY(-1px) scale(1.01);
-      }
-    }
-  }
-
   .paginationWrap {
     margin-top: 2rem;
     display: flex;
     justify-content: center;
+  }
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem 0 2rem 0;
+  color: $text-secondary;
+  [data-theme="dark"] & { color: $dark-text-secondary; }
+  .emptyIcon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.45;
+  }
+  .emptyText {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    color: $text-primary;
+    [data-theme="dark"] & { color: $dark-text-primary; }
+  }
+  .emptySub {
+    font-size: 0.94rem;
+    margin-bottom: 1.3rem;
+    opacity: 0.88;
+  }
+  .writeBtn {
+    background: $primary-500;
+    color: white;
+    font-weight: 600;
+    font-size: $font-size-base;
+    padding: 0.75em 1.6em;
+    border-radius: $radius-lg;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6em;
+    text-decoration: none;
+    transition: background 0.14s, transform 0.12s;
+    box-shadow: $shadow-md;
+    &:hover {
+      background: $primary-600;
+      transform: translateY(-1px) scale(1.01);
+    }
   }
 }
 

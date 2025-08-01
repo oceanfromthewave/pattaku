@@ -9,6 +9,7 @@ function Header() {
   const { isLoggedIn, userInfo, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [profileImageError, setProfileImageError] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -21,6 +22,11 @@ function Header() {
     setIsDarkMode(isDark);
     document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
   }, []);
+
+  // userInfo가 변경될 때마다 프로필 이미지 에러 상태 초기화
+  useEffect(() => {
+    setProfileImageError(false);
+  }, [userInfo?.profileImage]);
 
   const handleLogout = () => {
     logout();
@@ -44,6 +50,38 @@ function Header() {
 
   const isActivePath = (path) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
+  };
+
+  const handleProfileImageError = (e) => {
+    console.warn('⚠️ 헤더 프로필 이미지 로드 실패:', userInfo?.profileImage);
+    setProfileImageError(true);
+    // 이미지 숨기기
+    e.target.style.display = 'none';
+  };
+
+  const renderAvatar = () => {
+    const hasValidImage = userInfo?.profileImage && !profileImageError;
+    
+    if (hasValidImage) {
+      return (
+        <>
+          <img 
+            src={getProfileImageUrl(userInfo.profileImage)} 
+            alt="프로필" 
+            className={styles.avatarImage}
+            onError={handleProfileImageError}
+            onLoad={() => setProfileImageError(false)}
+          />
+          {profileImageError && (
+            <span className={styles.avatarFallback}>
+              {userInfo?.nickname?.charAt(0) || '👤'}
+            </span>
+          )}
+        </>
+      );
+    }
+    
+    return userInfo?.nickname?.charAt(0) || '👤';
   };
 
   return (
@@ -99,20 +137,7 @@ function Header() {
               <div className={styles.userProfile}>
                 <Link to="/mypage" className={styles.profileLink}>
                   <div className={styles.avatar}>
-                    {userInfo?.profileImage ? (
-                      <img 
-                        src={getProfileImageUrl(userInfo.profileImage)} 
-                        alt="프로필" 
-                        className={styles.avatarImage}
-                        onError={(e) => {
-                          console.error('❌ 헤더 이미지 로드 실패:', userInfo.profileImage);
-                          e.target.style.display = 'none';
-                          e.target.parentNode.textContent = userInfo?.nickname?.charAt(0) || '👤';
-                        }}
-                      />
-                    ) : (
-                      userInfo?.nickname?.charAt(0) || '👤'
-                    )}
+                    {renderAvatar()}
                   </div>
                   <span className={styles.username}>{userInfo?.nickname || '사용자'}</span>
                 </Link>
