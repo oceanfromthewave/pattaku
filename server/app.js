@@ -19,7 +19,14 @@ const app = express();
 const server = http.createServer(app); // http 서버 생성
 const io = new Server(server, {
   cors: {
-    origin: "*", // 클라이언트 주소에 맞게 변경 필요
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173", 
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:3000",
+      "http://pattaku.s3-website-ap-southeast-2.amazonaws.com",
+      "https://pattaku.s3-website-ap-southeast-2.amazonaws.com"
+    ],
     methods: ["GET", "POST"],
   },
 }); // Socket.io 서버 생성
@@ -33,7 +40,14 @@ const PORT = process.env.PORT || 5000;
 
 // CORS 설정
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000'],
+  origin: [
+    'http://localhost:3000', 
+    'http://localhost:5173', 
+    'http://127.0.0.1:5173', 
+    'http://127.0.0.1:3000',
+    'http://pattaku.s3-website-ap-southeast-2.amazonaws.com',
+    'https://pattaku.s3-website-ap-southeast-2.amazonaws.com'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
