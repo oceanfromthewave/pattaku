@@ -17,6 +17,7 @@ import LoginForm from './components/Auth/LoginForm';
 import RegisterForm from './components/Auth/RegisterForm';
 import ErrorBoundary from './components/ErrorBoundary';
 import TokenExpiredModal from './components/TokenExpiredModal';
+import DebugApiConfig from './components/DebugApiConfig';
 import './styles/main.scss';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -102,6 +103,9 @@ function App() {
         isOpen={showTokenExpiredModal}
         onConfirm={handleTokenExpiredConfirm}
       />
+      
+      {/* API 설정 디버깅 (개발환경에서만) */}
+      <DebugApiConfig />
     </div>
   );
 }

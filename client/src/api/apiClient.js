@@ -1,5 +1,7 @@
 import axios from 'axios';
-import { API_BASE_URL } from './config';
+
+// 강제 하드코딩된 API URL
+const FORCE_API_URL = 'https://pattaku.onrender.com';
 
 // AuthContext에서 토큰 만료 함수를 가져오기 위한 전역 변수
 let showTokenExpiredFunction = null;
@@ -9,10 +11,12 @@ export const setTokenExpiredHandler = (handler) => {
   showTokenExpiredFunction = handler;
 };
 
-// Axios 인스턴스 생성
+console.log('🔗 API 클라이언트 설정:', FORCE_API_URL);
+
+// Axios 인스턴스 생성 - 강제 URL 사용
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 30000, // 30초로 증가
+  baseURL: FORCE_API_URL,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -26,10 +30,8 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // 개발환경에서만 요청 로그
-    if (import.meta.env.DEV) {
-      console.log('API 요청:', `${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
-    }
+    // 모든 요청에 대해 URL 확인 로그
+    console.log('🌐 API 요청 URL:', `${config.baseURL}${config.url}`);
     
     return config;
   },
@@ -42,23 +44,20 @@ apiClient.interceptors.request.use(
 // 응답 인터셉터 - 에러 처리
 apiClient.interceptors.response.use(
   (response) => {
-    // 개발환경에서만 응답 로그
-    if (import.meta.env.DEV) {
-      console.log('API 응답 성공:', response.status, response.config.url);
-    }
+    console.log('✅ API 응답 성공:', response.status, response.config.url);
     return response;
   },
   (error) => {
     const requestUrl = error.config?.url || 'unknown';
     const requestMethod = error.config?.method?.toUpperCase() || 'unknown';
     
-    console.error('API 응답 오류:', {
+    console.error('❌ API 응답 오류:', {
       method: requestMethod,
       url: requestUrl,
       status: error.response?.status,
       statusText: error.response?.statusText,
       message: error.message,
-      fullUrl: `${API_BASE_URL}${requestUrl}`
+      fullUrl: `${FORCE_API_URL}${requestUrl}`
     });
     
     if (error.response?.status === 401) {

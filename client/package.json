@@ -6,11 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:production": "cross-env NODE_ENV=production VITE_API_URL=https://pattaku.onrender.com VITE_UPLOADS_URL=https://pattaku.onrender.com/uploads VITE_WS_URL=wss://pattaku.onrender.com vite build",
+    "build:production": "cross-env NODE_ENV=production vite build --mode production",
     "build:s3": "npm run build:production",
     "deploy": "npm run build:s3 && aws s3 sync ./dist s3://pattaku --delete",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "clean": "rm -rf dist",
+    "rebuild": "npm run clean && npm run build:production"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
