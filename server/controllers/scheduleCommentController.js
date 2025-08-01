@@ -2,7 +2,7 @@ const scheduleCommentModel = require("../models/scheduleCommentModel");
 
 // 댓글 목록 조회
 exports.list = async (req, res) => {
-  const schedule_id = req.params.id;
+  const schedule_id = req.params.scheduleId;
   const user_id = req.user?.id || null;
 
   try {
@@ -33,7 +33,7 @@ exports.list = async (req, res) => {
 
 // 댓글 등록
 exports.create = async (req, res) => {
-  const schedule_id = req.params.id;
+  const schedule_id = req.params.scheduleId;
   const user_id = req.user.id;
   const { content, parentId } = req.body;
 

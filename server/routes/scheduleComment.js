@@ -38,36 +38,36 @@ const upload = multer({
 });
 
 // 일정별 댓글 목록 (로그인 선택사항)
-router.get("/:id/comments", scheduleCommentController.list);
+router.get("/:scheduleId/comments", scheduleCommentController.list);
 
 // 댓글 등록 (로그인 필요, 파일 업로드 선택)
 router.post(
-  "/:id/comments",
+  "/:scheduleId/comments",
   auth,
   upload.single("file"),
   scheduleCommentController.create
 );
 
 // 댓글 수정 (작성자만 가능)
-router.put("/:id/comments/:commentId", auth, scheduleCommentController.update);
+router.put("/:scheduleId/comments/:commentId", auth, scheduleCommentController.update);
 
 // 댓글 삭제 (작성자만 가능)
 router.delete(
-  "/:id/comments/:commentId",
+  "/:scheduleId/comments/:commentId",
   auth,
   scheduleCommentController.remove
 );
 
 // 댓글 좋아요
 router.post(
-  "/:id/comments/:commentId/like",
+  "/:scheduleId/comments/:commentId/like",
   auth,
   scheduleCommentController.like
 );
 
 // 댓글 싫어요
 router.post(
-  "/:id/comments/:commentId/dislike",
+  "/:scheduleId/comments/:commentId/dislike",
   auth,
   scheduleCommentController.dislike
 );
@@ -78,7 +78,7 @@ router.use((error, req, res, next) => {
     if (error.code === "LIMIT_FILE_SIZE") {
       return res
         .status(400)
-        .json({ error: "파일 크기는 5MB 이하여야 합니다." });
+        .json({ error: "파일 크기는 5MB 이하여야 입니다." });
     }
     return res.status(400).json({ error: "파일 업로드 오류가 발생했습니다." });
   }

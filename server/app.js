@@ -88,12 +88,17 @@ const WebSocket = require("ws");
 const wsMap = require("./wsNotificationMap");
 const wss = new WebSocket.Server({ server });
 wss.on("connection", (ws, req) => {
-  // 쿼리스트링에서 userId 추출
+  // 쿼리스트링에서 userId 추출 - 더 안전한 방식
   const url = req.url;
   let userId = null;
   try {
-    userId = new URL("ws://localhost" + url).searchParams.get("userId");
-  } catch (e) {}
+    if (url && url.includes('?')) {
+      const urlObj = new URL("ws://localhost" + url);
+      userId = urlObj.searchParams.get("userId");
+    }
+  } catch (e) {
+    console.log("WebSocket URL parsing error:", e.message);
+  }
   if (userId) {
     wsMap.set(userId, ws);
     console.log("WS 연결:", userId);

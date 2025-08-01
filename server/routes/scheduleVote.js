@@ -7,9 +7,9 @@ const {
 const auth = require("../middleware/authMiddleware");
 
 // 투표 (등록/수정)
-router.post("/:id/vote", auth, voteSchedule);
+router.post("/:scheduleId/vote", auth, voteSchedule);
 
 // 일정 별 투표 현황
-router.get("/:id/votes", auth, getVotes);
+router.get("/:scheduleId/votes", auth, getVotes);
 
 module.exports = router;

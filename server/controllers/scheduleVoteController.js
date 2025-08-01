@@ -2,7 +2,7 @@ const scheduleVoteModel = require("../models/scheduleVoteModel");
 
 // 투표 등록/수정
 exports.voteSchedule = async (req, res) => {
-  const schedule_id = req.params.id;
+  const schedule_id = req.params.scheduleId;
   const user_id = req.user.id;
   const { status } = req.body;
 
@@ -20,7 +20,7 @@ exports.voteSchedule = async (req, res) => {
 
 // 투표 현황 조회 (닉네임, 내 상태)
 exports.getVotes = async (req, res) => {
-  const schedule_id = req.params.id;
+  const schedule_id = req.params.scheduleId;
   const user_id = req.user.id;
   try {
     const data = await scheduleVoteModel.getVoteStatsAsync(
