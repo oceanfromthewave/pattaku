@@ -53,28 +53,14 @@
   }
 }
 
-/* 헤더(닉네임/프로필/작성자) */
+/* 헤더(닉네임/프로필/작성자) - 아바타 제거 */
 .scheduleHeader {
   text-align: center;
   margin-bottom: 22px;
-  .avatar {
-    width: 44px; height: 44px;
-    border-radius: 14px;
-    margin-bottom: 10px;
-    background: $primary-400;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.3em;
-    font-weight: 900;
-    color: #fff;
-    user-select: none;
-    box-shadow: 0 1.5px 5px 0 rgba(60,60,60,0.13);
-  }
   .scheduleTitle {
     font-size: 2em;
     font-weight: 800;
-    margin: 3px 0 2px 0;
+    margin: 0 0 8px 0;
     letter-spacing: -1.1px;
     background: linear-gradient(135deg, $primary-600, $accent 90%);
     -webkit-background-clip: text;
@@ -86,14 +72,15 @@
     font-size: 1.05em;
     font-weight: 500;
     margin-top: 2px;
-    display: flex; align-items: center;
+    display: flex; 
+    align-items: center;
+    justify-content: center;
     gap: 4px;
     [data-theme="dark"] & {
       color: $primary-400;
     }
   }
   @include mobile-only {
-    .avatar { width: 38px; height: 38px; font-size: 1.8em; }
     .scheduleTitle { font-size: 1.25em; }
   }
 }
@@ -114,6 +101,115 @@
   .btnSecondary { background: $primary-50; color: $primary-600; border: 1.5px solid $primary-300; }
   .btnDanger { background: $error; color: #fff; border: 1.5px solid $error; }
   @include mobile-only { flex-direction: column; gap: 9px; .btn { width: 100%; } }
+}
+
+/* 이미지 슬라이더 - 사이즈 축소 */
+.imageSlider {
+  margin-bottom: 24px;
+  
+  .imageContainer {
+    position: relative;
+    width: 100%;
+    max-width: 300px; /* 이미지 최대 폭 축소 */
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    background: $gray-100;
+    
+    [data-theme="dark"] & {
+      background: $gray-800;
+    }
+  }
+  
+  .mainImage {
+    width: 100%;
+    height: 200px; /* 이미지 높이 축소 */
+    object-fit: cover;
+    display: block;
+    
+    @include mobile-only {
+      height: 150px; /* 모바일에서 더 축소 */
+    }
+  }
+  
+  .sliderBtn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    
+    &:hover:not(:disabled) {
+      background: rgba(0, 0, 0, 0.8);
+    }
+    
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    &.prevBtn {
+      left: 8px;
+    }
+    
+    &.nextBtn {
+      right: 8px;
+    }
+  }
+  
+  .imageCounter {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .thumbList {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+    
+    .thumbImg {
+      width: 50px; /* 썸네일 사이즈 축소 */
+      height: 50px;
+      object-fit: cover;
+      border-radius: 6px;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity 0.2s, transform 0.2s;
+      
+      &:hover {
+        opacity: 0.8;
+        transform: scale(1.05);
+      }
+      
+      &.selected {
+        opacity: 1;
+        border: 2px solid $primary-500;
+      }
+      
+      @include mobile-only {
+        width: 40px; /* 모바일에서 더 축소 */
+        height: 40px;
+      }
+    }
+  }
 }
 
 /* 일정 설명 전체박스 */
@@ -189,6 +285,37 @@
     font-weight: 700;
     min-width: 170px;
     font-size: 1em;
+  }
+}
+
+/* 빈 상태 */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  
+  .emptyStateIcon {
+    font-size: 4em;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+  
+  h2 {
+    color: $text-primary;
+    margin-bottom: 10px;
+    font-size: 1.5em;
+    
+    [data-theme="dark"] & {
+      color: $dark-text-primary;
+    }
+  }
+  
+  p {
+    color: $text-secondary;
+    margin-bottom: 30px;
+    
+    [data-theme="dark"] & {
+      color: $dark-text-secondary;
+    }
   }
 }
 

@@ -120,12 +120,8 @@ export default function ScheduleDetail({ isLogin }) {
     <div className={styles.scheduleDetailRoot}>
       {/* 메인 카드 */}
       <div className={styles.card}>
-        {/* 헤더 */}
+        {/* 헤더 - 아바타 제거 */}
         <div className={styles.scheduleHeader}>
-          {/* 썸네일/아바타/이니셜 */}
-          <div className={styles.avatar}>
-            {schedule.title?.charAt(0) || "📅"}
-          </div>
           <div className={styles.scheduleTitle}>
             {schedule.title}
           </div>
@@ -157,7 +153,7 @@ export default function ScheduleDetail({ isLogin }) {
 
         <hr />
 
-        {/* 이미지 슬라이더 */}
+        {/* 이미지 슬라이더 - 사이즈 축소 */}
         {images.length > 0 && (
           <div className={styles.imageSlider}>
             <div className={styles.imageContainer}>
