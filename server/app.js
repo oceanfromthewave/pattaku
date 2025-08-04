@@ -16,11 +16,12 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const SocketHandler = require("./socketHandler");
 const ChatSocketHandler = require("./socket/chatSocketHandler");
+const wsNotificationMap = require('./wsNotificationMap');
 
 const app = express();
 const server = http.createServer(app);
 
-// Socket.io CORS
+// Socket.io 설정
 const io = new Server(server, {
   cors: {
     origin: [
@@ -36,10 +37,37 @@ const io = new Server(server, {
   },
 });
 
+// Socket 핸들러 초기화
 const socketHandler = new SocketHandler(io);
 const chatSocketHandler = new ChatSocketHandler(io);
 app.set("socketHandler", socketHandler);
 app.set("chatSocketHandler", chatSocketHandler);
+
+// 알림 네임스페이스 설정
+const notificationNamespace = io.of('/notifications');
+notificationNamespace.on('connection', (socket) => {
+  console.log('📢 알림 소켓 연결:', socket.id);
+  
+  // 사용자 등록
+  socket.on('register_user', (userId) => {
+    if (userId) {
+      wsNotificationMap.set(userId, socket);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    // 연결 해제 시 맵에서 제거
+    for (const [userId, userSocket] of wsNotificationMap.wsMap.entries()) {
+      if (userSocket === socket) {
+        wsNotificationMap.delete(userId);
+        break;
+      }
+    }
+  });
+});
+
+// wsNotificationMap을 앱에 설정
+app.set('wsNotificationMap', wsNotificationMap);
 
 const PORT = process.env.PORT || 5000;
 
@@ -60,13 +88,12 @@ app.use(
   })
 );
 
-// [★매우중요] 모든 프리플라이트(OPTIONS) 요청 허용 (Preflight CORS)
 app.options("*", cors());
 
 // ------------------- 바디파서 -------------------
 app.use(express.json());
 
-// ----- [★ 중요] 업로드 파일에 ORB(Cross-Origin-Resource-Policy) 헤더 적용 -----
+// ------------------- 정적 파일 서비스 -------------------
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
@@ -88,32 +115,7 @@ app.use("/api/schedules", scheduleCommentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/chat", chatRoutes);
 
-// --- WebSocket(ws) 서버 추가 ---
-const WebSocket = require("ws");
-const wsMap = require("./wsNotificationMap");
-const wss = new WebSocket.Server({ server });
-wss.on("connection", (ws, req) => {
-  // 쿼리스트링에서 userId 추출 - 더 안전한 방식
-  const url = req.url;
-  let userId = null;
-  try {
-    if (url && url.includes('?')) {
-      const urlObj = new URL("ws://localhost" + url);
-      userId = urlObj.searchParams.get("userId");
-    }
-  } catch (e) {
-    console.log("WebSocket URL parsing error:", e.message);
-  }
-  if (userId) {
-    wsMap.set(userId, ws);
-    console.log("WS 연결:", userId);
-  }
-  ws.on("close", () => {
-    if (userId) wsMap.delete(userId);
-    console.log("WS 연결 종료:", userId);
-  });
-});
-
 server.listen(PORT, () => {
-  console.log(`서버 실행 중: http://localhost:${PORT}`);
+  console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
+  console.log(`🔌 Socket.io 실행 중 - 채팅: /, 알림: /notifications`);
 });
