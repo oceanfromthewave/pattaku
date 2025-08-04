@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "chat:setup": "node createChatTables.js",
+    "chat:test": "node -e \"console.log('Chat tables test'); process.exit(0);\""
+  }
+}

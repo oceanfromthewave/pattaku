@@ -1,77 +1,139 @@
 import { API_BASE_URL } from './config';
 
-const token = localStorage.getItem('token');
-const headers = {
-  'Content-Type': 'application/json',
-  ...(token && { Authorization: `Bearer ${token}` })
+// 헤더 생성 함수 (항상 최신 토큰 사용)
+const getHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` })
+  };
 };
 
 // 채팅방 관련 API
 export const chatRoomApi = {
   // 모든 채팅방 조회
   getAllRooms: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/chat/rooms`);
-    if (!response.ok) throw new Error('채팅방 목록 조회 실패');
-    return response.json();
+    console.log('🌐 API 요청: 모든 채팅방 조회');
+    const response = await fetch(`${API_BASE_URL}/api/chat/rooms`, {
+      headers: getHeaders()
+    });
+    if (!response.ok) {
+      console.error('❌ 채팅방 목록 조회 실패:', response.status, response.statusText);
+      throw new Error('채팅방 목록 조회 실패');
+    }
+    const data = await response.json();
+    console.log('✅ 채팅방 목록 조회 성공:', data.length, '개');
+    return data;
   },
 
   // 타입별 채팅방 조회
   getRoomsByType: async (type) => {
-    const response = await fetch(`${API_BASE_URL}/api/chat/rooms/type/${type}`);
-    if (!response.ok) throw new Error('타입별 채팅방 조회 실패');
-    return response.json();
+    console.log('🌐 API 요청: 타입별 채팅방 조회', type);
+    const response = await fetch(`${API_BASE_URL}/api/chat/rooms/type/${type}`, {
+      headers: getHeaders()
+    });
+    if (!response.ok) {
+      console.error('❌ 타입별 채팅방 조회 실패:', response.status, response.statusText);
+      throw new Error('타입별 채팅방 조회 실패');
+    }
+    const data = await response.json();
+    console.log('✅ 타입별 채팅방 조회 성공:', data.length, '개');
+    return data;
   },
 
   // 사용자 참여 채팅방 조회
   getUserRooms: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/chat/rooms/my`, { headers });
-    if (!response.ok) throw new Error('참여 채팅방 조회 실패');
-    return response.json();
+    console.log('🌐 API 요청: 내 채팅방 조회');
+    const response = await fetch(`${API_BASE_URL}/api/chat/rooms/my`, { 
+      headers: getHeaders() 
+    });
+    if (!response.ok) {
+      console.error('❌ 참여 채팅방 조회 실패:', response.status, response.statusText);
+      throw new Error('참여 채팅방 조회 실패');
+    }
+    const data = await response.json();
+    console.log('✅ 내 채팅방 조회 성공:', data.length, '개');
+    return data;
   },
 
   // 채팅방 상세 조회
   getRoomById: async (roomId) => {
-    const response = await fetch(`${API_BASE_URL}/api/chat/rooms/${roomId}`, { headers });
-    if (!response.ok) throw new Error('채팅방 상세 조회 실패');
-    return response.json();
+    console.log('🌐 API 요청: 채팅방 상세 조회', roomId);
+    const response = await fetch(`${API_BASE_URL}/api/chat/rooms/${roomId}`, {
+      headers: getHeaders()
+    });
+    if (!response.ok) {
+      console.error('❌ 채팅방 상세 조회 실패:', response.status, response.statusText);
+      throw new Error('채팅방 상세 조회 실패');
+    }
+    const data = await response.json();
+    console.log('✅ 채팅방 상세 조회 성공:', data.name);
+    return data;
   },
 
   // 채팅방 생성
   createRoom: async (roomData) => {
+    console.log('🌐 API 요청: 채팅방 생성', roomData);
     const response = await fetch(`${API_BASE_URL}/api/chat/rooms`, {
       method: 'POST',
-      headers,
+      headers: getHeaders(),
       body: JSON.stringify(roomData)
     });
-    if (!response.ok) throw new Error('채팅방 생성 실패');
-    return response.json();
+    if (!response.ok) {
+      console.error('❌ 채팅방 생성 실패:', response.status, response.statusText);
+      throw new Error('채팅방 생성 실패');
+    }
+    const data = await response.json();
+    console.log('✅ 채팅방 생성 성공:', data);
+    return data;
   },
 
   // 채팅방 참여
   joinRoom: async (roomId) => {
+    console.log('🌐 API 요청: 채팅방 참여', roomId);
     const response = await fetch(`${API_BASE_URL}/api/chat/rooms/${roomId}/join`, {
       method: 'POST',
-      headers
+      headers: getHeaders()
     });
-    if (!response.ok) throw new Error('채팅방 참여 실패');
-    return response.json();
+    if (!response.ok) {
+      console.error('❌ 채팅방 참여 실패:', response.status, response.statusText);
+      throw new Error('채팅방 참여 실패');
+    }
+    const data = await response.json();
+    console.log('✅ 채팅방 참여 성공:', data);
+    return data;
   },
 
   // 채팅방 나가기
   leaveRoom: async (roomId) => {
+    console.log('🌐 API 요청: 채팅방 나가기', roomId);
     const response = await fetch(`${API_BASE_URL}/api/chat/rooms/${roomId}/leave`, {
-      method: 'DELETE',
-      headers
+      method: 'POST',
+      headers: getHeaders()
     });
-    if (!response.ok) throw new Error('채팅방 나가기 실패');
-    return response.json();
+    if (!response.ok) {
+      console.error('❌ 채팅방 나가기 실패:', response.status, response.statusText);
+      throw new Error('채팅방 나가기 실패');
+    }
+    const data = await response.json();
+    console.log('✅ 채팅방 나가기 성공:', data);
+    return data;
   },
 
   // 1:1 채팅방 생성/조회
   getOrCreateDirectMessage: async (targetUserId) => {
-    const response = await fetch(`${API_BASE_URL}/api/chat/direct/${targetUserId}`, { headers });
-    if (!response.ok) throw new Error('1:1 채팅방 생성/조회 실패');
-    return response.json();
+    console.log('🌐 API 요청: 1:1 채팅방 생성/조회', targetUserId);
+    const response = await fetch(`${API_BASE_URL}/api/chat/direct/${targetUserId}`, {
+      method: 'POST',
+      headers: getHeaders()
+    });
+    if (!response.ok) {
+      console.error('❌ 1:1 채팅방 생성/조회 실패:', response.status, response.statusText);
+      throw new Error('1:1 채팅방 생성/조회 실패');
+    }
+    const data = await response.json();
+    console.log('✅ 1:1 채팅방 생성/조회 성공:', data);
+    return data;
   }
 };
 
@@ -79,57 +141,32 @@ export const chatRoomApi = {
 export const chatMessageApi = {
   // 채팅방 메시지 조회
   getRoomMessages: async (roomId, limit = 50, offset = 0) => {
+    console.log('🌐 API 요청: 채팅방 메시지 조회', roomId);
     const response = await fetch(
       `${API_BASE_URL}/api/chat/rooms/${roomId}/messages?limit=${limit}&offset=${offset}`,
-      { headers }
+      { headers: getHeaders() }
     );
-    if (!response.ok) throw new Error('메시지 조회 실패');
-    return response.json();
-  },
-
-  // 메시지 전송 (REST API - Socket.io를 주로 사용)
-  sendMessage: async (roomId, messageData) => {
-    const response = await fetch(`${API_BASE_URL}/api/chat/rooms/${roomId}/messages`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(messageData)
-    });
-    if (!response.ok) throw new Error('메시지 전송 실패');
-    return response.json();
-  },
-
-  // 메시지 수정
-  updateMessage: async (messageId, message) => {
-    const response = await fetch(`${API_BASE_URL}/api/chat/messages/${messageId}`, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify({ message })
-    });
-    if (!response.ok) throw new Error('메시지 수정 실패');
-    return response.json();
-  },
-
-  // 메시지 삭제
-  deleteMessage: async (messageId) => {
-    const response = await fetch(`${API_BASE_URL}/api/chat/messages/${messageId}`, {
-      method: 'DELETE',
-      headers
-    });
-    if (!response.ok) throw new Error('메시지 삭제 실패');
-    return response.json();
+    if (!response.ok) {
+      console.error('❌ 채팅방 메시지 조회 실패:', response.status, response.statusText);
+      throw new Error('채팅방 메시지 조회 실패');
+    }
+    const data = await response.json();
+    console.log('✅ 채팅방 메시지 조회 성공:', data.length, '개');
+    return data;
   },
 
   // 안읽은 메시지 수 조회
   getUnreadCount: async (roomId) => {
-    const response = await fetch(`${API_BASE_URL}/api/chat/rooms/${roomId}/unread`, { headers });
-    if (!response.ok) throw new Error('안읽은 메시지 수 조회 실패');
-    return response.json();
-  },
-
-  // 전체 안읽은 메시지 수 조회
-  getTotalUnreadCount: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/chat/unread-total`, { headers });
-    if (!response.ok) throw new Error('전체 안읽은 메시지 수 조회 실패');
-    return response.json();
+    console.log('🌐 API 요청: 안읽은 메시지 수 조회', roomId);
+    const response = await fetch(`${API_BASE_URL}/api/chat/rooms/${roomId}/unread`, {
+      headers: getHeaders()
+    });
+    if (!response.ok) {
+      console.error('❌ 안읽은 메시지 수 조회 실패:', response.status, response.statusText);
+      throw new Error('안읽은 메시지 수 조회 실패');
+    }
+    const data = await response.json();
+    console.log('✅ 안읽은 메시지 수 조회 성공:', data);
+    return data;
   }
 };

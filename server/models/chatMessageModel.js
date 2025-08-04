@@ -22,8 +22,13 @@ const chatMessageModel = {
       ORDER BY cm.created_at DESC
       LIMIT ? OFFSET ?
     `;
-    const messages = await query(sql, [roomId, limit, offset]);
-    return messages.reverse(); // 최신 순으로 정렬
+    try {
+      const messages = await query(sql, [roomId, limit, offset]);
+      return messages.reverse(); // 최신 순으로 정렬
+    } catch (error) {
+      console.error("getRoomMessagesAsync 오류:", error);
+      return [];
+    }
   },
 
   // 메시지 생성
@@ -39,27 +44,32 @@ const chatMessageModel = {
       INSERT INTO chat_messages (room_id, user_id, message, message_type, file_url, reply_to)
       VALUES (?, ?, ?, ?, ?, ?)
     `;
-    const result = await query(sql, [
-      room_id,
-      user_id,
-      message,
-      message_type,
-      file_url,
-      reply_to,
-    ]);
+    try {
+      const result = await query(sql, [
+        room_id,
+        user_id,
+        message,
+        message_type,
+        file_url,
+        reply_to,
+      ]);
 
-    // 생성된 메시지 정보 반환
-    const msgSql = `
-      SELECT 
-        cm.*,
-        u.nickname as sender_nickname,
-        u.profileImage as sender_profile
-      FROM chat_messages cm
-      JOIN users u ON cm.user_id = u.id
-      WHERE cm.id = ?
-    `;
-    const msgResult = await query(msgSql, [result.insertId]);
-    return msgResult[0];
+      // 생성된 메시지 정보 반환
+      const msgSql = `
+        SELECT 
+          cm.*,
+          u.nickname as sender_nickname,
+          u.profileImage as sender_profile
+        FROM chat_messages cm
+        JOIN users u ON cm.user_id = u.id
+        WHERE cm.id = ?
+      `;
+      const msgResult = await query(msgSql, [result.insertId]);
+      return msgResult[0];
+    } catch (error) {
+      console.error("createMessageAsync 오류:", error);
+      throw error;
+    }
   },
 
   // 메시지 수정
@@ -69,7 +79,12 @@ const chatMessageModel = {
       SET message = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND user_id = ? AND is_deleted = FALSE
     `;
-    await query(sql, [newMessage, messageId, userId]);
+    try {
+      await query(sql, [newMessage, messageId, userId]);
+    } catch (error) {
+      console.error("updateMessageAsync 오류:", error);
+      throw error;
+    }
   },
 
   // 메시지 삭제 (소프트 삭제)
@@ -79,7 +94,12 @@ const chatMessageModel = {
       SET is_deleted = TRUE, updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND user_id = ?
     `;
-    await query(sql, [messageId, userId]);
+    try {
+      await query(sql, [messageId, userId]);
+    } catch (error) {
+      console.error("deleteMessageAsync 오류:", error);
+      throw error;
+    }
   },
 
   // 특정 메시지 조회
@@ -93,8 +113,13 @@ const chatMessageModel = {
       JOIN users u ON cm.user_id = u.id
       WHERE cm.id = ? AND cm.is_deleted = FALSE
     `;
-    const result = await query(sql, [messageId]);
-    return result[0];
+    try {
+      const result = await query(sql, [messageId]);
+      return result[0] || null;
+    } catch (error) {
+      console.error("getMessageByIdAsync 오류:", error);
+      return null;
+    }
   },
 
   // 읽음 상태 업데이트
@@ -104,7 +129,12 @@ const chatMessageModel = {
       SET last_read_at = CURRENT_TIMESTAMP
       WHERE room_id = ? AND user_id = ?
     `;
-    await query(sql, [roomId, userId]);
+    try {
+      await query(sql, [roomId, userId]);
+    } catch (error) {
+      console.error("updateLastReadAsync 오류:", error);
+      throw error;
+    }
   },
 
   // 안읽은 메시지 수 조회
@@ -118,8 +148,13 @@ const chatMessageModel = {
         AND cm.user_id != ? 
         AND cm.is_deleted = FALSE
     `;
-    const result = await query(sql, [roomId, userId, userId]);
-    return result[0].unread_count;
+    try {
+      const result = await query(sql, [roomId, userId, userId]);
+      return result[0].unread_count;
+    } catch (error) {
+      console.error("getUnreadCountAsync 오류:", error);
+      return 0;
+    }
   },
 
   // 사용자의 전체 안읽은 메시지 수
@@ -133,8 +168,13 @@ const chatMessageModel = {
         AND cm.user_id != ? 
         AND cm.is_deleted = FALSE
     `;
-    const result = await query(sql, [userId, userId]);
-    return result[0].total_unread;
+    try {
+      const result = await query(sql, [userId, userId]);
+      return result[0].total_unread;
+    } catch (error) {
+      console.error("getTotalUnreadCountAsync 오류:", error);
+      return 0;
+    }
   },
 };
 

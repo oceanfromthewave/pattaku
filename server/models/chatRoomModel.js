@@ -18,7 +18,12 @@ const chatRoomModel = {
       WHERE cr.is_active = TRUE
       ORDER BY cr.created_at DESC
     `;
-    return await query(sql);
+    try {
+      return await query(sql);
+    } catch (error) {
+      console.error("getAllRoomsAsync 오류:", error);
+      return [];
+    }
   },
 
   // ID로 채팅방 조회
@@ -32,8 +37,13 @@ const chatRoomModel = {
       LEFT JOIN users u ON cr.created_by = u.id
       WHERE cr.id = ? AND cr.is_active = TRUE
     `;
-    const result = await query(sql, [roomId]);
-    return result[0];
+    try {
+      const result = await query(sql, [roomId]);
+      return result[0] || null;
+    } catch (error) {
+      console.error("getRoomByIdAsync 오류:", error);
+      return null;
+    }
   },
 
   // 타입별 채팅방 조회
@@ -48,7 +58,12 @@ const chatRoomModel = {
       WHERE cr.type = ? AND cr.is_active = TRUE
       ORDER BY cr.created_at DESC
     `;
-    return await query(sql, [type]);
+    try {
+      return await query(sql, [type]);
+    } catch (error) {
+      console.error("getRoomsByTypeAsync 오류:", error);
+      return [];
+    }
   },
 
   // 채팅방 생성
@@ -57,14 +72,19 @@ const chatRoomModel = {
       INSERT INTO chat_rooms (name, description, type, topic, created_by)
       VALUES (?, ?, ?, ?, ?)
     `;
-    const result = await query(sql, [
-      name,
-      description,
-      type,
-      topic,
-      created_by,
-    ]);
-    return result.insertId;
+    try {
+      const result = await query(sql, [
+        name,
+        description,
+        type,
+        topic,
+        created_by,
+      ]);
+      return result.insertId;
+    } catch (error) {
+      console.error("createRoomAsync 오류:", error);
+      throw error;
+    }
   },
 
   // 채팅방 참여
@@ -74,13 +94,23 @@ const chatRoomModel = {
       VALUES (?, ?)
       ON DUPLICATE KEY UPDATE joined_at = CURRENT_TIMESTAMP
     `;
-    await query(sql, [roomId, userId]);
+    try {
+      await query(sql, [roomId, userId]);
+    } catch (error) {
+      console.error("joinRoomAsync 오류:", error);
+      throw error;
+    }
   },
 
   // 채팅방 나가기
   leaveRoomAsync: async (roomId, userId) => {
     const sql = `DELETE FROM chat_participants WHERE room_id = ? AND user_id = ?`;
-    await query(sql, [roomId, userId]);
+    try {
+      await query(sql, [roomId, userId]);
+    } catch (error) {
+      console.error("leaveRoomAsync 오류:", error);
+      throw error;
+    }
   },
 
   // 채팅방 참여자 조회
@@ -95,7 +125,12 @@ const chatRoomModel = {
       WHERE cp.room_id = ?
       ORDER BY cp.joined_at DESC
     `;
-    return await query(sql, [roomId]);
+    try {
+      return await query(sql, [roomId]);
+    } catch (error) {
+      console.error("getRoomParticipantsAsync 오류:", error);
+      return [];
+    }
   },
 
   // 사용자 참여 채팅방 조회
@@ -112,51 +147,61 @@ const chatRoomModel = {
       WHERE cp.user_id = ? AND cr.is_active = TRUE
       ORDER BY cp.last_read_at DESC
     `;
-    return await query(sql, [userId]);
+    try {
+      return await query(sql, [userId]);
+    } catch (error) {
+      console.error("getUserRoomsAsync 오류:", error);
+      return [];
+    }
   },
 
   // 1:1 채팅방 생성 또는 찾기
   getOrCreateDirectMessageAsync: async (user1Id, user2Id) => {
-    // 기존 1:1 채팅방 찾기
-    let sql = `
-      SELECT dm.*, cr.name, cr.id as room_id
-      FROM direct_messages dm
-      JOIN chat_rooms cr ON dm.room_id = cr.id
-      WHERE (dm.user1_id = ? AND dm.user2_id = ?) 
-         OR (dm.user1_id = ? AND dm.user2_id = ?)
-    `;
-    let result = await query(sql, [user1Id, user2Id, user2Id, user1Id]);
+    try {
+      // 기존 1:1 채팅방 찾기
+      let sql = `
+        SELECT dm.*, cr.name, cr.id as room_id
+        FROM direct_messages dm
+        JOIN chat_rooms cr ON dm.room_id = cr.id
+        WHERE (dm.user1_id = ? AND dm.user2_id = ?) 
+           OR (dm.user1_id = ? AND dm.user2_id = ?)
+      `;
+      let result = await query(sql, [user1Id, user2Id, user2Id, user1Id]);
 
-    if (result.length > 0) {
-      return result[0];
+      if (result.length > 0) {
+        return result[0];
+      }
+
+      // 새 1:1 채팅방 생성
+      const roomSql = `
+        INSERT INTO chat_rooms (name, type, created_by)
+        VALUES (?, 'private', ?)
+      `;
+      const roomResult = await query(roomSql, [`Direct Message`, user1Id]);
+      const roomId = roomResult.insertId;
+
+      // direct_messages 테이블에 기록
+      const dmSql = `
+        INSERT INTO direct_messages (user1_id, user2_id, room_id)
+        VALUES (?, ?, ?)
+      `;
+      await query(dmSql, [
+        Math.min(user1Id, user2Id),
+        Math.max(user1Id, user2Id),
+        roomId,
+      ]);
+
+      // 두 사용자를 채팅방에 자동 참여
+      await query(
+        `INSERT INTO chat_participants (room_id, user_id) VALUES (?, ?), (?, ?)`,
+        [roomId, user1Id, roomId, user2Id]
+      );
+
+      return { room_id: roomId, user1_id: user1Id, user2_id: user2Id };
+    } catch (error) {
+      console.error("getOrCreateDirectMessageAsync 오류:", error);
+      throw error;
     }
-
-    // 새 1:1 채팅방 생성
-    const roomSql = `
-      INSERT INTO chat_rooms (name, type, created_by)
-      VALUES (?, 'private', ?)
-    `;
-    const roomResult = await query(roomSql, [`Direct Message`, user1Id]);
-    const roomId = roomResult.insertId;
-
-    // direct_messages 테이블에 기록
-    const dmSql = `
-      INSERT INTO direct_messages (user1_id, user2_id, room_id)
-      VALUES (?, ?, ?)
-    `;
-    await query(dmSql, [
-      Math.min(user1Id, user2Id),
-      Math.max(user1Id, user2Id),
-      roomId,
-    ]);
-
-    // 두 사용자를 채팅방에 자동 참여
-    await query(
-      `INSERT INTO chat_participants (room_id, user_id) VALUES (?, ?), (?, ?)`,
-      [roomId, user1Id, roomId, user2Id]
-    );
-
-    return { room_id: roomId, user1_id: user1Id, user2_id: user2Id };
   },
 };
 

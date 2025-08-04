@@ -7,15 +7,23 @@ class ChatSocketHandler {
     this.io = io;
     this.connectedUsers = new Map(); // userId -> { socketId, nickname, rooms: Set() }
     this.setupChatEvents();
+    console.log('🔌 ChatSocketHandler 초기화 완료');
   }
 
   setupChatEvents() {
     this.io.on('connection', (socket) => {
-      console.log('🔌 채팅 소켓 연결:', socket.id);
+      console.log('🔌 새로운 소켓 연결:', socket.id);
 
       // 사용자 인증
       socket.on('chat:authenticate', async (token) => {
         try {
+          console.log('🔐 채팅 소켓 인증 시도:', socket.id);
+          
+          if (!token) {
+            socket.emit('chat:authenticated', { success: false, error: '토큰이 없습니다' });
+            return;
+          }
+
           const decoded = jwt.verify(token, process.env.JWT_SECRET);
           socket.userId = decoded.id;
           socket.nickname = decoded.nickname;
@@ -27,14 +35,19 @@ class ChatSocketHandler {
             rooms: new Set()
           });
 
-          console.log(`👤 채팅 사용자 인증: ${decoded.nickname} (${decoded.id})`);
+          console.log(`✅ 채팅 사용자 인증 성공: ${decoded.nickname} (${decoded.id})`);
           socket.emit('chat:authenticated', { success: true, userId: decoded.id });
 
           // 사용자의 채팅방 목록 조회 및 자동 참여
-          const userRooms = await chatRoomModel.getUserRoomsAsync(decoded.id);
-          for (const room of userRooms) {
-            socket.join(`room_${room.id}`);
-            this.connectedUsers.get(decoded.id).rooms.add(room.id);
+          try {
+            const userRooms = await chatRoomModel.getUserRoomsAsync(decoded.id);
+            for (const room of userRooms) {
+              socket.join(`room_${room.id}`);
+              this.connectedUsers.get(decoded.id).rooms.add(room.id);
+              console.log(`🏠 자동 참여: ${decoded.nickname} -> 방 ${room.id}`);
+            }
+          } catch (error) {
+            console.error('❌ 사용자 채팅방 자동 참여 오류:', error);
           }
 
           // 온라인 사용자 알림
@@ -58,12 +71,17 @@ class ChatSocketHandler {
             return;
           }
 
+          console.log(`🚪 채팅방 참여: ${socket.nickname} -> 방 ${roomId}`);
+
           // 데이터베이스에 참여 기록
           await chatRoomModel.joinRoomAsync(roomId, socket.userId);
 
           // 소켓 방 참여
           socket.join(`room_${roomId}`);
-          this.connectedUsers.get(socket.userId).rooms.add(roomId);
+          const userInfo = this.connectedUsers.get(socket.userId);
+          if (userInfo) {
+            userInfo.rooms.add(roomId);
+          }
 
           // 참여 알림
           socket.to(`room_${roomId}`).emit('chat:user_joined', {
@@ -73,10 +91,10 @@ class ChatSocketHandler {
           });
 
           socket.emit('chat:joined_room', { roomId });
-          console.log(`📥 사용자 ${socket.nickname}이 방 ${roomId}에 참여`);
+          console.log(`✅ 채팅방 참여 완료: ${socket.nickname} -> 방 ${roomId}`);
 
         } catch (error) {
-          console.error('채팅방 참여 오류:', error);
+          console.error('❌ 채팅방 참여 오류:', error);
           socket.emit('chat:error', { message: '채팅방 참여에 실패했습니다.' });
         }
       });
@@ -87,12 +105,17 @@ class ChatSocketHandler {
           const { roomId } = data;
           if (!socket.userId) return;
 
+          console.log(`🚪 채팅방 나가기: ${socket.nickname} -> 방 ${roomId}`);
+
           // 데이터베이스에서 참여 해제
           await chatRoomModel.leaveRoomAsync(roomId, socket.userId);
 
           // 소켓 방 나가기
           socket.leave(`room_${roomId}`);
-          this.connectedUsers.get(socket.userId).rooms.delete(roomId);
+          const userInfo = this.connectedUsers.get(socket.userId);
+          if (userInfo) {
+            userInfo.rooms.delete(roomId);
+          }
 
           // 나가기 알림
           socket.to(`room_${roomId}`).emit('chat:user_left', {
@@ -102,10 +125,10 @@ class ChatSocketHandler {
           });
 
           socket.emit('chat:left_room', { roomId });
-          console.log(`📤 사용자 ${socket.nickname}이 방 ${roomId}에서 나감`);
+          console.log(`✅ 채팅방 나가기 완료: ${socket.nickname} -> 방 ${roomId}`);
 
         } catch (error) {
-          console.error('채팅방 나가기 오류:', error);
+          console.error('❌ 채팅방 나가기 오류:', error);
           socket.emit('chat:error', { message: '채팅방 나가기에 실패했습니다.' });
         }
       });
@@ -124,6 +147,8 @@ class ChatSocketHandler {
             return;
           }
 
+          console.log(`💬 메시지 전송: ${socket.nickname} -> 방 ${roomId}: "${message.substring(0, 20)}..."`);
+
           // 데이터베이스에 메시지 저장
           const newMessage = await chatMessageModel.createMessageAsync({
             room_id: roomId,
@@ -139,10 +164,10 @@ class ChatSocketHandler {
             sender_nickname: socket.nickname
           });
 
-          console.log(`💬 메시지 전송: ${socket.nickname} -> 방 ${roomId}`);
+          console.log(`✅ 메시지 전송 완료: ${socket.nickname} -> 방 ${roomId}`);
 
         } catch (error) {
-          console.error('메시지 전송 오류:', error);
+          console.error('❌ 메시지 전송 오류:', error);
           socket.emit('chat:error', { message: '메시지 전송에 실패했습니다.' });
         }
       });
@@ -152,6 +177,8 @@ class ChatSocketHandler {
         try {
           const { messageId, newMessage } = data;
           if (!socket.userId) return;
+
+          console.log(`✏️ 메시지 수정: ${socket.nickname} -> 메시지 ${messageId}`);
 
           await chatMessageModel.updateMessageAsync(messageId, socket.userId, newMessage);
 
@@ -164,10 +191,11 @@ class ChatSocketHandler {
               newMessage,
               updatedAt: updatedMessage.updated_at
             });
+            console.log(`✅ 메시지 수정 완료: ${messageId}`);
           }
 
         } catch (error) {
-          console.error('메시지 수정 오류:', error);
+          console.error('❌ 메시지 수정 오류:', error);
           socket.emit('chat:error', { message: '메시지 수정에 실패했습니다.' });
         }
       });
@@ -178,6 +206,8 @@ class ChatSocketHandler {
           const { messageId } = data;
           if (!socket.userId) return;
 
+          console.log(`🗑️ 메시지 삭제: ${socket.nickname} -> 메시지 ${messageId}`);
+
           const message = await chatMessageModel.getMessageByIdAsync(messageId);
           if (message) {
             await chatMessageModel.deleteMessageAsync(messageId, socket.userId);
@@ -186,10 +216,11 @@ class ChatSocketHandler {
             this.io.to(`room_${message.room_id}`).emit('chat:message_deleted', {
               messageId
             });
+            console.log(`✅ 메시지 삭제 완료: ${messageId}`);
           }
 
         } catch (error) {
-          console.error('메시지 삭제 오류:', error);
+          console.error('❌ 메시지 삭제 오류:', error);
           socket.emit('chat:error', { message: '메시지 삭제에 실패했습니다.' });
         }
       });
@@ -221,7 +252,7 @@ class ChatSocketHandler {
           });
 
         } catch (error) {
-          console.error('읽음 상태 업데이트 오류:', error);
+          console.error('❌ 읽음 상태 업데이트 오류:', error);
         }
       });
 
@@ -237,16 +268,19 @@ class ChatSocketHandler {
               fromUserId: socket.userId,
               fromNickname: socket.nickname
             });
+            console.log(`💌 1:1 채팅 초대: ${socket.nickname} -> ${targetUser.nickname}`);
           }
 
         } catch (error) {
-          console.error('1:1 채팅 초대 오류:', error);
+          console.error('❌ 1:1 채팅 초대 오류:', error);
         }
       });
 
       // 연결 해제
       socket.on('disconnect', () => {
         if (socket.userId) {
+          console.log(`👋 채팅 사용자 연결 해제: ${socket.nickname} (${socket.userId})`);
+          
           // 오프라인 알림
           socket.broadcast.emit('chat:user_offline', {
             userId: socket.userId,
@@ -254,8 +288,12 @@ class ChatSocketHandler {
           });
 
           this.connectedUsers.delete(socket.userId);
-          console.log(`👋 채팅 사용자 연결 해제: ${socket.nickname} (${socket.userId})`);
         }
+      });
+
+      // 에러 처리
+      socket.on('error', (error) => {
+        console.error('🚨 소켓 에러:', error);
       });
     });
   }
@@ -265,6 +303,7 @@ class ChatSocketHandler {
     const user = this.connectedUsers.get(userId);
     if (user) {
       this.io.to(user.socketId).emit('chat:notification', notification);
+      console.log(`🔔 채팅 알림 전송: ${notification.title} -> 사용자 ${userId}`);
       return true;
     }
     return false;

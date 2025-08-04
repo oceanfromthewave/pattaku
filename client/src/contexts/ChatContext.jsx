@@ -17,6 +17,7 @@ export const ChatProvider = ({ children }) => {
   const { isLoggedIn, userInfo } = useAuth();
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [messages, setMessages] = useState({}); // roomId -> messages[]
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [typingUsers, setTypingUsers] = useState({}); // roomId -> [userIds]
@@ -25,18 +26,21 @@ export const ChatProvider = ({ children }) => {
   
   const socketRef = useRef(null);
   const typingTimeoutRef = useRef({});
+  const reconnectTimeoutRef = useRef(null);
 
   // 소켓 연결 및 인증
   useEffect(() => {
     if (isLoggedIn && userInfo && !socketRef.current) {
-      console.log('🔌 채팅 소켓 연결 시작...');
+      console.log('🔌 채팅 소켓 연결 시작...', WS_URL);
       
       const newSocket = io(WS_URL, {
         transports: ['websocket', 'polling'],
         timeout: 20000,
         reconnection: true,
         reconnectionAttempts: 5,
-        reconnectionDelay: 1000
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        maxReconnectionAttempts: 5
       });
 
       newSocket.on('connect', () => {
@@ -46,26 +50,45 @@ export const ChatProvider = ({ children }) => {
         // 인증 토큰 전송
         const token = localStorage.getItem('token');
         if (token) {
+          console.log('🔐 채팅 소켓 인증 시작...');
           newSocket.emit('chat:authenticate', token);
+        } else {
+          console.error('❌ 인증 토큰이 없습니다');
         }
       });
 
-      newSocket.on('disconnect', () => {
-        console.log('❌ 채팅 소켓 연결 해제');
+      newSocket.on('disconnect', (reason) => {
+        console.log('❌ 채팅 소켓 연결 해제:', reason);
         setIsConnected(false);
+        setIsAuthenticated(false);
+        
+        // 자동 재연결 시도
+        if (reason === 'io server disconnect') {
+          // 서버에서 강제로 연결을 끊은 경우, 수동으로 재연결
+          newSocket.connect();
+        }
+      });
+
+      newSocket.on('connect_error', (error) => {
+        console.error('❌ 채팅 소켓 연결 오류:', error);
+        setIsConnected(false);
+        setIsAuthenticated(false);
       });
 
       // 인증 결과
       newSocket.on('chat:authenticated', (data) => {
         if (data.success) {
           console.log('✅ 채팅 소켓 인증 성공');
+          setIsAuthenticated(true);
         } else {
           console.error('❌ 채팅 소켓 인증 실패:', data.error);
+          setIsAuthenticated(false);
         }
       });
 
       // 새 메시지 수신
       newSocket.on('chat:new_message', (message) => {
+        console.log('💬 새 메시지 수신:', message);
         setMessages(prev => ({
           ...prev,
           [message.room_id]: [...(prev[message.room_id] || []), message]
@@ -83,6 +106,7 @@ export const ChatProvider = ({ children }) => {
       // 메시지 수정
       newSocket.on('chat:message_edited', (data) => {
         const { messageId, newMessage, updatedAt } = data;
+        console.log('✏️ 메시지 수정 알림:', messageId);
         setMessages(prev => {
           const updated = { ...prev };
           Object.keys(updated).forEach(roomId => {
@@ -99,6 +123,7 @@ export const ChatProvider = ({ children }) => {
       // 메시지 삭제
       newSocket.on('chat:message_deleted', (data) => {
         const { messageId } = data;
+        console.log('🗑️ 메시지 삭제 알림:', messageId);
         setMessages(prev => {
           const updated = { ...prev };
           Object.keys(updated).forEach(roomId => {
@@ -110,10 +135,17 @@ export const ChatProvider = ({ children }) => {
 
       // 사용자 온라인/오프라인
       newSocket.on('chat:user_online', (data) => {
-        setOnlineUsers(prev => [...prev, data]);
+        console.log('👤 사용자 온라인:', data.nickname);
+        setOnlineUsers(prev => {
+          if (!prev.find(user => user.userId === data.userId)) {
+            return [...prev, data];
+          }
+          return prev;
+        });
       });
 
       newSocket.on('chat:user_offline', (data) => {
+        console.log('👤 사용자 오프라인:', data.nickname);
         setOnlineUsers(prev => prev.filter(user => user.userId !== data.userId));
       });
 
@@ -122,24 +154,37 @@ export const ChatProvider = ({ children }) => {
         const { userId, nickname, isTyping } = data;
         setTypingUsers(prev => {
           const updated = { ...prev };
+          const roomTyping = updated[currentRoom] || [];
+          
           if (isTyping) {
-            updated[currentRoom] = [...(updated[currentRoom] || []), { userId, nickname }];
+            if (!roomTyping.find(user => user.userId === userId)) {
+              updated[currentRoom] = [...roomTyping, { userId, nickname }];
+            }
           } else {
-            updated[currentRoom] = (updated[currentRoom] || []).filter(user => user.userId !== userId);
+            updated[currentRoom] = roomTyping.filter(user => user.userId !== userId);
           }
           return updated;
         });
       });
 
+      // 채팅방 참여/나가기 알림
+      newSocket.on('chat:user_joined', (data) => {
+        console.log('📥 사용자 채팅방 참여:', data);
+      });
+
+      newSocket.on('chat:user_left', (data) => {
+        console.log('📤 사용자 채팅방 나가기:', data);
+      });
+
       // 1:1 채팅 초대
       newSocket.on('chat:direct_invite', (data) => {
-        // 1:1 채팅 초대 알림 처리
         console.log('💬 1:1 채팅 초대:', data);
+        // TODO: 초대 알림 UI 표시
       });
 
       // 에러 처리
       newSocket.on('chat:error', (data) => {
-        console.error('채팅 오류:', data.message);
+        console.error('❌ 채팅 오류:', data.message);
       });
 
       socketRef.current = newSocket;
@@ -148,26 +193,35 @@ export const ChatProvider = ({ children }) => {
 
     return () => {
       if (socketRef.current) {
+        console.log('🔌 채팅 소켓 연결 해제');
         socketRef.current.disconnect();
         socketRef.current = null;
         setSocket(null);
         setIsConnected(false);
+        setIsAuthenticated(false);
+      }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
       }
     };
   }, [isLoggedIn, userInfo]);
 
   // 채팅방 참여
   const joinRoom = (roomId) => {
-    if (socket && isConnected) {
+    if (socket && isConnected && isAuthenticated) {
+      console.log('🚪 채팅방 참여 시도:', roomId);
       socket.emit('chat:join_room', { roomId });
       setCurrentRoom(roomId);
       setUnreadCounts(prev => ({ ...prev, [roomId]: 0 }));
+    } else {
+      console.warn('⚠️ 소켓이 연결되지 않았거나 인증되지 않음');
     }
   };
 
   // 채팅방 나가기
   const leaveRoom = (roomId) => {
-    if (socket && isConnected) {
+    if (socket && isConnected && isAuthenticated) {
+      console.log('🚪 채팅방 나가기 시도:', roomId);
       socket.emit('chat:leave_room', { roomId });
       if (currentRoom === roomId) {
         setCurrentRoom(null);
@@ -177,33 +231,38 @@ export const ChatProvider = ({ children }) => {
 
   // 메시지 전송
   const sendMessage = (roomId, message, messageType = 'text', replyTo = null) => {
-    if (socket && isConnected) {
+    if (socket && isConnected && isAuthenticated) {
+      console.log('💬 메시지 전송 시도:', { roomId, message: message.substring(0, 20) + '...' });
       socket.emit('chat:send_message', {
         roomId,
         message,
         messageType,
         replyTo
       });
+    } else {
+      console.warn('⚠️ 메시지 전송 실패: 소켓 연결 또는 인증 상태 확인 필요');
     }
   };
 
   // 메시지 수정
   const editMessage = (messageId, newMessage) => {
-    if (socket && isConnected) {
+    if (socket && isConnected && isAuthenticated) {
+      console.log('✏️ 메시지 수정 시도:', messageId);
       socket.emit('chat:edit_message', { messageId, newMessage });
     }
   };
 
   // 메시지 삭제
   const deleteMessage = (messageId) => {
-    if (socket && isConnected) {
+    if (socket && isConnected && isAuthenticated) {
+      console.log('🗑️ 메시지 삭제 시도:', messageId);
       socket.emit('chat:delete_message', { messageId });
     }
   };
 
   // 타이핑 상태 전송
   const sendTyping = (roomId, isTyping) => {
-    if (socket && isConnected) {
+    if (socket && isConnected && isAuthenticated) {
       socket.emit('chat:typing', { roomId, isTyping });
       
       // 타이핑 중지 타이머 설정
@@ -220,7 +279,7 @@ export const ChatProvider = ({ children }) => {
 
   // 읽음 상태 업데이트
   const markAsRead = (roomId) => {
-    if (socket && isConnected) {
+    if (socket && isConnected && isAuthenticated) {
       socket.emit('chat:mark_read', { roomId });
       setUnreadCounts(prev => ({ ...prev, [roomId]: 0 }));
     }
@@ -228,7 +287,7 @@ export const ChatProvider = ({ children }) => {
 
   // 1:1 채팅 초대
   const inviteDirectChat = (targetUserId) => {
-    if (socket && isConnected) {
+    if (socket && isConnected && isAuthenticated) {
       socket.emit('chat:invite_direct', { targetUserId });
     }
   };
@@ -257,6 +316,7 @@ export const ChatProvider = ({ children }) => {
     // 상태
     socket,
     isConnected,
+    isAuthenticated,
     messages,
     onlineUsers,
     typingUsers,
