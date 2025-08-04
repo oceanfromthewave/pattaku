@@ -5,7 +5,7 @@ async function createChatTables() {
     console.log('🗄️ 채팅 테이블 생성 시작...');
 
     // 채팅방 테이블
-    await db.query(`
+    await db.execute(`
       CREATE TABLE IF NOT EXISTS chat_rooms (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
@@ -25,7 +25,7 @@ async function createChatTables() {
     `);
 
     // 채팅 메시지 테이블
-    await db.query(`
+    await db.execute(`
       CREATE TABLE IF NOT EXISTS chat_messages (
         id INT AUTO_INCREMENT PRIMARY KEY,
         room_id INT NOT NULL,
@@ -48,7 +48,7 @@ async function createChatTables() {
     `);
 
     // 채팅방 참여자 테이블
-    await db.query(`
+    await db.execute(`
       CREATE TABLE IF NOT EXISTS chat_participants (
         id INT AUTO_INCREMENT PRIMARY KEY,
         room_id INT NOT NULL,
@@ -66,7 +66,7 @@ async function createChatTables() {
     `);
 
     // 1:1 채팅방 테이블
-    await db.query(`
+    await db.execute(`
       CREATE TABLE IF NOT EXISTS direct_messages (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user1_id INT NOT NULL,
@@ -84,9 +84,9 @@ async function createChatTables() {
     `);
 
     // 기본 채팅방 생성
-    const existingRooms = await db.query('SELECT COUNT(*) as count FROM chat_rooms');
+    const [existingRooms] = await db.execute('SELECT COUNT(*) as count FROM chat_rooms');
     if (existingRooms[0].count === 0) {
-      await db.query(`
+      await db.execute(`
         INSERT INTO chat_rooms (name, description, type, topic) VALUES
         ('전체 채팅', '모든 사용자가 참여할 수 있는 전체 채팅방입니다.', 'public', 'general'),
         ('자유 주제', '자유롭게 이야기할 수 있는 공간입니다.', 'topic', 'free'),

@@ -1,7 +1,4 @@
 const db = require("../config/db");
-const { promisify } = require("util");
-
-const query = promisify(db.query).bind(db);
 
 // 채팅방 관련 함수들
 const chatRoomModel = {
@@ -19,7 +16,8 @@ const chatRoomModel = {
       ORDER BY cr.created_at DESC
     `;
     try {
-      return await query(sql);
+      const [rows] = await db.execute(sql);
+      return rows;
     } catch (error) {
       console.error("getAllRoomsAsync 오류:", error);
       return [];
@@ -38,8 +36,8 @@ const chatRoomModel = {
       WHERE cr.id = ? AND cr.is_active = TRUE
     `;
     try {
-      const result = await query(sql, [roomId]);
-      return result[0] || null;
+      const [rows] = await db.execute(sql, [roomId]);
+      return rows[0] || null;
     } catch (error) {
       console.error("getRoomByIdAsync 오류:", error);
       return null;
@@ -59,7 +57,8 @@ const chatRoomModel = {
       ORDER BY cr.created_at DESC
     `;
     try {
-      return await query(sql, [type]);
+      const [rows] = await db.execute(sql, [type]);
+      return rows;
     } catch (error) {
       console.error("getRoomsByTypeAsync 오류:", error);
       return [];
@@ -73,7 +72,7 @@ const chatRoomModel = {
       VALUES (?, ?, ?, ?, ?)
     `;
     try {
-      const result = await query(sql, [
+      const [result] = await db.execute(sql, [
         name,
         description,
         type,
@@ -95,7 +94,7 @@ const chatRoomModel = {
       ON DUPLICATE KEY UPDATE joined_at = CURRENT_TIMESTAMP
     `;
     try {
-      await query(sql, [roomId, userId]);
+      await db.execute(sql, [roomId, userId]);
     } catch (error) {
       console.error("joinRoomAsync 오류:", error);
       throw error;
@@ -106,7 +105,7 @@ const chatRoomModel = {
   leaveRoomAsync: async (roomId, userId) => {
     const sql = `DELETE FROM chat_participants WHERE room_id = ? AND user_id = ?`;
     try {
-      await query(sql, [roomId, userId]);
+      await db.execute(sql, [roomId, userId]);
     } catch (error) {
       console.error("leaveRoomAsync 오류:", error);
       throw error;
@@ -126,7 +125,8 @@ const chatRoomModel = {
       ORDER BY cp.joined_at DESC
     `;
     try {
-      return await query(sql, [roomId]);
+      const [rows] = await db.execute(sql, [roomId]);
+      return rows;
     } catch (error) {
       console.error("getRoomParticipantsAsync 오류:", error);
       return [];
@@ -148,7 +148,8 @@ const chatRoomModel = {
       ORDER BY cp.last_read_at DESC
     `;
     try {
-      return await query(sql, [userId]);
+      const [rows] = await db.execute(sql, [userId]);
+      return rows;
     } catch (error) {
       console.error("getUserRoomsAsync 오류:", error);
       return [];
@@ -166,10 +167,15 @@ const chatRoomModel = {
         WHERE (dm.user1_id = ? AND dm.user2_id = ?) 
            OR (dm.user1_id = ? AND dm.user2_id = ?)
       `;
-      let result = await query(sql, [user1Id, user2Id, user2Id, user1Id]);
+      const [rows] = await db.execute(sql, [
+        user1Id,
+        user2Id,
+        user2Id,
+        user1Id,
+      ]);
 
-      if (result.length > 0) {
-        return result[0];
+      if (rows.length > 0) {
+        return rows[0];
       }
 
       // 새 1:1 채팅방 생성
@@ -177,7 +183,10 @@ const chatRoomModel = {
         INSERT INTO chat_rooms (name, type, created_by)
         VALUES (?, 'private', ?)
       `;
-      const roomResult = await query(roomSql, [`Direct Message`, user1Id]);
+      const [roomResult] = await db.execute(roomSql, [
+        `Direct Message`,
+        user1Id,
+      ]);
       const roomId = roomResult.insertId;
 
       // direct_messages 테이블에 기록
@@ -185,17 +194,15 @@ const chatRoomModel = {
         INSERT INTO direct_messages (user1_id, user2_id, room_id)
         VALUES (?, ?, ?)
       `;
-      await query(dmSql, [
+      await db.execute(dmSql, [
         Math.min(user1Id, user2Id),
         Math.max(user1Id, user2Id),
         roomId,
       ]);
 
       // 두 사용자를 채팅방에 자동 참여
-      await query(
-        `INSERT INTO chat_participants (room_id, user_id) VALUES (?, ?), (?, ?)`,
-        [roomId, user1Id, roomId, user2Id]
-      );
+      const participantSql = `INSERT INTO chat_participants (room_id, user_id) VALUES (?, ?), (?, ?)`;
+      await db.execute(participantSql, [roomId, user1Id, roomId, user2Id]);
 
       return { room_id: roomId, user1_id: user1Id, user2_id: user2Id };
     } catch (error) {

@@ -1,7 +1,4 @@
-const db = require("../config/db");
-const { promisify } = require("util");
-
-const query = promisify(db.query).bind(db);
+const db = require("../config/database");
 
 // 채팅 메시지 관련 함수들
 const chatMessageModel = {
@@ -23,37 +20,23 @@ const chatMessageModel = {
       LIMIT ? OFFSET ?
     `;
     try {
-      const messages = await query(sql, [roomId, limit, offset]);
-      return messages.reverse(); // 최신 순으로 정렬
+      const [rows] = await db.execute(sql, [roomId, limit, offset]);
+      return rows.reverse(); // 최신 순으로 정렬
     } catch (error) {
-      console.error("getRoomMessagesAsync 오류:", error);
+      console.error('getRoomMessagesAsync 오류:', error);
       return [];
     }
   },
 
   // 메시지 생성
-  createMessageAsync: async ({
-    room_id,
-    user_id,
-    message,
-    message_type = "text",
-    file_url = null,
-    reply_to = null,
-  }) => {
+  createMessageAsync: async ({ room_id, user_id, message, message_type = 'text', file_url = null, reply_to = null }) => {
     const sql = `
       INSERT INTO chat_messages (room_id, user_id, message, message_type, file_url, reply_to)
       VALUES (?, ?, ?, ?, ?, ?)
     `;
     try {
-      const result = await query(sql, [
-        room_id,
-        user_id,
-        message,
-        message_type,
-        file_url,
-        reply_to,
-      ]);
-
+      const [result] = await db.execute(sql, [room_id, user_id, message, message_type, file_url, reply_to]);
+      
       // 생성된 메시지 정보 반환
       const msgSql = `
         SELECT 
@@ -64,10 +47,10 @@ const chatMessageModel = {
         JOIN users u ON cm.user_id = u.id
         WHERE cm.id = ?
       `;
-      const msgResult = await query(msgSql, [result.insertId]);
-      return msgResult[0];
+      const [msgRows] = await db.execute(msgSql, [result.insertId]);
+      return msgRows[0];
     } catch (error) {
-      console.error("createMessageAsync 오류:", error);
+      console.error('createMessageAsync 오류:', error);
       throw error;
     }
   },
@@ -80,9 +63,9 @@ const chatMessageModel = {
       WHERE id = ? AND user_id = ? AND is_deleted = FALSE
     `;
     try {
-      await query(sql, [newMessage, messageId, userId]);
+      await db.execute(sql, [newMessage, messageId, userId]);
     } catch (error) {
-      console.error("updateMessageAsync 오류:", error);
+      console.error('updateMessageAsync 오류:', error);
       throw error;
     }
   },
@@ -95,9 +78,9 @@ const chatMessageModel = {
       WHERE id = ? AND user_id = ?
     `;
     try {
-      await query(sql, [messageId, userId]);
+      await db.execute(sql, [messageId, userId]);
     } catch (error) {
-      console.error("deleteMessageAsync 오류:", error);
+      console.error('deleteMessageAsync 오류:', error);
       throw error;
     }
   },
@@ -114,10 +97,10 @@ const chatMessageModel = {
       WHERE cm.id = ? AND cm.is_deleted = FALSE
     `;
     try {
-      const result = await query(sql, [messageId]);
-      return result[0] || null;
+      const [rows] = await db.execute(sql, [messageId]);
+      return rows[0] || null;
     } catch (error) {
-      console.error("getMessageByIdAsync 오류:", error);
+      console.error('getMessageByIdAsync 오류:', error);
       return null;
     }
   },
@@ -130,9 +113,9 @@ const chatMessageModel = {
       WHERE room_id = ? AND user_id = ?
     `;
     try {
-      await query(sql, [roomId, userId]);
+      await db.execute(sql, [roomId, userId]);
     } catch (error) {
-      console.error("updateLastReadAsync 오류:", error);
+      console.error('updateLastReadAsync 오류:', error);
       throw error;
     }
   },
@@ -149,10 +132,10 @@ const chatMessageModel = {
         AND cm.is_deleted = FALSE
     `;
     try {
-      const result = await query(sql, [roomId, userId, userId]);
-      return result[0].unread_count;
+      const [rows] = await db.execute(sql, [roomId, userId, userId]);
+      return rows[0].unread_count;
     } catch (error) {
-      console.error("getUnreadCountAsync 오류:", error);
+      console.error('getUnreadCountAsync 오류:', error);
       return 0;
     }
   },
@@ -169,13 +152,13 @@ const chatMessageModel = {
         AND cm.is_deleted = FALSE
     `;
     try {
-      const result = await query(sql, [userId, userId]);
-      return result[0].total_unread;
+      const [rows] = await db.execute(sql, [userId, userId]);
+      return rows[0].total_unread;
     } catch (error) {
-      console.error("getTotalUnreadCountAsync 오류:", error);
+      console.error('getTotalUnreadCountAsync 오류:', error);
       return 0;
     }
-  },
+  }
 };
 
 module.exports = chatMessageModel;
