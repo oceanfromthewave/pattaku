@@ -237,13 +237,21 @@ class ChatSocketHandler {
         });
       });
 
-      // 읽음 상태 업데이트
+      // 읽음 상태 업데이트 (오류 처리 개선)
       socket.on('chat:mark_read', async (data) => {
         try {
           const { roomId } = data;
           if (!socket.userId) return;
 
-          await chatMessageModel.updateLastReadAsync(roomId, socket.userId);
+          // 타임아웃 설정과 함께 실행
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('DB 쿼리 타임아웃 (30초)')), 30000)
+          );
+
+          await Promise.race([
+            chatMessageModel.updateLastReadAsync(roomId, socket.userId),
+            timeoutPromise
+          ]);
 
           // 채팅방의 다른 사용자들에게 읽음 상태 알림
           socket.to(`room_${roomId}`).emit('chat:message_read', {
@@ -253,6 +261,7 @@ class ChatSocketHandler {
 
         } catch (error) {
           console.error('❌ 읽음 상태 업데이트 오류:', error);
+          // 에러가 발생해도 클라이언트에게는 알리지 않음 (선택적 기능)
         }
       });
 

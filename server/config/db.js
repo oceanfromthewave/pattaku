@@ -1,5 +1,5 @@
 // server/config/db.js
-const mysql = require("mysql2"); // 여기 반드시 mysql2!
+const mysql = require("mysql2");
 require("dotenv").config();
 
 let dbConfig;
@@ -15,8 +15,15 @@ if (process.env.DATABASE_URL) {
     password: url.password,
     database: url.pathname.substring(1), // '/' 제거
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 20,
+    maxIdle: 20,
+    idleTimeout: 60000,
     queueLimit: 0,
+    acquireTimeout: 60000,
+    timeout: 60000,
+    reconnect: true,
+    keepAliveInitialDelay: 0,
+    enableKeepAlive: true,
   };
 } else {
   // 개별 환경변수 사용
@@ -27,8 +34,15 @@ if (process.env.DATABASE_URL) {
     database: process.env.DB_NAME,
     port: process.env.DB_PORT || 3306,
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 20,
+    maxIdle: 20,
+    idleTimeout: 60000,
     queueLimit: 0,
+    acquireTimeout: 60000,
+    timeout: 60000,
+    reconnect: true,
+    keepAliveInitialDelay: 0,
+    enableKeepAlive: true,
   };
 }
 
@@ -40,5 +54,17 @@ console.log('DB 연결 설정:', {
 });
 
 const db = mysql.createPool(dbConfig);
+
+// 연결 풀 이벤트 리스너
+db.on('connection', (connection) => {
+  console.log('DB 연결 생성됨:', connection.threadId);
+});
+
+db.on('error', (err) => {
+  console.error('DB 연결 오류:', err);
+  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+    console.log('DB 연결이 끊어졌습니다. 재연결을 시도합니다.');
+  }
+});
 
 module.exports = db.promise(); // 반드시 promise()로 내보내기!

@@ -27,6 +27,7 @@ export const ChatProvider = ({ children }) => {
   const socketRef = useRef(null);
   const typingTimeoutRef = useRef({});
   const reconnectTimeoutRef = useRef(null);
+  const connectionAttempts = useRef(0);
 
   // 소켓 연결 및 인증
   useEffect(() => {
@@ -37,15 +38,20 @@ export const ChatProvider = ({ children }) => {
         transports: ['websocket', 'polling'],
         timeout: 20000,
         reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        maxReconnectionAttempts: 5
+        reconnectionAttempts: 10,
+        reconnectionDelay: 2000,
+        reconnectionDelayMax: 10000,
+        maxReconnectionAttempts: 10,
+        forceNew: true,
+        upgrade: true,
+        secure: true, // HTTPS에서 안전한 연결
+        rejectUnauthorized: false
       });
 
       newSocket.on('connect', () => {
         console.log('✅ 채팅 소켓 연결 성공');
         setIsConnected(true);
+        connectionAttempts.current = 0;
         
         // 인증 토큰 전송
         const token = localStorage.getItem('token');
@@ -62,10 +68,15 @@ export const ChatProvider = ({ children }) => {
         setIsConnected(false);
         setIsAuthenticated(false);
         
-        // 자동 재연결 시도
+        // 재연결 시도
         if (reason === 'io server disconnect') {
-          // 서버에서 강제로 연결을 끊은 경우, 수동으로 재연결
-          newSocket.connect();
+          setTimeout(() => {
+            if (connectionAttempts.current < 5) {
+              connectionAttempts.current++;
+              console.log(`🔄 재연결 시도 ${connectionAttempts.current}/5`);
+              newSocket.connect();
+            }
+          }, 3000);
         }
       });
 
@@ -73,6 +84,12 @@ export const ChatProvider = ({ children }) => {
         console.error('❌ 채팅 소켓 연결 오류:', error);
         setIsConnected(false);
         setIsAuthenticated(false);
+        connectionAttempts.current++;
+      });
+
+      newSocket.on('reconnect', (attemptNumber) => {
+        console.log('🔄 채팅 소켓 재연결 성공:', attemptNumber);
+        connectionAttempts.current = 0;
       });
 
       // 인증 결과
@@ -277,11 +294,15 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
-  // 읽음 상태 업데이트
+  // 읽음 상태 업데이트 (오류 허용)
   const markAsRead = (roomId) => {
     if (socket && isConnected && isAuthenticated) {
-      socket.emit('chat:mark_read', { roomId });
-      setUnreadCounts(prev => ({ ...prev, [roomId]: 0 }));
+      try {
+        socket.emit('chat:mark_read', { roomId });
+        setUnreadCounts(prev => ({ ...prev, [roomId]: 0 }));
+      } catch (error) {
+        console.warn('⚠️ 읽음 상태 업데이트 실패 (무시):', error);
+      }
     }
   };
 
