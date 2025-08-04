@@ -6,13 +6,54 @@ class ChatSocketHandler {
   constructor(io) {
     this.io = io;
     this.connectedUsers = new Map(); // userId -> { socketId, nickname, rooms: Set() }
+    this.pendingReadUpdates = new Map(); // roomId -> Set(userId) - 배치 처리용
+    this.readUpdateTimer = null;
     this.setupChatEvents();
+    
+    // 배치 읽음 상태 업데이트 타이머 시작
+    this.startReadUpdateBatcher();
+    
     console.log('🔌 ChatSocketHandler 초기화 완료');
+  }
+
+  // 배치 읽음 상태 업데이트 시스템
+  startReadUpdateBatcher() {
+    this.readUpdateTimer = setInterval(async () => {
+      if (this.pendingReadUpdates.size > 0) {
+        await this.processPendingReadUpdates();
+      }
+    }, 5000); // 5초마다 배치 처리
+  }
+
+  async processPendingReadUpdates() {
+    const updates = [];
+    
+    for (const [roomId, userIds] of this.pendingReadUpdates.entries()) {
+      for (const userId of userIds) {
+        updates.push({ roomId: parseInt(roomId), userId: parseInt(userId) });
+      }
+    }
+
+    if (updates.length > 0) {
+      try {
+        await chatMessageModel.batchUpdateLastReadAsync(updates);
+        console.log(`✅ 배치 읽음 상태 업데이트: ${updates.length}건 처리`);
+      } catch (error) {
+        console.error('❌ 배치 읽음 상태 업데이트 오류:', error);
+      }
+    }
+
+    this.pendingReadUpdates.clear();
   }
 
   setupChatEvents() {
     this.io.on('connection', (socket) => {
       console.log('🔌 새로운 소켓 연결:', socket.id);
+
+      // 소켓 에러 처리
+      socket.on('error', (error) => {
+        console.error('🚨 소켓 에러:', error);
+      });
 
       // 사용자 인증
       socket.on('chat:authenticate', async (token) => {
@@ -27,6 +68,15 @@ class ChatSocketHandler {
           const decoded = jwt.verify(token, process.env.JWT_SECRET);
           socket.userId = decoded.id;
           socket.nickname = decoded.nickname;
+
+          // 기존 연결이 있다면 정리
+          const existingUser = this.connectedUsers.get(decoded.id);
+          if (existingUser) {
+            const existingSocket = this.io.sockets.sockets.get(existingUser.socketId);
+            if (existingSocket && existingSocket.id !== socket.id) {
+              existingSocket.disconnect(true);
+            }
+          }
 
           // 연결된 사용자 정보 저장
           this.connectedUsers.set(decoded.id, {
@@ -237,30 +287,28 @@ class ChatSocketHandler {
         });
       });
 
-      // 읽음 상태 업데이트 (오류 처리 개선)
+      // 읽음 상태 업데이트 (배치 처리로 개선)
       socket.on('chat:mark_read', async (data) => {
         try {
           const { roomId } = data;
           if (!socket.userId) return;
 
-          // 타임아웃 설정과 함께 실행
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('DB 쿼리 타임아웃 (30초)')), 30000)
-          );
+          // 배치 처리를 위해 대기열에 추가
+          if (!this.pendingReadUpdates.has(roomId)) {
+            this.pendingReadUpdates.set(roomId, new Set());
+          }
+          this.pendingReadUpdates.get(roomId).add(socket.userId);
 
-          await Promise.race([
-            chatMessageModel.updateLastReadAsync(roomId, socket.userId),
-            timeoutPromise
-          ]);
-
-          // 채팅방의 다른 사용자들에게 읽음 상태 알림
+          // 즉시 클라이언트에 읽음 상태 알림 (UX 개선)
           socket.to(`room_${roomId}`).emit('chat:message_read', {
             userId: socket.userId,
             roomId
           });
 
+          console.log(`📖 읽음 상태 배치 대기열 추가: 사용자 ${socket.userId} -> 방 ${roomId}`);
+
         } catch (error) {
-          console.error('❌ 읽음 상태 업데이트 오류:', error);
+          console.error('❌ 읽음 상태 처리 오류:', error);
           // 에러가 발생해도 클라이언트에게는 알리지 않음 (선택적 기능)
         }
       });
@@ -296,13 +344,17 @@ class ChatSocketHandler {
             nickname: socket.nickname
           });
 
+          // 연결된 사용자 목록에서 제거
           this.connectedUsers.delete(socket.userId);
+          
+          // 해당 사용자의 읽음 상태 업데이트 대기열도 정리
+          for (const [roomId, userIds] of this.pendingReadUpdates.entries()) {
+            userIds.delete(socket.userId);
+            if (userIds.size === 0) {
+              this.pendingReadUpdates.delete(roomId);
+            }
+          }
         }
-      });
-
-      // 에러 처리
-      socket.on('error', (error) => {
-        console.error('🚨 소켓 에러:', error);
       });
     });
   }
@@ -330,6 +382,21 @@ class ChatSocketHandler {
   // 특정 사용자가 온라인인지 확인
   isUserOnline(userId) {
     return this.connectedUsers.has(parseInt(userId));
+  }
+
+  // 정리 함수 (서버 종료시 호출)
+  cleanup() {
+    if (this.readUpdateTimer) {
+      clearInterval(this.readUpdateTimer);
+      this.readUpdateTimer = null;
+    }
+    
+    // 남은 읽음 상태 업데이트 처리
+    if (this.pendingReadUpdates.size > 0) {
+      this.processPendingReadUpdates();
+    }
+    
+    console.log('🧹 ChatSocketHandler 정리 완료');
   }
 }
 

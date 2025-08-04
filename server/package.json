@@ -1,16 +1,23 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Pattaku 채팅 서버",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node --max-old-space-size=512 --expose-gc app.js",
+    "start:production": "node --max-old-space-size=350 --expose-gc app.js",
+    "dev": "nodemon --max-old-space-size=512 --expose-gc app.js",
+    "memory-check": "node --max-old-space-size=512 --expose-gc -e \"console.log('Memory limit:', process.memoryUsage())\"",
+    "db-test": "node createAllTables.js"
   },
-  "keywords": [],
+  "keywords": ["chat", "socket.io", "express", "mysql"],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",

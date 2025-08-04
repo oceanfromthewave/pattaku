@@ -1,5 +1,29 @@
 const db = require("../config/db");
 
+// 재시도 헬퍼 함수
+const retryQuery = async (queryFn, maxRetries = 3, delay = 1000) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await queryFn();
+    } catch (error) {
+      console.error(`쿼리 시도 ${attempt}/${maxRetries} 실패:`, error.message);
+      
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      
+      // ETIMEDOUT이나 PROTOCOL_CONNECTION_LOST 에러의 경우 재시도
+      if (error.code === 'ETIMEDOUT' || error.code === 'PROTOCOL_CONNECTION_LOST') {
+        await new Promise(resolve => setTimeout(resolve, delay * attempt));
+        continue;
+      }
+      
+      // 다른 에러는 즉시 throw
+      throw error;
+    }
+  }
+};
+
 // 채팅 메시지 관련 함수들
 const chatMessageModel = {
   // 채팅방의 메시지 조회 (페이지네이션)
@@ -19,13 +43,11 @@ const chatMessageModel = {
       ORDER BY cm.created_at DESC
       LIMIT ? OFFSET ?
     `;
-    try {
-      const [rows] = await db.execute(sql, [roomId, limit, offset]);
+    
+    return await retryQuery(async () => {
+      const [rows] = await db.execute(sql, [roomId, parseInt(limit), parseInt(offset)]);
       return rows.reverse(); // 최신 순으로 정렬
-    } catch (error) {
-      console.error("getRoomMessagesAsync 오류:", error);
-      return [];
-    }
+    });
   },
 
   // 메시지 생성
@@ -41,7 +63,8 @@ const chatMessageModel = {
       INSERT INTO chat_messages (room_id, user_id, message, message_type, file_url, reply_to)
       VALUES (?, ?, ?, ?, ?, ?)
     `;
-    try {
+    
+    return await retryQuery(async () => {
       const [result] = await db.execute(sql, [
         room_id,
         user_id,
@@ -63,10 +86,7 @@ const chatMessageModel = {
       `;
       const [msgRows] = await db.execute(msgSql, [result.insertId]);
       return msgRows[0];
-    } catch (error) {
-      console.error("createMessageAsync 오류:", error);
-      throw error;
-    }
+    });
   },
 
   // 메시지 수정
@@ -76,12 +96,10 @@ const chatMessageModel = {
       SET message = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND user_id = ? AND is_deleted = FALSE
     `;
-    try {
+    
+    return await retryQuery(async () => {
       await db.execute(sql, [newMessage, messageId, userId]);
-    } catch (error) {
-      console.error("updateMessageAsync 오류:", error);
-      throw error;
-    }
+    });
   },
 
   // 메시지 삭제 (소프트 삭제)
@@ -91,12 +109,10 @@ const chatMessageModel = {
       SET is_deleted = TRUE, updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND user_id = ?
     `;
-    try {
+    
+    return await retryQuery(async () => {
       await db.execute(sql, [messageId, userId]);
-    } catch (error) {
-      console.error("deleteMessageAsync 오류:", error);
-      throw error;
-    }
+    });
   },
 
   // 특정 메시지 조회
@@ -110,27 +126,38 @@ const chatMessageModel = {
       JOIN users u ON cm.user_id = u.id
       WHERE cm.id = ? AND cm.is_deleted = FALSE
     `;
-    try {
+    
+    return await retryQuery(async () => {
       const [rows] = await db.execute(sql, [messageId]);
       return rows[0] || null;
-    } catch (error) {
-      console.error("getMessageByIdAsync 오류:", error);
-      return null;
-    }
+    });
   },
 
-  // 읽음 상태 업데이트
+  // 읽음 상태 업데이트 (오류 처리 강화)
   updateLastReadAsync: async (roomId, userId) => {
     const sql = `
       UPDATE chat_participants 
       SET last_read_at = CURRENT_TIMESTAMP
       WHERE room_id = ? AND user_id = ?
     `;
+    
+    // 특별히 이 함수는 타임아웃과 재시도를 더 엄격하게 처리
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('읽음 상태 업데이트 타임아웃 (15초)')), 15000)
+    );
+    
     try {
-      await db.execute(sql, [roomId, userId]);
+      return await Promise.race([
+        retryQuery(async () => {
+          const [result] = await db.execute(sql, [roomId, userId]);
+          return result;
+        }, 2, 500), // 최대 2번 재시도, 0.5초 간격
+        timeoutPromise
+      ]);
     } catch (error) {
-      console.error("updateLastReadAsync 오류:", error);
-      throw error;
+      // 읽음 상태 업데이트는 선택적 기능이므로 로그만 남기고 에러를 throw하지 않음
+      console.error(`❌ 읽음 상태 업데이트 실패 (Room: ${roomId}, User: ${userId}):`, error.message);
+      return null;
     }
   },
 
@@ -145,13 +172,11 @@ const chatMessageModel = {
         AND cm.user_id != ? 
         AND cm.is_deleted = FALSE
     `;
-    try {
+    
+    return await retryQuery(async () => {
       const [rows] = await db.execute(sql, [roomId, userId, userId]);
       return rows[0].unread_count;
-    } catch (error) {
-      console.error("getUnreadCountAsync 오류:", error);
-      return 0;
-    }
+    });
   },
 
   // 사용자의 전체 안읽은 메시지 수
@@ -165,14 +190,42 @@ const chatMessageModel = {
         AND cm.user_id != ? 
         AND cm.is_deleted = FALSE
     `;
-    try {
+    
+    return await retryQuery(async () => {
       const [rows] = await db.execute(sql, [userId, userId]);
       return rows[0].total_unread;
-    } catch (error) {
-      console.error("getTotalUnreadCountAsync 오류:", error);
-      return 0;
-    }
+    });
   },
+
+  // 배치로 읽음 상태 업데이트 (성능 개선)
+  batchUpdateLastReadAsync: async (updates) => {
+    if (!updates || updates.length === 0) return;
+    
+    const sql = `
+      UPDATE chat_participants 
+      SET last_read_at = CURRENT_TIMESTAMP
+      WHERE (room_id = ? AND user_id = ?)
+    `;
+    
+    return await retryQuery(async () => {
+      const connection = await db.getConnection();
+      try {
+        await connection.beginTransaction();
+        
+        for (const { roomId, userId } of updates) {
+          await connection.execute(sql, [roomId, userId]);
+        }
+        
+        await connection.commit();
+        console.log(`✅ 배치 읽음 상태 업데이트 완료: ${updates.length}건`);
+      } catch (error) {
+        await connection.rollback();
+        throw error;
+      } finally {
+        connection.release();
+      }
+    });
+  }
 };
 
 module.exports = chatMessageModel;
