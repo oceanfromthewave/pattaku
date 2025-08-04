@@ -1,8 +1,8 @@
-const db = require("./config/database");
+const db = require("./config/db");
 
 async function createChatTables() {
   try {
-    console.log('🗄️ 채팅 테이블 생성 시작...');
+    console.log("🗄️ 채팅 테이블 생성 시작...");
 
     // 채팅방 테이블
     await db.execute(`
@@ -84,7 +84,9 @@ async function createChatTables() {
     `);
 
     // 기본 채팅방 생성
-    const [existingRooms] = await db.execute('SELECT COUNT(*) as count FROM chat_rooms');
+    const [existingRooms] = await db.execute(
+      "SELECT COUNT(*) as count FROM chat_rooms"
+    );
     if (existingRooms[0].count === 0) {
       await db.execute(`
         INSERT INTO chat_rooms (name, description, type, topic) VALUES
@@ -93,13 +95,13 @@ async function createChatTables() {
         ('질문과 답변', '궁금한 것이 있으면 언제든 물어보세요!', 'topic', 'qna'),
         ('공지사항', '중요한 공지사항을 전달하는 채팅방입니다.', 'topic', 'notice')
       `);
-      console.log('✅ 기본 채팅방 생성 완료');
+      console.log("✅ 기본 채팅방 생성 완료");
     }
 
-    console.log('✅ 채팅 테이블 생성 완료');
+    console.log("✅ 채팅 테이블 생성 완료");
     process.exit(0);
   } catch (error) {
-    console.error('❌ 채팅 테이블 생성 실패:', error);
+    console.error("❌ 채팅 테이블 생성 실패:", error);
     process.exit(1);
   }
 }
