@@ -14,6 +14,7 @@ const scheduleVoteRoutes = require("./routes/scheduleVote");
 const scheduleCommentRoutes = require("./routes/scheduleComment");
 const notificationRoutes = require("./routes/notificationRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const aiRoutes = require("./routes/aiRoutes"); // AI 라우트 추가
 const SocketHandler = require("./socketHandler");
 const ChatSocketHandler = require("./socket/chatSocketHandler");
 const wsNotificationMap = require('./wsNotificationMap');
@@ -22,7 +23,7 @@ const app = express();
 const server = http.createServer(app);
 
 // 메모리 제한 설정
-const MAX_MEMORY_MB = process.env.NODE_ENV === 'production' ? 350 : 500; // Render 메모리 제한 고려
+const MAX_MEMORY_MB = process.env.NODE_ENV === 'production' ? 350 : 500;
 
 // 허용할 도메인 목록
 const allowedOrigins = [
@@ -45,12 +46,10 @@ const io = new Server(server, {
   },
   allowEIO3: true,
   transports: ['websocket', 'polling'],
-  // 메모리 최적화 설정
-  maxHttpBufferSize: 1e6, // 1MB로 제한
-  pingTimeout: 60000,     // 60초로 증가
-  pingInterval: 25000,    // 25초
-  upgradeTimeout: 30000,  // 30초로 증가
-  // 연결 제한
+  maxHttpBufferSize: 1e6,
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  upgradeTimeout: 30000,
   maxConnections: process.env.NODE_ENV === 'production' ? 500 : 100
 });
 
@@ -80,7 +79,6 @@ notificationNamespace.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    // 메모리 누수 방지를 위한 정리
     for (const [userId, userSocket] of wsNotificationMap.wsMap.entries()) {
       if (userSocket === socket) {
         wsNotificationMap.delete(userId);
@@ -98,11 +96,10 @@ app.set('wsNotificationMap', wsNotificationMap);
 
 const PORT = process.env.PORT || 5000;
 
-// ------------------- CORS 설정 개선 -------------------
+// CORS 설정
 const corsOptions = {
   origin: function (origin, callback) {
     console.log('🌐 CORS 요청 origin:', origin);
-    // origin이 없는 경우(모바일 앱, Postman 등) 또는 허용 목록에 있는 경우
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -126,12 +123,11 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// 모든 OPTIONS 요청에 대한 처리
+// OPTIONS 요청 처리
 app.options("*", (req, res) => {
   console.log('🛡️ OPTIONS 요청:', req.url, 'Origin:', req.headers.origin);
   const origin = req.headers.origin;
   
-  // 허용된 origin만 설정
   if (!origin || allowedOrigins.includes(origin)) {
     res.header("Access-Control-Allow-Origin", origin || "*");
   }
@@ -139,16 +135,15 @@ app.options("*", (req, res) => {
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH");
   res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With,Accept,Origin");
   res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Max-Age", "86400"); // 24시간 캐시
+  res.header("Access-Control-Max-Age", "86400");
   res.sendStatus(200);
 });
 
-// ------------------- 바디파서 (메모리 제한) -------------------
+// 바디파서 설정
 app.use(express.json({ 
-  limit: '10mb',  // 제한 줄임
+  limit: '10mb',
   verify: (req, res, buf) => {
-    // 요청 크기 체크
-    if (buf.length > 10 * 1024 * 1024) { // 10MB
+    if (buf.length > 10 * 1024 * 1024) {
       throw new Error('요청이 너무 큽니다');
     }
   }
@@ -156,40 +151,36 @@ app.use(express.json({
 app.use(express.urlencoded({ 
   extended: true, 
   limit: '10mb',
-  parameterLimit: 1000  // 매개변수 수 제한
+  parameterLimit: 1000
 }));
 
-// ------------------- 정적 파일 서비스 -------------------
+// 정적 파일 서비스
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
     setHeaders: (res, filePath, stat) => {
       res.set("Access-Control-Allow-Origin", "*");
       res.set("Cross-Origin-Resource-Policy", "cross-origin");
-      // 캐시 헤더 추가 (메모리 절약)
-      res.set("Cache-Control", "public, max-age=86400"); // 24시간
+      res.set("Cache-Control", "public, max-age=86400");
     },
-    maxAge: '1d' // 1일 캐시
+    maxAge: '1d'
   })
 );
 
-// ------------------- 추가 헤더 설정 -------------------
+// 추가 헤더 설정 및 메모리 체크
 app.use((req, res, next) => {
-  // 메모리 사용량 체크 미들웨어
   const memUsage = process.memoryUsage();
   const memUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
   
   if (memUsedMB > MAX_MEMORY_MB) {
     console.warn(`⚠️ 메모리 사용량 경고: ${memUsedMB}MB / ${MAX_MEMORY_MB}MB`);
     
-    // 메모리 정리 시도
     if (global.gc) {
       global.gc();
       console.log('🗑️ 가비지 컬렉션 실행');
     }
   }
 
-  // 요청한 도메인이 허용 목록에 있으면 설정
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.header("Access-Control-Allow-Origin", origin);
@@ -200,17 +191,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// ------------------- 요청 크기 제한 미들웨어 -------------------
+// 요청 크기 제한
 app.use((req, res, next) => {
   const contentLength = req.get('content-length');
-  if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) { // 10MB
+  if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) {
     return res.status(413).json({ error: '요청이 너무 큽니다' });
   }
   next();
 });
 
-// ------------------- 라우터 등록 -------------------
-// API 요청 로깅 미들웨어
+// API 요청 로깅
 app.use('/api', (req, res, next) => {
   console.log(`🌐 API 요청: ${req.method} ${req.originalUrl}`);
   console.log(`   Origin: ${req.headers.origin}`);
@@ -221,6 +211,7 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
+// 라우터 등록
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/auth", authRoutes);
@@ -230,8 +221,9 @@ app.use("/api/schedules", scheduleVoteRoutes);
 app.use("/api/schedules", scheduleCommentRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/ai", aiRoutes); // AI 라우트 추가
 
-// ------------------- 헬스체크 엔드포인트 -------------------
+// 헬스체크 엔드포인트
 app.get('/health', (req, res) => {
   const memUsage = process.memoryUsage();
   res.json({
@@ -247,11 +239,10 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ------------------- 에러 핸들링 -------------------
+// 에러 핸들링
 app.use((err, req, res, next) => {
   console.error('서버 오류:', err);
   
-  // 메모리 관련 에러 체크
   if (err.message && err.message.includes('heap')) {
     console.error('💀 메모리 부족 에러 감지');
     if (global.gc) {
@@ -262,12 +253,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-// ------------------- 404 처리 -------------------
+// 404 처리
 app.use('*', (req, res) => {
   res.status(404).json({ error: 'Not Found' });
 });
 
-// ------------------- 메모리 모니터링 -------------------
+// 메모리 모니터링
 let memoryWarningCount = 0;
 const startMemoryMonitoring = () => {
   setInterval(() => {
@@ -278,47 +269,41 @@ const startMemoryMonitoring = () => {
       memoryWarningCount++;
       console.warn(`⚠️ 메모리 사용량 경고 #${memoryWarningCount}: ${memUsedMB}MB / ${MAX_MEMORY_MB}MB`);
       
-      // 연속 경고시 강제 가비지 컬렉션
       if (memoryWarningCount >= 3 && global.gc) {
         global.gc();
         memoryWarningCount = 0;
         console.log('🗑️ 강제 가비지 컬렉션 실행');
       }
     } else if (memoryWarningCount > 0) {
-      memoryWarningCount = 0; // 메모리가 정상으로 돌아오면 카운터 리셋
+      memoryWarningCount = 0;
     }
     
-    // 개발 환경에서만 로그 출력
     if (process.env.NODE_ENV !== 'production') {
       console.log('📊 메모리 사용량:', {
         heap: `${memUsedMB}MB`,
         connections: io.engine.clientsCount
       });
     }
-  }, 30000); // 30초마다
+  }, 30000);
 };
 
-// ------------------- Graceful Shutdown -------------------
+// Graceful Shutdown
 const gracefulShutdown = async (signal) => {
   console.log(`\n🔄 ${signal} 신호 수신 - 서버 종료 시작...`);
   
   try {
-    // 새로운 연결 거부
     server.close(() => {
       console.log('✅ HTTP 서버 종료');
     });
     
-    // Socket.io 정리
     if (chatSocketHandler && typeof chatSocketHandler.cleanup === 'function') {
       chatSocketHandler.cleanup();
     }
     
-    // 모든 소켓 연결 종료
     io.close(() => {
       console.log('✅ Socket.io 서버 종료');
     });
     
-    // 알림 맵 정리
     wsNotificationMap.clear();
     
     console.log('✅ 정리 작업 완료');
@@ -333,7 +318,6 @@ const gracefulShutdown = async (signal) => {
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-// 처리되지 않은 예외 처리
 process.on('uncaughtException', (error) => {
   console.error('💀 처리되지 않은 예외:', error);
   gracefulShutdown('uncaughtException');
@@ -344,7 +328,7 @@ process.on('unhandledRejection', (reason, promise) => {
   gracefulShutdown('unhandledRejection');
 });
 
-// ------------------- 서버 시작 -------------------
+// 서버 시작
 server.listen(PORT, () => {
   console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
   console.log(`🔌 Socket.io 실행 중 - 채팅: /, 알림: /notifications`);
@@ -354,8 +338,8 @@ server.listen(PORT, () => {
   console.log('📊 API 엔드포인트:');
   console.log('   - GET /health (서버 상태 체크)');
   console.log('   - /api/chat/* (채팅 관련)');
+  console.log('   - /api/ai/* (AI 기능)'); // AI 엔드포인트 추가
   console.log('   - /api/users/* (사용자 관련)');
   
-  // 메모리 모니터링 시작
   startMemoryMonitoring();
 });

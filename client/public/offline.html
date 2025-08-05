@@ -1,0 +1,264 @@
+<!-- public/offline.html - 오프라인 페이지 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오프라인 - Pattaku Chat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .offline-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 60px 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .offline-icon {
+      font-size: 6rem;
+      margin-bottom: 30px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .offline-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      background: linear-gradient(45deg, #fff, #f0f8ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .offline-message {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      margin-bottom: 40px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .retry-button {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+      min-width: 200px;
+    }
+
+    .retry-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(79, 172, 254, 0.4);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #e53e3e;
+      animation: blink 1s infinite;
+    }
+
+    .status-dot.online {
+      background: #48bb78;
+      animation: none;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .cached-content {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .cached-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .cached-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .cached-item {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      text-decoration: none;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .cached-item:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 480px) {
+      .offline-container {
+        padding: 40px 20px;
+      }
+
+      .offline-title {
+        font-size: 2rem;
+      }
+
+      .offline-message {
+        font-size: 1rem;
+      }
+
+      .retry-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">📡</div>
+    
+    <h1 class="offline-title">오프라인 상태</h1>
+    
+    <p class="offline-message">
+      인터넷 연결을 확인할 수 없습니다.<br>
+      네트워크 연결을 확인하고 다시 시도해주세요.
+    </p>
+    
+    <div class="offline-actions">
+      <button class="retry-button" onclick="retryConnection()">
+        🔄 다시 연결하기
+      </button>
+      
+      <div class="status-indicator">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">연결 확인 중...</span>
+      </div>
+    </div>
+
+    <div class="cached-content">
+      <h3 class="cached-title">💾 오프라인에서 사용 가능한 기능</h3>
+      <div class="cached-items">
+        <a href="/chat" class="cached-item">채팅 기록 보기</a>
+        <a href="/posts" class="cached-item">저장된 게시글</a>
+        <a href="/schedule" class="cached-item">일정 보기</a>
+        <a href="/mypage" class="cached-item">내 정보</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let retryInterval;
+    let isOnline = navigator.onLine;
+
+    // 연결 상태 확인
+    function checkConnection() {
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+
+      if (navigator.onLine) {
+        fetch('/', { method: 'HEAD', cache: 'no-cache' })
+          .then(() => {
+            statusDot.classList.add('online');
+            statusText.textContent = '연결됨 - 페이지를 새로고침해주세요';
+            clearInterval(retryInterval);
+            
+            // 3초 후 자동 새로고침
+            setTimeout(() => {
+              window.location.reload();
+            }, 3000);
+          })
+          .catch(() => {
+            statusDot.classList.remove('online');
+            statusText.textContent = '오프라인';
+          });
+      } else {
+        statusDot.classList.remove('online');
+        statusText.textContent = '네트워크 연결 없음';
+      }
+    }
+
+    // 다시 연결 시도
+    function retryConnection() {
+      const button = document.querySelector('.retry-button');
+      button.textContent = '🔄 연결 확인 중...';
+      button.disabled = true;
+
+      checkConnection();
+
+      setTimeout(() => {
+        button.textContent = '🔄 다시 연결하기';
+        button.disabled = false;
+      }, 2000);
+    }
+
+    // 온라인/오프라인 이벤트 리스너
+    window.addEventListener('online', () => {
+      isOnline = true;
+      checkConnection();
+    });
+
+    window.addEventListener('offline', () => {
+      isOnline = false;
+      checkConnection();
+    });
+
+    // 주기적으로 연결 상태 확인
+    retryInterval = setInterval(checkConnection, 10000);
+
+    // 초기 연결 상태 확인
+    checkConnection();
+  </script>
+</body>
+</html>

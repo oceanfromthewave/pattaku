@@ -24,27 +24,63 @@ const retryQuery = async (queryFn, maxRetries = 3, delay = 1000) => {
   }
 };
 
+// 프로필 이미지 컬럼 확인 (캐시 적용)
+let profileImageColumn = null;
+let lastChecked = 0;
+const CACHE_TTL = 300000; // 5분
+
+const getProfileImageColumn = async () => {
+  const now = Date.now();
+  if (profileImageColumn !== null && (now - lastChecked) < CACHE_TTL) {
+    return profileImageColumn;
+  }
+
+  try {
+    const [columns] = await db.execute('DESCRIBE users');
+    const profileCol = columns.find(col => 
+      col.Field === 'profile_image' || col.Field === 'profileImage'
+    );
+    
+    profileImageColumn = profileCol ? profileCol.Field : null;
+    lastChecked = now;
+    
+    console.log(`📋 프로필 이미지 컬럼 확인: ${profileImageColumn || '없음'}`);
+    return profileImageColumn;
+  } catch (error) {
+    console.error('프로필 이미지 컬럼 확인 실패:', error);
+    return null;
+  }
+};
+
+// 프로필 필드 생성 헬퍼
+const getProfileField = async (alias = 'sender_profile') => {
+  const column = await getProfileImageColumn();
+  return column ? `u.${column} as ${alias}` : `NULL as ${alias}`;
+};
+
 // 채팅 메시지 관련 함수들
 const chatMessageModel = {
   // 채팅방의 메시지 조회 (페이지네이션)
   getRoomMessagesAsync: async (roomId, limit = 50, offset = 0) => {
-    const sql = `
-      SELECT 
-        cm.*,
-        u.nickname as sender_nickname,
-        u.profileImage as sender_profile,
-        reply_msg.message as reply_message,
-        reply_user.nickname as reply_user_nickname
-      FROM chat_messages cm
-      JOIN users u ON cm.user_id = u.id
-      LEFT JOIN chat_messages reply_msg ON cm.reply_to = reply_msg.id
-      LEFT JOIN users reply_user ON reply_msg.user_id = reply_user.id
-      WHERE cm.room_id = ? AND cm.is_deleted = FALSE
-      ORDER BY cm.created_at DESC
-      LIMIT ? OFFSET ?
-    `;
-    
     return await retryQuery(async () => {
+      const profileField = await getProfileField('sender_profile');
+      
+      const sql = `
+        SELECT 
+          cm.*,
+          u.nickname as sender_nickname,
+          ${profileField},
+          reply_msg.message as reply_message,
+          reply_user.nickname as reply_user_nickname
+        FROM chat_messages cm
+        JOIN users u ON cm.user_id = u.id
+        LEFT JOIN chat_messages reply_msg ON cm.reply_to = reply_msg.id
+        LEFT JOIN users reply_user ON reply_msg.user_id = reply_user.id
+        WHERE cm.room_id = ? AND cm.is_deleted = FALSE
+        ORDER BY cm.created_at DESC
+        LIMIT ? OFFSET ?
+      `;
+      
       const [rows] = await db.execute(sql, [roomId, parseInt(limit), parseInt(offset)]);
       return rows.reverse(); // 최신 순으로 정렬
     });
@@ -75,11 +111,13 @@ const chatMessageModel = {
       ]);
 
       // 생성된 메시지 정보 반환
+      const profileField = await getProfileField('sender_profile');
+      
       const msgSql = `
         SELECT 
           cm.*,
           u.nickname as sender_nickname,
-          u.profileImage as sender_profile
+          ${profileField}
         FROM chat_messages cm
         JOIN users u ON cm.user_id = u.id
         WHERE cm.id = ?
@@ -117,17 +155,19 @@ const chatMessageModel = {
 
   // 특정 메시지 조회
   getMessageByIdAsync: async (messageId) => {
-    const sql = `
-      SELECT 
-        cm.*,
-        u.nickname as sender_nickname,
-        u.profileImage as sender_profile
-      FROM chat_messages cm
-      JOIN users u ON cm.user_id = u.id
-      WHERE cm.id = ? AND cm.is_deleted = FALSE
-    `;
-    
     return await retryQuery(async () => {
+      const profileField = await getProfileField('sender_profile');
+      
+      const sql = `
+        SELECT 
+          cm.*,
+          u.nickname as sender_nickname,
+          ${profileField}
+        FROM chat_messages cm
+        JOIN users u ON cm.user_id = u.id
+        WHERE cm.id = ? AND cm.is_deleted = FALSE
+      `;
+      
       const [rows] = await db.execute(sql, [messageId]);
       return rows[0] || null;
     });

@@ -1,0 +1,64 @@
+{
+  "name": "Pattaku Chat - 실시간 채팅 플랫폼",
+  "short_name": "Pattaku Chat",
+  "description": "실시간 채팅, 게시판, 일정 관리가 가능한 통합 커뮤니티 플랫폼",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#667eea",
+  "background_color": "#ffffff",
+  "scope": "/",
+  "lang": "ko-KR",
+  "dir": "ltr",
+  
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  
+  "shortcuts": [
+    {
+      "name": "채팅",
+      "short_name": "Chat",
+      "description": "실시간 채팅방으로 바로 이동",
+      "url": "/chat",
+      "icons": [
+        {
+          "src": "/icons/shortcut-chat.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "게시판",
+      "short_name": "Posts",
+      "description": "게시판으로 바로 이동",
+      "url": "/posts",
+      "icons": [
+        {
+          "src": "/icons/shortcut-posts.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  
+  "categories": [
+    "social",
+    "productivity",
+    "communication"
+  ],
+  
+  "related_applications": [],
+  "prefer_related_applications": false
+}
