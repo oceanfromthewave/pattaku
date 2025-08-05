@@ -22,7 +22,9 @@ class ChatSocketHandler {
       if (this.pendingReadUpdates.size > 0) {
         await this.processPendingReadUpdates();
       }
-    }, 5000); // 5초마다 배치 처리
+    }, 10000); // 10초마다 배치 처리 (더 안정적)
+    
+    console.log('🔄 배치 읽음 상태 업데이트 시스템 시작 (10초 간격)');
   }
 
   async processPendingReadUpdates() {
@@ -36,8 +38,9 @@ class ChatSocketHandler {
 
     if (updates.length > 0) {
       try {
+        console.log(`🗓️ 배치 읽음 상태 업데이트 시작: ${updates.length}건`);
         await chatMessageModel.batchUpdateLastReadAsync(updates);
-        console.log(`✅ 배치 읽음 상태 업데이트: ${updates.length}건 처리`);
+        console.log(`✅ 배치 읽음 상태 업데이트 완료: ${updates.length}건`);
       } catch (error) {
         console.error('❌ 배치 읽음 상태 업데이트 오류:', error);
       }
@@ -297,15 +300,20 @@ class ChatSocketHandler {
           if (!this.pendingReadUpdates.has(roomId)) {
             this.pendingReadUpdates.set(roomId, new Set());
           }
+          
+          const wasEmpty = this.pendingReadUpdates.get(roomId).size === 0;
           this.pendingReadUpdates.get(roomId).add(socket.userId);
+
+          // 첫 번째 사용자일 때만 로그
+          if (wasEmpty) {
+            console.log(`📖 읽음 상태 배치 대기열 추가: 방 ${roomId}`);
+          }
 
           // 즉시 클라이언트에 읽음 상태 알림 (UX 개선)
           socket.to(`room_${roomId}`).emit('chat:message_read', {
             userId: socket.userId,
             roomId
           });
-
-          console.log(`📖 읽음 상태 배치 대기열 추가: 사용자 ${socket.userId} -> 방 ${roomId}`);
 
         } catch (error) {
           console.error('❌ 읽음 상태 처리 오류:', error);

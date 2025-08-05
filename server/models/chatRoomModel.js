@@ -147,18 +147,16 @@ const chatRoomModel = {
       WHERE cp.user_id = ? AND cr.is_active = TRUE
       ORDER BY cp.last_read_at DESC
     `;
-    try {
+    
+    return await retryQuery(async () => {
       const [rows] = await db.execute(sql, [userId]);
       return rows;
-    } catch (error) {
-      console.error("getUserRoomsAsync 오류:", error);
-      return [];
-    }
+    });
   },
 
   // 1:1 채팅방 생성 또는 찾기
   getOrCreateDirectMessageAsync: async (user1Id, user2Id) => {
-    try {
+    return await retryQuery(async () => {
       // 기존 1:1 채팅방 찾기
       let sql = `
         SELECT dm.*, cr.name, cr.id as room_id
@@ -205,10 +203,7 @@ const chatRoomModel = {
       await db.execute(participantSql, [roomId, user1Id, roomId, user2Id]);
 
       return { room_id: roomId, user1_id: user1Id, user2_id: user2Id };
-    } catch (error) {
-      console.error("getOrCreateDirectMessageAsync 오류:", error);
-      throw error;
-    }
+    });
   },
 };
 

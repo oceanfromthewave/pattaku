@@ -47,9 +47,9 @@ const io = new Server(server, {
   transports: ['websocket', 'polling'],
   // 메모리 최적화 설정
   maxHttpBufferSize: 1e6, // 1MB로 제한
-  pingTimeout: 30000,     // 30초
+  pingTimeout: 60000,     // 60초로 증가
   pingInterval: 25000,    // 25초
-  upgradeTimeout: 10000,  // 10초
+  upgradeTimeout: 30000,  // 30초로 증가
   // 연결 제한
   maxConnections: process.env.NODE_ENV === 'production' ? 500 : 100
 });
@@ -101,11 +101,12 @@ const PORT = process.env.PORT || 5000;
 // ------------------- CORS 설정 개선 -------------------
 const corsOptions = {
   origin: function (origin, callback) {
+    console.log('🌐 CORS 요청 origin:', origin);
     // origin이 없는 경우(모바일 앱, Postman 등) 또는 허용 목록에 있는 경우
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log('CORS 차단된 도메인:', origin);
+      console.log('❌ CORS 차단된 도메인:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -127,10 +128,18 @@ app.use(cors(corsOptions));
 
 // 모든 OPTIONS 요청에 대한 처리
 app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  console.log('🛡️ OPTIONS 요청:', req.url, 'Origin:', req.headers.origin);
+  const origin = req.headers.origin;
+  
+  // 허용된 origin만 설정
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin || "*");
+  }
+  
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH");
   res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With,Accept,Origin");
   res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Max-Age", "86400"); // 24시간 캐시
   res.sendStatus(200);
 });
 
@@ -201,6 +210,17 @@ app.use((req, res, next) => {
 });
 
 // ------------------- 라우터 등록 -------------------
+// API 요청 로깅 미들웨어
+app.use('/api', (req, res, next) => {
+  console.log(`🌐 API 요청: ${req.method} ${req.originalUrl}`);
+  console.log(`   Origin: ${req.headers.origin}`);
+  console.log(`   User-Agent: ${req.headers['user-agent']?.substring(0, 50)}...`);
+  if (req.headers.authorization) {
+    console.log(`   인증: 토큰 있음`);
+  }
+  next();
+});
+
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/auth", authRoutes);
@@ -330,6 +350,11 @@ server.listen(PORT, () => {
   console.log(`🔌 Socket.io 실행 중 - 채팅: /, 알림: /notifications`);
   console.log('📋 허용된 도메인:', allowedOrigins);
   console.log(`🧠 메모리 제한: ${MAX_MEMORY_MB}MB`);
+  console.log(`🌍 환경: ${process.env.NODE_ENV || 'development'}`);
+  console.log('📊 API 엔드포인트:');
+  console.log('   - GET /health (서버 상태 체크)');
+  console.log('   - /api/chat/* (채팅 관련)');
+  console.log('   - /api/users/* (사용자 관련)');
   
   // 메모리 모니터링 시작
   startMemoryMonitoring();
