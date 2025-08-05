@@ -1,5 +1,29 @@
 const db = require("../config/db");
 
+// 재시도 헬퍼 함수
+const retryQuery = async (queryFn, maxRetries = 3, delay = 1000) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await queryFn();
+    } catch (error) {
+      console.error(`쿼리 시도 ${attempt}/${maxRetries} 실패:`, error.message);
+      
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      
+      // ETIMEDOUT이나 PROTOCOL_CONNECTION_LOST 에러의 경우 재시도
+      if (error.code === 'ETIMEDOUT' || error.code === 'PROTOCOL_CONNECTION_LOST') {
+        await new Promise(resolve => setTimeout(resolve, delay * attempt));
+        continue;
+      }
+      
+      // 다른 에러는 즉시 throw
+      throw error;
+    }
+  }
+};
+
 // 채팅방 관련 함수들
 const chatRoomModel = {
   // 모든 채팅방 조회
@@ -15,13 +39,11 @@ const chatRoomModel = {
       WHERE cr.is_active = TRUE
       ORDER BY cr.created_at DESC
     `;
-    try {
+    
+    return await retryQuery(async () => {
       const [rows] = await db.execute(sql);
       return rows;
-    } catch (error) {
-      console.error("getAllRoomsAsync 오류:", error);
-      return [];
-    }
+    });
   },
 
   // ID로 채팅방 조회
@@ -35,13 +57,11 @@ const chatRoomModel = {
       LEFT JOIN users u ON cr.created_by = u.id
       WHERE cr.id = ? AND cr.is_active = TRUE
     `;
-    try {
+    
+    return await retryQuery(async () => {
       const [rows] = await db.execute(sql, [roomId]);
       return rows[0] || null;
-    } catch (error) {
-      console.error("getRoomByIdAsync 오류:", error);
-      return null;
-    }
+    });
   },
 
   // 타입별 채팅방 조회
@@ -56,13 +76,11 @@ const chatRoomModel = {
       WHERE cr.type = ? AND cr.is_active = TRUE
       ORDER BY cr.created_at DESC
     `;
-    try {
+    
+    return await retryQuery(async () => {
       const [rows] = await db.execute(sql, [type]);
       return rows;
-    } catch (error) {
-      console.error("getRoomsByTypeAsync 오류:", error);
-      return [];
-    }
+    });
   },
 
   // 채팅방 생성
@@ -71,7 +89,8 @@ const chatRoomModel = {
       INSERT INTO chat_rooms (name, description, type, topic, created_by)
       VALUES (?, ?, ?, ?, ?)
     `;
-    try {
+    
+    return await retryQuery(async () => {
       const [result] = await db.execute(sql, [
         name,
         description,
@@ -80,10 +99,7 @@ const chatRoomModel = {
         created_by,
       ]);
       return result.insertId;
-    } catch (error) {
-      console.error("createRoomAsync 오류:", error);
-      throw error;
-    }
+    });
   },
 
   // 채팅방 참여
@@ -93,44 +109,69 @@ const chatRoomModel = {
       VALUES (?, ?)
       ON DUPLICATE KEY UPDATE joined_at = CURRENT_TIMESTAMP
     `;
-    try {
+    
+    return await retryQuery(async () => {
       await db.execute(sql, [roomId, userId]);
-    } catch (error) {
-      console.error("joinRoomAsync 오류:", error);
-      throw error;
-    }
+    });
   },
 
   // 채팅방 나가기
   leaveRoomAsync: async (roomId, userId) => {
     const sql = `DELETE FROM chat_participants WHERE room_id = ? AND user_id = ?`;
-    try {
+    
+    return await retryQuery(async () => {
       await db.execute(sql, [roomId, userId]);
-    } catch (error) {
-      console.error("leaveRoomAsync 오류:", error);
-      throw error;
-    }
+    });
   },
 
-  // 채팅방 참여자 조회
+  // 채팅방 참여자 조회 (동적 컬럼 확인)
   getRoomParticipantsAsync: async (roomId) => {
-    const sql = `
-      SELECT 
-        cp.*,
-        u.nickname,
-        u.profileImage
-      FROM chat_participants cp
-      JOIN users u ON cp.user_id = u.id
-      WHERE cp.room_id = ?
-      ORDER BY cp.joined_at DESC
-    `;
-    try {
-      const [rows] = await db.execute(sql, [roomId]);
-      return rows;
-    } catch (error) {
-      console.error("getRoomParticipantsAsync 오류:", error);
-      return [];
-    }
+    return await retryQuery(async () => {
+      try {
+        // 먼저 users 테이블의 컬럼을 확인
+        const [columns] = await db.execute('DESCRIBE users');
+        const hasProfileImage = columns.some(col => 
+          col.Field === 'profile_image' || col.Field === 'profileImage'
+        );
+        
+        let profileField = '';
+        if (hasProfileImage) {
+          const profileCol = columns.find(col => 
+            col.Field === 'profile_image' || col.Field === 'profileImage'
+          );
+          profileField = `, u.${profileCol.Field} as profile_image`;
+        }
+        
+        const sql = `
+          SELECT 
+            cp.*,
+            u.nickname${profileField}
+          FROM chat_participants cp
+          JOIN users u ON cp.user_id = u.id
+          WHERE cp.room_id = ?
+          ORDER BY cp.joined_at DESC
+        `;
+        
+        const [rows] = await db.execute(sql, [roomId]);
+        return rows;
+      } catch (error) {
+        console.error('getRoomParticipantsAsync 상세 오류:', error);
+        // 최소한의 정보라도 반환
+        const fallbackSql = `
+          SELECT 
+            cp.room_id,
+            cp.user_id,
+            cp.joined_at,
+            u.nickname
+          FROM chat_participants cp
+          JOIN users u ON cp.user_id = u.id
+          WHERE cp.room_id = ?
+          ORDER BY cp.joined_at DESC
+        `;
+        const [fallbackRows] = await db.execute(fallbackSql, [roomId]);
+        return fallbackRows;
+      }
+    });
   },
 
   // 사용자 참여 채팅방 조회

@@ -41,11 +41,17 @@ exports.getRoomById = async (req, res) => {
       return res.status(404).json({ error: '채팅방을 찾을 수 없습니다.' });
     }
 
-    // 참여자 목록도 함께 조회
-    const participants = await chatRoomModel.getRoomParticipantsAsync(roomId);
-    room.participants = participants;
+    // 참여자 목록 조회 (오류 발생시 빈 배열로 처리)
+    try {
+      const participants = await chatRoomModel.getRoomParticipantsAsync(roomId);
+      room.participants = participants;
+      console.log(`✅ 채팅방 상세 조회 성공: ${room.name} (참여자 ${participants.length}명)`);
+    } catch (participantError) {
+      console.warn(`⚠️ 참여자 조회 실패, 빈 배열로 설정:`, participantError.message);
+      room.participants = [];
+      console.log(`✅ 채팅방 상세 조회 성공: ${room.name} (참여자 조회 실패)`);
+    }
 
-    console.log(`✅ 채팅방 상세 조회 성공: ${room.name} (참여자 ${participants.length}명)`);
     res.json(room);
   } catch (error) {
     console.error('❌ 채팅방 상세 조회 오류:', error);
