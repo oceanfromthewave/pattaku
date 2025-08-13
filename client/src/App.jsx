@@ -1,27 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { useAuth } from './contexts/AuthContext';
 import { ChatProvider } from './contexts/ChatContext';
 import Header from './components/Header';
 import Home from './components/Home';
-import PostList from './components/Posts/PostList';
-import PostDetail from './components/Posts/PostDetail';
-import PostForm from './components/Posts/PostForm';
-import EditPostForm from './components/Posts/EditPostForm';
-import ScheduleList from './components/Schedule/ScheduleList';
-import ScheduleDetail from './components/Schedule/ScheduleDetail';
-import ScheduleForm from './components/Schedule/ScheduleForm';
-import EditScheduleForm from './components/Schedule/EditScheduleForm';
-import ChatRoomList from './components/Chat/ChatRoomList';
-import ChatRoom from './components/Chat/ChatRoom';
-import MyPage from './components/MyPage/MyPage';
-import LoginForm from './components/Auth/LoginForm';
-import RegisterForm from './components/Auth/RegisterForm';
 import ErrorBoundary from './components/ErrorBoundary';
 import TokenExpiredModal from './components/TokenExpiredModal';
-import DebugApiConfig from './components/DebugApiConfig';
-import DevStatusDashboard from './components/DevStatusDashboard';
+import Loading from './components/Loading';
+
+// 동적 임포트로 코드 스플리팅
+const PostList = React.lazy(() => import('./components/Posts/PostList'));
+const PostDetail = React.lazy(() => import('./components/Posts/PostDetail'));
+const PostForm = React.lazy(() => import('./components/Posts/PostForm'));
+const EditPostForm = React.lazy(() => import('./components/Posts/EditPostForm'));
+const ScheduleList = React.lazy(() => import('./components/Schedule/ScheduleList'));
+const ScheduleDetail = React.lazy(() => import('./components/Schedule/ScheduleDetail'));
+const ScheduleForm = React.lazy(() => import('./components/Schedule/ScheduleForm'));
+const EditScheduleForm = React.lazy(() => import('./components/Schedule/EditScheduleForm'));
+const ChatRoomList = React.lazy(() => import('./components/Chat/ChatRoomList'));
+const ChatRoom = React.lazy(() => import('./components/Chat/ChatRoom'));
+const MyPage = React.lazy(() => import('./components/MyPage/MyPage'));
+const LoginForm = React.lazy(() => import('./components/Auth/LoginForm'));
+const RegisterForm = React.lazy(() => import('./components/Auth/RegisterForm'));
+const DebugApiConfig = React.lazy(() => import('./components/DebugApiConfig'));
+const DevStatusDashboard = React.lazy(() => import('./components/DevStatusDashboard'));
 import './styles/main.scss';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -46,8 +49,9 @@ function App() {
         
         <main className="main-content">
           <ErrorBoundary>
-            <Routes>
-              <Route path="/" element={<Home />} />
+            <Suspense fallback={<Loading />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
               <Route 
                 path="/login" 
                 element={<LoginForm />} 
@@ -85,7 +89,8 @@ function App() {
                   </div>
                 </div>
               } />
-            </Routes>
+              </Routes>
+            </Suspense>
           </ErrorBoundary>
         </main>
 

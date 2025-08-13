@@ -2,6 +2,7 @@ const postModel = require("../models/postModel");
 const fs = require("fs");
 const path = require("path");
 const NotificationService = require("../notificationService");
+const cache = require("../utils/cache");
 
 let notificationService;
 
@@ -39,7 +40,19 @@ exports.createPost = async (req, res) => {
     res.status(201).json({ message: "글 작성 성공", postId: result.insertId });
   } catch (err) {
     console.error('❌ 게시글 작성 실패:', err);
-    res.status(500).json({ error: "글 작성 실패" });
+    
+    // 에러 타입별 처리
+    if (err.code === 'ER_NO_REFERENCED_ROW_2') {
+      return res.status(400).json({ error: "잘못된 사용자 정보입니다." });
+    }
+    if (err.code === 'ER_DATA_TOO_LONG') {
+      return res.status(400).json({ error: "내용이 너무 깁니다." });
+    }
+    if (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') {
+      return res.status(503).json({ error: "데이터베이스 연결 오류" });
+    }
+    
+    res.status(500).json({ error: "글 작성 중 오류가 발생했습니다." });
   }
 };
 
@@ -51,6 +64,18 @@ exports.getAllPosts = async (req, res) => {
     const { q: keyword, author, sort } = req.query;
 
     console.log(`📋 게시글 목록 조회: 페이지 ${page}, 검색어: "${keyword || '없음'}"`);
+
+    // 캐시 키 생성
+    const cacheKey = `posts:${page}:${limit}:${keyword || 'none'}:${author || 'none'}:${sort || 'recent'}`;
+    
+    // 캐시에서 확인 (검색이나 필터링이 없는 경우만)
+    if (!keyword && !author && page <= 5) { // 첫 5페이지만 캐싱
+      const cached = cache.get(cacheKey);
+      if (cached) {
+        console.log(`🚀 캐시에서 반환: ${cacheKey}`);
+        return res.json(cached);
+      }
+    }
 
     // 검색 조건 구성
     let whereClause = "WHERE 1=1";
@@ -66,10 +91,14 @@ exports.getAllPosts = async (req, res) => {
       queryParams.push(`%${author}%`, `%${author}%`);
     }
 
-    // 정렬 조건
+    // 정렬 조건 (최적화된 컬럼 사용)
     let orderClause = "ORDER BY p.created_at DESC";
     if (sort === 'popular') {
-      orderClause = "ORDER BY likes DESC, p.created_at DESC";
+      orderClause = "ORDER BY p.like_count DESC, p.created_at DESC";
+    } else if (sort === 'comments') {
+      orderClause = "ORDER BY p.comment_count DESC, p.created_at DESC";
+    } else if (sort === 'views') {
+      orderClause = "ORDER BY p.view_count DESC, p.created_at DESC";
     }
 
     // 전체 개수 조회
@@ -82,35 +111,19 @@ exports.getAllPosts = async (req, res) => {
     const countResult = await postModel.getAllWithPaginationAsync(countQuery, queryParams);
     const total = countResult[0].total;
 
-    // 게시글 목록 조회
+    // 최적화된 게시글 목록 조회 (비정규화된 컬럼 사용)
     const postsQuery = `
       SELECT 
         p.*,
         u.username as author,
         u.nickname as author_nickname,
-        COALESCE(like_counts.likes, 0) as likes,
-        COALESCE(like_counts.dislikes, 0) as dislikes,
-        COALESCE(comment_counts.comments_count, 0) as comments_count,
-        COALESCE(file_counts.files_count, 0) as files_count
+        p.like_count as likes,
+        p.dislike_count as dislikes,
+        p.comment_count as comments_count,
+        p.file_count as files_count,
+        p.view_count
       FROM posts p
       LEFT JOIN users u ON p.user_id = u.id
-      LEFT JOIN (
-        SELECT post_id, 
-               SUM(CASE WHEN type = 'like' THEN 1 ELSE 0 END) as likes,
-               SUM(CASE WHEN type = 'dislike' THEN 1 ELSE 0 END) as dislikes
-        FROM post_likes 
-        GROUP BY post_id
-      ) like_counts ON p.id = like_counts.post_id
-      LEFT JOIN (
-        SELECT post_id, COUNT(*) as comments_count
-        FROM comments 
-        GROUP BY post_id
-      ) comment_counts ON p.id = comment_counts.post_id
-      LEFT JOIN (
-        SELECT post_id, COUNT(*) as files_count
-        FROM post_files 
-        GROUP BY post_id
-      ) file_counts ON p.id = file_counts.post_id
       ${whereClause}
       ${orderClause}
       LIMIT ? OFFSET ?
@@ -123,19 +136,36 @@ exports.getAllPosts = async (req, res) => {
     
     const totalPages = Math.ceil(total / limit);
     
-    console.log(`✅ 게시글 목록 조회 성공: ${posts.length}개`);
-    
-    res.json({
+    const result = {
       posts,
       currentPage: page,
       totalPages,
       total,
       hasNext: page < totalPages,
       hasPrev: page > 1
-    });
+    };
+    
+    // 캐시에 저장 (검색이나 필터링이 없는 경우만)
+    if (!keyword && !author && page <= 5) {
+      cache.set(cacheKey, result, 180000); // 3분 TTL
+      console.log(`💾 캐시에 저장: ${cacheKey}`);
+    }
+    
+    console.log(`✅ 게시글 목록 조회 성공: ${posts.length}개`);
+    
+    res.json(result);
   } catch (err) {
     console.error('❌ 게시글 목록 조회 실패:', err);
-    res.status(500).json({ error: "글 목록 조회 실패" });
+    
+    // 에러 타입별 처리
+    if (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') {
+      return res.status(503).json({ error: "데이터베이스 연결 오류" });
+    }
+    if (err.code === 'ER_BAD_FIELD_ERROR') {
+      return res.status(400).json({ error: "잘못된 정렬 조건입니다." });
+    }
+    
+    res.status(500).json({ error: "게시글 목록을 불러올 수 없습니다." });
   }
 };
 

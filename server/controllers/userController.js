@@ -13,7 +13,13 @@ exports.getAllUsers = async (req, res) => {
     const users = await userModel.getAllAsync();
     res.json(users);
   } catch (err) {
-    res.status(500).json({ error: "사용자 조회 실패" });
+    console.error('❌ 사용자 조회 실패:', err);
+    
+    if (err.code === 'ECONNREFUSED' || err.code === 'ETIMEDOUT') {
+      return res.status(503).json({ error: "데이터베이스 연결 오류" });
+    }
+    
+    res.status(500).json({ error: "사용자 조회 중 오류가 발생했습니다." });
   }
 };
 
@@ -40,12 +46,21 @@ exports.registerUser = async (req, res) => {
     await userModel.createAsync({ username, password: hash, email, nickname });
     res.status(201).json({ message: "회원가입 성공" });
   } catch (e) {
+    console.error('❌ 회원가입 실패:', e);
+    
     if (e.code === "ER_DUP_ENTRY") {
       return res
         .status(409)
         .json({ error: "이미 존재하는 아이디/이메일/닉네임입니다." });
     }
-    res.status(500).json({ error: "회원가입 실패", details: e.message });
+    if (e.code === 'ECONNREFUSED' || e.code === 'ETIMEDOUT') {
+      return res.status(503).json({ error: "데이터베이스 연결 오류" });
+    }
+    if (e.code === 'ER_DATA_TOO_LONG') {
+      return res.status(400).json({ error: "입력 데이터가 너무 깁니다." });
+    }
+    
+    res.status(500).json({ error: "회원가입 처리 중 오류가 발생했습니다." });
   }
 };
 

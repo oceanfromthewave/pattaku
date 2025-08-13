@@ -19,11 +19,33 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       sourcemap: false,
-      rollupOptions: {
-        output: {
-          manualChunks: undefined,
+      target: 'es2015',
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: mode === 'production',
+          drop_debugger: true,
         },
       },
+      rollupOptions: {
+        output: {
+          // 청크 분할로 로딩 성능 향상
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            ui: ['@mui/material', '@emotion/react', '@emotion/styled'],
+            charts: ['chart.js', 'react-chartjs-2'],
+            icons: ['lucide-react', '@mui/icons-material'],
+            utils: ['axios', 'socket.io-client', 'react-router-dom'],
+            toast: ['react-toastify']
+          },
+          // 파일명 최적화
+          chunkFileNames: 'assets/[name]-[hash].js',
+          entryFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash].[ext]'
+        },
+      },
+      // 청크 크기 제한
+      chunkSizeWarningLimit: 1000,
     },
     define: {
       // 🚨 모든 환경에서 강제로 Render URL 사용

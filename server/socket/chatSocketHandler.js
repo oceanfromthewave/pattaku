@@ -8,10 +8,15 @@ class ChatSocketHandler {
     this.connectedUsers = new Map(); // userId -> { socketId, nickname, rooms: Set() }
     this.pendingReadUpdates = new Map(); // roomId -> Set(userId) - 배치 처리용
     this.readUpdateTimer = null;
+    this.cleanupTimer = null;
+    this.maxConnections = process.env.NODE_ENV === 'production' ? 500 : 100;
     this.setupChatEvents();
     
     // 배치 읽음 상태 업데이트 타이머 시작
     this.startReadUpdateBatcher();
+    
+    // 주기적 메모리 정리
+    this.startMemoryCleanup();
     
     console.log('🔌 ChatSocketHandler 초기화 완료');
   }
@@ -47,6 +52,69 @@ class ChatSocketHandler {
     }
 
     this.pendingReadUpdates.clear();
+  }
+
+  // 메모리 정리 시스템
+  startMemoryCleanup() {
+    this.cleanupTimer = setInterval(() => {
+      this.cleanupDisconnectedUsers();
+      this.cleanupEmptyRooms();
+      this.logMemoryUsage();
+    }, 300000); // 5분마다 정리
+    
+    console.log('🧹 메모리 정리 시스템 시작 (5분 간격)');
+  }
+
+  cleanupDisconnectedUsers() {
+    const beforeSize = this.connectedUsers.size;
+    const now = Date.now();
+    const timeoutThreshold = 300000; // 5분
+
+    for (const [userId, userInfo] of this.connectedUsers.entries()) {
+      const socket = this.io.sockets.sockets.get(userInfo.socketId);
+      
+      // 소켓이 존재하지 않거나 연결이 끊어진 경우
+      if (!socket || !socket.connected) {
+        // 마지막 활동 시간 체크
+        const lastActivity = userInfo.lastActivity || userInfo.connectedAt || now;
+        if (now - lastActivity > timeoutThreshold) {
+          this.connectedUsers.delete(userId);
+          console.log(`🗑️ 비활성 사용자 정리: ${userId}`);
+        }
+      }
+    }
+
+    const cleaned = beforeSize - this.connectedUsers.size;
+    if (cleaned > 0) {
+      console.log(`🧹 연결 해제된 사용자 ${cleaned}명 정리됨`);
+    }
+  }
+
+  cleanupEmptyRooms() {
+    // 빈 대기열 정리
+    for (const [roomId, userIds] of this.pendingReadUpdates.entries()) {
+      if (userIds.size === 0) {
+        this.pendingReadUpdates.delete(roomId);
+      }
+    }
+  }
+
+  logMemoryUsage() {
+    const memUsage = process.memoryUsage();
+    const stats = {
+      connectedUsers: this.connectedUsers.size,
+      pendingUpdates: this.pendingReadUpdates.size,
+      heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024) + 'MB',
+      heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024) + 'MB',
+      socketConnections: this.io.engine.clientsCount
+    };
+
+    // 연결 수가 임계값을 초과하면 경고
+    if (stats.socketConnections > this.maxConnections * 0.8) {
+      console.warn('⚠️ 소켓 연결 수 임계값 접근:', stats);
+    } else if (process.env.NODE_ENV !== 'production') {
+      console.log('📊 ChatSocket 메모리 상태:', stats);
+    }
   }
 
   setupChatEvents() {
@@ -399,10 +467,19 @@ class ChatSocketHandler {
       this.readUpdateTimer = null;
     }
     
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = null;
+    }
+    
     // 남은 읽음 상태 업데이트 처리
     if (this.pendingReadUpdates.size > 0) {
       this.processPendingReadUpdates();
     }
+    
+    // 메모리 정리
+    this.connectedUsers.clear();
+    this.pendingReadUpdates.clear();
     
     console.log('🧹 ChatSocketHandler 정리 완료');
   }

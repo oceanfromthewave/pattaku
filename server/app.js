@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const http = require("http");
+const compression = require("compression");
 const { Server } = require("socket.io");
 require("dotenv").config();
 
@@ -121,6 +122,27 @@ const corsOptions = {
   preflightContinue: false
 };
 
+// HTTP 응답 압축 (네트워크 최적화)
+app.use(compression({
+  filter: (req, res) => {
+    // 압축 제외할 파일 타입
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    
+    // 이미지는 이미 압축되어 있으므로 제외
+    const contentType = res.getHeader('content-type') || '';
+    if (contentType.startsWith('image/')) {
+      return false;
+    }
+    
+    return compression.filter(req, res);
+  },
+  level: 6, // 압축 레벨 (1-9, 6이 기본값)
+  threshold: 1024, // 1KB 이상만 압축
+  memLevel: 8 // 메모리 사용량 (1-9)
+}));
+
 app.use(cors(corsOptions));
 
 // OPTIONS 요청 처리
@@ -154,16 +176,38 @@ app.use(express.urlencoded({
   parameterLimit: 1000
 }));
 
-// 정적 파일 서비스
+// 정적 파일 서비스 (최적화)
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
     setHeaders: (res, filePath, stat) => {
+      const ext = path.extname(filePath).toLowerCase();
+      
+      // CORS 헤더
       res.set("Access-Control-Allow-Origin", "*");
       res.set("Cross-Origin-Resource-Policy", "cross-origin");
-      res.set("Cache-Control", "public, max-age=86400");
+      
+      // 이미지 파일은 더 긴 캐시
+      if (['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif'].includes(ext)) {
+        res.set("Cache-Control", "public, max-age=2592000, immutable"); // 30일
+        res.set("Expires", new Date(Date.now() + 2592000000).toUTCString());
+      } else {
+        res.set("Cache-Control", "public, max-age=86400"); // 1일
+      }
+      
+      // ETag와 Last-Modified 설정
+      res.set("ETag", `"${stat.mtime.getTime()}-${stat.size}"`);
+      res.set("Last-Modified", stat.mtime.toUTCString());
+      
+      // 압축 힌트
+      if (ext === '.svg') {
+        res.set("Content-Type", "image/svg+xml");
+        res.set("Content-Encoding", "gzip");
+      }
     },
-    maxAge: '1d'
+    maxAge: '30d', // 기본 30일
+    etag: true,
+    lastModified: true
   })
 );
 

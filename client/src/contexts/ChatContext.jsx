@@ -29,6 +29,21 @@ export const ChatProvider = ({ children }) => {
   const reconnectTimeoutRef = useRef(null);
   const connectionAttempts = useRef(0);
 
+  // 브라우저 알림 권한 요청
+  const requestNotificationPermission = useCallback(async () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      try {
+        const permission = await Notification.requestPermission();
+        console.log('📢 알림 권한:', permission);
+        return permission === 'granted';
+      } catch (error) {
+        console.error('❌ 알림 권한 요청 실패:', error);
+        return false;
+      }
+    }
+    return Notification.permission === 'granted';
+  }, []);
+
   // 소켓 연결 및 인증
   useEffect(() => {
     if (isLoggedIn && userInfo && !socketRef.current) {
@@ -52,6 +67,9 @@ export const ChatProvider = ({ children }) => {
         console.log('✅ 채팅 소켓 연결 성공');
         setIsConnected(true);
         connectionAttempts.current = 0;
+        
+        // 브라우저 알림 권한 요청
+        requestNotificationPermission();
         
         // 인증 토큰 전송
         const token = localStorage.getItem('token');
@@ -196,7 +214,24 @@ export const ChatProvider = ({ children }) => {
       // 1:1 채팅 초대
       newSocket.on('chat:direct_invite', (data) => {
         console.log('💬 1:1 채팅 초대:', data);
-        // TODO: 초대 알림 UI 표시
+        
+        // 알림 표시
+        const message = `${data.inviterNickname || data.inviterUsername}님이 1:1 채팅을 요청했습니다.`;
+        
+        // 브라우저 알림 (권한이 있는 경우)
+        if (Notification.permission === 'granted') {
+          new Notification('채팅 초대', {
+            body: message,
+            icon: '/favicon.png'
+          });
+        }
+        
+        // 시스템 알림으로도 표시 (Toast)
+        if (window.notify && window.notify.info) {
+          window.notify.info(message);
+        } else {
+          alert(message); // 폴백
+        }
       });
 
       // 에러 처리
@@ -359,6 +394,7 @@ export const ChatProvider = ({ children }) => {
     getRoomUnreadCount,
     getTotalUnreadCount,
     getRoomTypingUsers,
+    requestNotificationPermission,
 
     // 메시지 상태 업데이트 (컴포넌트에서 직접 사용)
     setMessages,

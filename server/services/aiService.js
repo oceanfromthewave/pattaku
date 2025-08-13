@@ -1,5 +1,6 @@
 // server/services/aiService.js - AI 서비스 통합
 const axios = require('axios');
+const crypto = require('crypto');
 
 class AIService {
   constructor() {
@@ -249,7 +250,6 @@ class AIService {
 
   // 해시 생성
   generateHash(text) {
-    const crypto = require('crypto');
     return crypto.createHash('md5').update(text).digest('hex');
   }
 

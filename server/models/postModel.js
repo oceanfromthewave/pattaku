@@ -69,10 +69,10 @@ exports.getByIdAsync = async (id) => {
   });
 };
 
-// 조회수 증가
+// 조회수 증가 (최적화된 컬럼명 사용)
 exports.incrementViewsAsync = async (id) => {
   return await retryQuery(async () => {
-    await db.execute("UPDATE posts SET views = COALESCE(views, 0) + 1 WHERE id = ?", [id]);
+    await db.execute("UPDATE posts SET view_count = view_count + 1 WHERE id = ?", [id]);
   });
 };
 
