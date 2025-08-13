@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useChatSocket } from '../../contexts/ChatContext';
-import { chatRoomApi } from '../../api/chatApi';
+import { chatApi } from '../../api/chatApi';
 import { notifyError, notifySuccess } from '../../utils/notify';
 import styles from '../../styles/ChatRoomList.module.scss';
 
@@ -31,11 +31,11 @@ export default function ChatRoomList() {
       let roomsData;
       
       if (activeTab === 'all') {
-        roomsData = await chatRoomApi.getAllRooms();
+        roomsData = await chatApi.rooms.getAll();
       } else if (activeTab === 'my') {
-        roomsData = await chatRoomApi.getUserRooms();
+        roomsData = await chatApi.rooms.getMy();
       } else {
-        roomsData = await chatRoomApi.getRoomsByType(activeTab);
+        roomsData = await chatApi.rooms.getByType(activeTab);
       }
       
       console.log(`✅ 채팅방 ${roomsData.length}개 로드됨:`, roomsData);
@@ -52,7 +52,7 @@ export default function ChatRoomList() {
   const fetchMyRooms = async () => {
     try {
       console.log('📋 내 채팅방 목록 요청...');
-      const myRoomsData = await chatRoomApi.getUserRooms();
+      const myRoomsData = await chatApi.rooms.getMy();
       console.log(`✅ 내 채팅방 ${myRoomsData.length}개 로드됨:`, myRoomsData);
       setMyRooms(myRoomsData);
     } catch (error) {
@@ -81,7 +81,7 @@ export default function ChatRoomList() {
 
     try {
       console.log('🚪 채팅방 참여 시도:', roomId);
-      await chatRoomApi.joinRoom(roomId);
+      await chatApi.rooms.join(roomId);
       notifySuccess('채팅방에 참여했습니다.');
       fetchMyRooms(); // 내 채팅방 목록 새로고침
     } catch (error) {
@@ -93,7 +93,7 @@ export default function ChatRoomList() {
   const handleCreateRoom = async (formData) => {
     try {
       console.log('🏗️ 채팅방 생성 시도:', formData);
-      const response = await chatRoomApi.createRoom(formData);
+      const response = await chatApi.rooms.create(formData);
       notifySuccess('채팅방이 생성되었습니다.');
       setShowCreateModal(false);
       fetchRooms(); // 목록 새로고침

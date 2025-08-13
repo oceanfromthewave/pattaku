@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useChatSocket } from '../../contexts/ChatContext';
-import { chatRoomApi, chatMessageApi } from '../../api/chatApi';
+import { chatApi } from '../../api/chatApi';
 import { getProfileImageUrl } from '../../utils/imageUtils';
 import { notifyError } from '../../utils/notify';
 import styles from '../../styles/ChatRoom.module.scss';
@@ -41,11 +41,11 @@ export default function ChatRoom() {
     const fetchRoom = async () => {
       try {
         setLoading(true);
-        const roomData = await chatRoomApi.getRoomById(roomId);
+        const roomData = await chatApi.rooms.getById(roomId);
         setRoom(roomData);
         
         // 메시지 로드
-        const messages = await chatMessageApi.getRoomMessages(roomId);
+        const messages = await chatApi.messages.getRoomMessages(roomId);
         setMessages(prev => ({ ...prev, [roomId]: messages }));
         
         // 채팅방 참여

@@ -56,6 +56,13 @@ class NotificationSocketMap {
     console.log(`📢 브로드캐스트 완료: ${sentCount}명에게 전송`);
     return sentCount;
   }
+
+  // 모든 연결 정리 (graceful shutdown용)
+  clear() {
+    const count = this.wsMap.size;
+    this.wsMap.clear();
+    console.log(`📢 알림 소켓 맵 정리 완료: ${count}개 연결 제거`);
+  }
 }
 
 // 싱글톤 인스턴스 생성

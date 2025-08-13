@@ -21,6 +21,7 @@ import RegisterForm from './components/Auth/RegisterForm';
 import ErrorBoundary from './components/ErrorBoundary';
 import TokenExpiredModal from './components/TokenExpiredModal';
 import DebugApiConfig from './components/DebugApiConfig';
+import DevStatusDashboard from './components/DevStatusDashboard';
 import './styles/main.scss';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -115,6 +116,9 @@ function App() {
         
         {/* API 설정 디버깅 (개발환경에서만) */}
         <DebugApiConfig />
+        
+        {/* 개발 상태 대시보드 (개발환경에서만) */}
+        <DevStatusDashboard />
       </div>
     </ChatProvider>
   );

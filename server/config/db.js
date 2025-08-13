@@ -19,9 +19,9 @@ if (process.env.DATABASE_URL) {
     maxIdle: 5, // 유지할 최대 유휴 연결 수 줄임
     idleTimeout: 30000, // 유휴 타임아웃 줄임 (30초)
     queueLimit: 0,
-    acquireTimeout: 20000, // 연결 획득 타임아웃 줄임 (20초)
-    timeout: 30000, // 쿼리 타임아웃 줄임 (30초)
-    reconnect: true,
+    // acquireTimeout: 20000, // 연결 획득 타임아웃 줄임 (20초) - MySQL2에서 지원하지 않음
+    // queryTimeout: 30000, // 쿼리 타임아웃 줄임 (30초) - MySQL2에서 지원하지 않음
+    // autoReconnect: true, // MySQL2에서 지원하지 않음
     keepAliveInitialDelay: 0,
     enableKeepAlive: true,
     // SSL 설정 추가 (Render/PlanetScale용)
@@ -45,9 +45,9 @@ if (process.env.DATABASE_URL) {
     maxIdle: 5,
     idleTimeout: 30000,
     queueLimit: 0,
-    acquireTimeout: 20000,
-    timeout: 30000,
-    reconnect: true,
+    // acquireTimeout: 20000, // MySQL2에서 지원하지 않음
+    // queryTimeout: 30000, // MySQL2에서 지원하지 않음  
+    // autoReconnect: true, // MySQL2에서 지원하지 않음
     keepAliveInitialDelay: 0,
     enableKeepAlive: true,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
@@ -98,7 +98,7 @@ db.on('error', (err) => {
 // 연결 테스트 함수
 async function testConnection() {
   try {
-    const [rows] = await db.execute('SELECT 1 as test');
+    const result = await db.execute('SELECT 1 as test');
     console.log('✅ DB 연결 테스트 성공');
     return true;
   } catch (error) {

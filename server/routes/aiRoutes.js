@@ -10,7 +10,7 @@ router.use(auth);
 // 게시글 자동 요약
 router.post("/summarize", async (req, res) => {
   try {
-    const { content } = req.body;
+    const { content } = req.body; 
 
     if (!content || content.length < 100) {
       return res.status(400).json({

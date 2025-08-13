@@ -2,19 +2,50 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPost } from '../../api/postApi';
 import { notifySuccess, notifyError, notifyPromise } from '../../utils/notify';
+import AIAssistant from '../AI/AIAssistant';
 import imageCompression from 'browser-image-compression';
 import styles from '../../styles/PostForm.module.scss';
 
 export default function PostForm() {
-  const [form, setForm] = useState({ title: '', content: '' });
+  const [form, setForm] = useState({ title: '', content: '', tags: '' });
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [showAI, setShowAI] = useState(true);
   const fileInputRef = useRef();
   const navigate = useNavigate();
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
+
+  // AI 제안 처리
+  const handleAISuggestion = (type, data) => {
+    switch (type) {
+      case 'addTag':
+        // 태그 추가
+        const currentTags = form.tags ? form.tags.split(',').map(t => t.trim()).filter(t => t) : [];
+        if (!currentTags.includes(data)) {
+          const newTags = [...currentTags, data].join(', ');
+          setForm(prev => ({ ...prev, tags: newTags }));
+          notifySuccess(`태그 "${data}" 추가됨`);
+        }
+        break;
+      case 'summarize':
+        // 요약문을 제목에 제안 (사용자가 선택)
+        if (window.confirm('AI 요약을 제목으로 사용하시겠습니까?')) {
+          setForm(prev => ({ ...prev, title: data.summary }));
+        }
+        break;
+      default:
+        console.log('AI 제안:', type, data);
+    }
+  };
+
+  // AI 업데이트 처리
+  const handleAIUpdate = (newContent) => {
+    setForm(prev => ({ ...prev, content: newContent }));
+    notifySuccess('AI가 내용을 업데이트했습니다');
+  };
 
   // 파일 추가
   const handleFiles = (selectedFiles) => {
@@ -111,6 +142,13 @@ export default function PostForm() {
       const formData = new FormData();
       formData.append('title', form.title.trim());
       formData.append('content', form.content.trim());
+      
+      // 태그 추가
+      if (form.tags.trim()) {
+        const tagsArray = form.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+        formData.append('tags', JSON.stringify(tagsArray));
+      }
+      
       compressedFiles.forEach(f => formData.append('files', f));
 
       await notifyPromise(
@@ -122,7 +160,7 @@ export default function PostForm() {
         }
       );
 
-      setForm({ title: '', content: '' });
+      setForm({ title: '', content: '', tags: '' });
       setFiles([]);
       if (fileInputRef.current) fileInputRef.current.value = '';
 
@@ -141,7 +179,19 @@ export default function PostForm() {
         <div className={styles.formHeader}>
           <h2 className={styles.formTitle}>✍️ 새 글 작성</h2>
           <p className={styles.formSubtitle}>다른 사람들과 생각을 공유해보세요</p>
+          
+          {/* AI 토글 버튼 */}
+          <div className={styles.aiToggle}>
+            <button
+              type="button"
+              className={`${styles.aiToggleBtn} ${showAI ? styles.active : ''}`}
+              onClick={() => setShowAI(!showAI)}
+            >
+              🤖 AI 어시스턴트 {showAI ? '끄기' : '켜기'}
+            </button>
+          </div>
         </div>
+
         <form className={styles.formBody} onSubmit={handleSubmit}>
           {/* 제목 */}
           <div className={styles.formGroup}>
@@ -159,6 +209,7 @@ export default function PostForm() {
             />
             <div className={styles.charCount}>{form.title.length}/100</div>
           </div>
+
           {/* 내용 */}
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>내용</label>
@@ -175,6 +226,35 @@ export default function PostForm() {
             />
             <div className={styles.charCount}>{form.content.length}자</div>
           </div>
+
+          {/* 태그 */}
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>태그 (선택사항)</label>
+            <input
+              className={styles.formInput}
+              name="tags"
+              placeholder="태그를 쉼표로 구분하여 입력하세요 (예: React, JavaScript, 개발)"
+              value={form.tags}
+              onChange={handleChange}
+              autoComplete="off"
+              disabled={loading}
+            />
+            <div className={styles.tagHelp}>
+              💡 AI 어시스턴트가 내용을 분석하여 태그를 추천해드립니다
+            </div>
+          </div>
+
+          {/* AI 어시스턴트 */}
+          {showAI && (
+            <AIAssistant
+              content={form.content}
+              title={form.title}
+              onSuggestion={handleAISuggestion}
+              onUpdate={handleAIUpdate}
+              disabled={loading}
+            />
+          )}
+
           {/* 파일 첨부 */}
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>파일 첨부</label>
@@ -208,6 +288,7 @@ export default function PostForm() {
                 </div>
               )}
             </div>
+
             {/* 미리보기 */}
             {files.length > 0 && (
               <div className={styles.previewWrap}>
@@ -239,6 +320,7 @@ export default function PostForm() {
               </div>
             )}
           </div>
+
           {/* 버튼 */}
           <div className={styles.buttonGroup}>
             <button
