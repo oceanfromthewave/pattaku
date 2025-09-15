@@ -15,7 +15,7 @@ start "Pattaku Client" cmd /k "cd client && npm run dev"
 echo.
 echo Development environment started!
 echo - Backend: http://localhost:5000
-echo - Frontend: http://localhost:5173
+echo - Frontend: http://localhost:3000
 echo.
 echo Press any key to exit...
 pause > nul

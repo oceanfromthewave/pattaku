@@ -50,18 +50,24 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    // 로그 (옵션)
-    const fullUrl = `${config.baseURL}${config.url}`;
-    console.log("🌐 API Request:", {
-      method: config.method?.toUpperCase(),
-      url: fullUrl,
-      baseURL: config.baseURL,
-      isRenderUrl: config.baseURL.includes("onrender.com"),
-    });
+
+    // 개발 환경에서만 로그 출력
+    if (import.meta.env.DEV) {
+      const fullUrl = `${config.baseURL}${config.url}`;
+      console.log("🌐 API Request:", {
+        method: config.method?.toUpperCase(),
+        url: fullUrl,
+        baseURL: config.baseURL,
+        isRenderUrl: config.baseURL.includes("onrender.com"),
+      });
+    }
+
     return config;
   },
   (error) => {
-    console.error("❌ API Request Error:", error);
+    if (import.meta.env.DEV) {
+      console.error("❌ API Request Error:", error);
+    }
     return Promise.reject(error);
   }
 );
@@ -69,11 +75,14 @@ apiClient.interceptors.request.use(
 // 응답 인터셉터 - 에러 처리
 apiClient.interceptors.response.use(
   (response) => {
-    console.log("✅ API Response Success:", {
-      status: response.status,
-      url: response.config.url,
-      method: response.config.method?.toUpperCase(),
-    });
+    // 개발 환경에서만 로그 출력
+    if (import.meta.env.DEV) {
+      console.log("✅ API Response Success:", {
+        status: response.status,
+        url: response.config.url,
+        method: response.config.method?.toUpperCase(),
+      });
+    }
     return response;
   },
   (error) => {
@@ -83,20 +92,23 @@ apiClient.interceptors.response.use(
       ? `${error.config.baseURL}${requestUrl}`
       : "unknown";
 
-    console.error("❌ API Response Error:", {
-      method: requestMethod,
-      url: requestUrl,
-      fullUrl: fullUrl,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      message: error.message,
-    });
+    // 개발 환경에서만 상세 로그 출력
+    if (import.meta.env.DEV) {
+      console.error("❌ API Response Error:", {
+        method: requestMethod,
+        url: requestUrl,
+        fullUrl: fullUrl,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.message,
+      });
 
-    if (fullUrl.includes("s3-website")) {
-      console.error(
-        "🚨🚨🚨 CRITICAL: Request went to S3! This should never happen!"
-      );
-      console.error("🔧 Please refresh the page and check the build");
+      if (fullUrl.includes("s3-website")) {
+        console.error(
+          "🚨🚨🚨 CRITICAL: Request went to S3! This should never happen!"
+        );
+        console.error("🔧 Please refresh the page and check the build");
+      }
     }
 
     if (error.response?.status === 401) {
@@ -124,8 +136,10 @@ apiClient.interceptors.response.use(
   }
 );
 
-// 전역 변수로 API 클라이언트 노출 (디버깅용)
-window.DEBUG_API_CLIENT = apiClient;
-window.DEBUG_API_URL = API_BASE_URL;
+// 개발 환경에서만 전역 변수 노출
+if (import.meta.env.DEV) {
+  window.DEBUG_API_CLIENT = apiClient;
+  window.DEBUG_API_URL = API_BASE_URL;
+}
 
 export default apiClient;

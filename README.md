@@ -28,7 +28,7 @@
 ## ✨ 주요 특징
 
 ### 🎨 모던한 UI/UX
-- **Material-UI v6** 기반 일관된 디자인 시스템
+- **Material-UI v7** 기반 일관된 디자인 시스템
 - **완전 반응형** 모바일/태블릿/데스크톱 지원
 - **다크모드** 완벽 지원 및 자동 시스템 감지
 - **부드러운 애니메이션** 및 마이크로 인터랙션
@@ -54,9 +54,9 @@
 | 기술 | 용도 | 버전 |
 |------|------|------|
 | **React** | UI 프레임워크 | 19.x |
-| **Material-UI** | 컴포넌트 라이브러리 | v6 |
+| **Material-UI** | 컴포넌트 라이브러리 | v7 |
 | **Vite** | 개발 서버 & 번들러 | Latest |
-| **React Router** | 클라이언트 라우팅 | v6 |
+| **React Router** | 클라이언트 라우팅 | v7 |
 | **SCSS** | 스타일링 | Latest |
 | **Socket.IO Client** | 실시간 통신 | Latest |
 
@@ -319,20 +319,18 @@ DELETE /api/notifications/:id      # 알림 삭제
 
 ### 🔧 개발 도구
 ```bash
-# 빌드 도구
-npm run build          # 프로덕션 빌드
-npm run build:client   # 클라이언트만 빌드
-npm run build:server   # 서버만 빌드
+# 루트 스크립트
+npm run dev             # 서버+클라이언트 동시 실행
+npm run dev:server      # 서버만 실행 (nodemon)
+npm run dev:client      # 클라이언트만 실행 (Vite 3000)
 
-# 테스트 도구
-npm test               # 전체 테스트 실행
-npm run test:client    # 클라이언트 테스트
-npm run test:server    # 서버 테스트
+npm run build           # 클라이언트 빌드
+npm run build:production# 프로덕션 모드 빌드
 
-# 코드 품질
-npm run lint           # ESLint 검사
-npm run format         # Prettier 포맷팅
-npm run type-check     # TypeScript 타입 검사
+npm start               # 서버 실행
+npm run start:production# 프로덕션 서버 실행
+
+npm run lint            # 클라이언트 ESLint 검사
 ```
 
 ### 🎯 성능 최적화
@@ -356,13 +354,7 @@ npm run type-check     # TypeScript 타입 검사
 ## 🚀 배포 가이드
 
 ### 🐳 Docker 배포
-```bash
-# Docker 이미지 빌드
-docker build -t pattaku .
-
-# 컨테이너 실행
-docker run -p 3000:3000 -p 5000:5000 pattaku
-```
+Dockerfile 추가 후 사용 가능합니다. 필요 시 요청해 주세요.
 
 ### ☁️ 클라우드 배포
 - **Frontend**: Vercel, Netlify

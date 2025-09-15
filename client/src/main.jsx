@@ -4,13 +4,14 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import App from './App';
-import theme from './styles/theme';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeModeProvider, useThemeMode } from './contexts/ThemeModeContext';
 import './styles/main.scss';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <ThemeProvider theme={theme}>
+function ThemedRoot() {
+  const { muiTheme } = useThemeMode();
+  return (
+    <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <Router>
         <AuthProvider>
@@ -18,5 +19,19 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         </AuthProvider>
       </Router>
     </ThemeProvider>
+  );
+}
+
+function Root() {
+  return (
+    <ThemeModeProvider>
+      <ThemedRoot />
+    </ThemeModeProvider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <Root />
   </React.StrictMode>
 );

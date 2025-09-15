@@ -18,13 +18,13 @@ const chatRoutes = require("./routes/chatRoutes");
 const aiRoutes = require("./routes/aiRoutes"); // AI 라우트 추가
 const SocketHandler = require("./socketHandler");
 const ChatSocketHandler = require("./socket/chatSocketHandler");
-const wsNotificationMap = require('./wsNotificationMap');
+const wsNotificationMap = require("./wsNotificationMap");
 
 const app = express();
 const server = http.createServer(app);
 
-// 메모리 제한 설정
-const MAX_MEMORY_MB = process.env.NODE_ENV === 'production' ? 350 : 500;
+// 메모리 제한 설정 (더 합리적인 값으로 조정)
+const MAX_MEMORY_MB = process.env.NODE_ENV === "production" ? 512 : 1024;
 
 // 허용할 도메인 목록
 const allowedOrigins = [
@@ -34,7 +34,7 @@ const allowedOrigins = [
   "http://127.0.0.1:3000",
   "http://pattaku.s3-website-ap-southeast-2.amazonaws.com",
   "https://pattaku.s3-website-ap-southeast-2.amazonaws.com",
-  "https://pattaku.onrender.com"
+  "https://pattaku.onrender.com",
 ];
 
 // Socket.io 설정 (메모리 효율화)
@@ -43,15 +43,15 @@ const io = new Server(server, {
     origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization"],
   },
   allowEIO3: true,
-  transports: ['websocket', 'polling'],
+  transports: ["websocket", "polling"],
   maxHttpBufferSize: 1e6,
   pingTimeout: 60000,
   pingInterval: 25000,
   upgradeTimeout: 30000,
-  maxConnections: process.env.NODE_ENV === 'production' ? 500 : 100
+  maxConnections: process.env.NODE_ENV === "production" ? 500 : 100,
 });
 
 // Socket 핸들러 초기화
@@ -63,23 +63,23 @@ try {
   chatSocketHandler = new ChatSocketHandler(io);
   app.set("socketHandler", socketHandler);
   app.set("chatSocketHandler", chatSocketHandler);
-  console.log('✅ Socket handlers 초기화 완료');
+  console.log("✅ Socket handlers 초기화 완료");
 } catch (error) {
-  console.error('❌ Socket handlers 초기화 실패:', error);
+  console.error("❌ Socket handlers 초기화 실패:", error);
 }
 
 // 알림 네임스페이스 설정
-const notificationNamespace = io.of('/notifications');
-notificationNamespace.on('connection', (socket) => {
-  console.log('📢 알림 소켓 연결:', socket.id);
-  
-  socket.on('register_user', (userId) => {
+const notificationNamespace = io.of("/notifications");
+notificationNamespace.on("connection", (socket) => {
+  console.log("📢 알림 소켓 연결:", socket.id);
+
+  socket.on("register_user", (userId) => {
     if (userId) {
       wsNotificationMap.set(userId, socket);
     }
   });
 
-  socket.on('disconnect', () => {
+  socket.on("disconnect", () => {
     for (const [userId, userSocket] of wsNotificationMap.wsMap.entries()) {
       if (userSocket === socket) {
         wsNotificationMap.delete(userId);
@@ -88,93 +88,105 @@ notificationNamespace.on('connection', (socket) => {
     }
   });
 
-  socket.on('error', (error) => {
-    console.error('📢 알림 소켓 에러:', error);
+  socket.on("error", (error) => {
+    console.error("📢 알림 소켓 에러:", error);
   });
 });
 
-app.set('wsNotificationMap', wsNotificationMap);
+app.set("wsNotificationMap", wsNotificationMap);
 
 const PORT = process.env.PORT || 5000;
 
 // CORS 설정
 const corsOptions = {
   origin: function (origin, callback) {
-    console.log('🌐 CORS 요청 origin:', origin);
+    console.log("🌐 CORS 요청 origin:", origin);
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log('❌ CORS 차단된 도메인:', origin);
-      callback(new Error('Not allowed by CORS'));
+      console.log("❌ CORS 차단된 도메인:", origin);
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: [
-    "Content-Type", 
-    "Authorization", 
+    "Content-Type",
+    "Authorization",
     "X-Requested-With",
     "Accept",
-    "Origin"
+    "Origin",
   ],
   exposedHeaders: ["Authorization"],
   optionsSuccessStatus: 200,
-  preflightContinue: false
+  preflightContinue: false,
 };
 
 // HTTP 응답 압축 (네트워크 최적화)
-app.use(compression({
-  filter: (req, res) => {
-    // 압축 제외할 파일 타입
-    if (req.headers['x-no-compression']) {
-      return false;
-    }
-    
-    // 이미지는 이미 압축되어 있으므로 제외
-    const contentType = res.getHeader('content-type') || '';
-    if (contentType.startsWith('image/')) {
-      return false;
-    }
-    
-    return compression.filter(req, res);
-  },
-  level: 6, // 압축 레벨 (1-9, 6이 기본값)
-  threshold: 1024, // 1KB 이상만 압축
-  memLevel: 8 // 메모리 사용량 (1-9)
-}));
+app.use(
+  compression({
+    filter: (req, res) => {
+      // 압축 제외할 파일 타입
+      if (req.headers["x-no-compression"]) {
+        return false;
+      }
+
+      // 이미지는 이미 압축되어 있으므로 제외
+      const contentType = res.getHeader("content-type") || "";
+      if (contentType.startsWith("image/")) {
+        return false;
+      }
+
+      return compression.filter(req, res);
+    },
+    level: 6, // 압축 레벨 (1-9, 6이 기본값)
+    threshold: 1024, // 1KB 이상만 압축
+    memLevel: 8, // 메모리 사용량 (1-9)
+  })
+);
 
 app.use(cors(corsOptions));
 
 // OPTIONS 요청 처리
 app.options("*", (req, res) => {
-  console.log('🛡️ OPTIONS 요청:', req.url, 'Origin:', req.headers.origin);
+  console.log("🛡️ OPTIONS 요청:", req.url, "Origin:", req.headers.origin);
   const origin = req.headers.origin;
-  
+
   if (!origin || allowedOrigins.includes(origin)) {
     res.header("Access-Control-Allow-Origin", origin || "*");
   }
-  
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH");
-  res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With,Accept,Origin");
+
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type,Authorization,X-Requested-With,Accept,Origin"
+  );
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Max-Age", "86400");
   res.sendStatus(200);
 });
 
 // 바디파서 설정
-app.use(express.json({ 
-  limit: '10mb',
-  verify: (req, res, buf) => {
-    if (buf.length > 10 * 1024 * 1024) {
-      throw new Error('요청이 너무 큽니다');
-    }
-  }
-}));
-app.use(express.urlencoded({ 
-  extended: true, 
-  limit: '10mb',
-  parameterLimit: 1000
-}));
+app.use(
+  express.json({
+    limit: "10mb",
+    verify: (req, res, buf) => {
+      if (buf.length > 10 * 1024 * 1024) {
+        throw new Error("요청이 너무 큽니다");
+      }
+    },
+  })
+);
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "10mb",
+    parameterLimit: 1000,
+  })
+);
 
 // 정적 파일 서비스 (최적화)
 app.use(
@@ -182,32 +194,32 @@ app.use(
   express.static(path.join(__dirname, "uploads"), {
     setHeaders: (res, filePath, stat) => {
       const ext = path.extname(filePath).toLowerCase();
-      
+
       // CORS 헤더
       res.set("Access-Control-Allow-Origin", "*");
       res.set("Cross-Origin-Resource-Policy", "cross-origin");
-      
+
       // 이미지 파일은 더 긴 캐시
-      if (['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif'].includes(ext)) {
+      if ([".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif"].includes(ext)) {
         res.set("Cache-Control", "public, max-age=2592000, immutable"); // 30일
         res.set("Expires", new Date(Date.now() + 2592000000).toUTCString());
       } else {
         res.set("Cache-Control", "public, max-age=86400"); // 1일
       }
-      
+
       // ETag와 Last-Modified 설정
       res.set("ETag", `"${stat.mtime.getTime()}-${stat.size}"`);
       res.set("Last-Modified", stat.mtime.toUTCString());
-      
+
       // 압축 힌트
-      if (ext === '.svg') {
+      if (ext === ".svg") {
         res.set("Content-Type", "image/svg+xml");
         res.set("Content-Encoding", "gzip");
       }
     },
-    maxAge: '30d', // 기본 30일
+    maxAge: "30d", // 기본 30일
     etag: true,
-    lastModified: true
+    lastModified: true,
   })
 );
 
@@ -215,13 +227,13 @@ app.use(
 app.use((req, res, next) => {
   const memUsage = process.memoryUsage();
   const memUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
-  
+
   if (memUsedMB > MAX_MEMORY_MB) {
     console.warn(`⚠️ 메모리 사용량 경고: ${memUsedMB}MB / ${MAX_MEMORY_MB}MB`);
-    
+
     if (global.gc) {
       global.gc();
-      console.log('🗑️ 가비지 컬렉션 실행');
+      console.log("🗑️ 가비지 컬렉션 실행");
     }
   }
 
@@ -230,25 +242,33 @@ app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", origin);
   }
   res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS,PATCH");
-  res.header("Access-Control-Allow-Headers", "Content-Type,Authorization,X-Requested-With,Accept,Origin");
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type,Authorization,X-Requested-With,Accept,Origin"
+  );
   next();
 });
 
 // 요청 크기 제한
 app.use((req, res, next) => {
-  const contentLength = req.get('content-length');
+  const contentLength = req.get("content-length");
   if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) {
-    return res.status(413).json({ error: '요청이 너무 큽니다' });
+    return res.status(413).json({ error: "요청이 너무 큽니다" });
   }
   next();
 });
 
 // API 요청 로깅
-app.use('/api', (req, res, next) => {
+app.use("/api", (req, res, next) => {
   console.log(`🌐 API 요청: ${req.method} ${req.originalUrl}`);
   console.log(`   Origin: ${req.headers.origin}`);
-  console.log(`   User-Agent: ${req.headers['user-agent']?.substring(0, 50)}...`);
+  console.log(
+    `   User-Agent: ${req.headers["user-agent"]?.substring(0, 50)}...`
+  );
   if (req.headers.authorization) {
     console.log(`   인증: 토큰 있음`);
   }
@@ -268,38 +288,74 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/ai", aiRoutes); // AI 라우트 추가
 
 // 헬스체크 엔드포인트
-app.get('/health', (req, res) => {
+app.get("/health", (req, res) => {
   const memUsage = process.memoryUsage();
   res.json({
-    status: 'OK',
+    status: "OK",
     memory: {
       rss: `${Math.round(memUsage.rss / 1024 / 1024)}MB`,
       heapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`,
       heapUsed: `${Math.round(memUsage.heapUsed / 1024 / 1024)}MB`,
-      external: `${Math.round(memUsage.external / 1024 / 1024)}MB`
+      external: `${Math.round(memUsage.external / 1024 / 1024)}MB`,
     },
     uptime: process.uptime(),
-    connections: io.engine.clientsCount
+    connections: io.engine.clientsCount,
+  });
+});
+
+// /api/health 별칭
+app.get("/api/health", (req, res) => {
+  const memUsage = process.memoryUsage();
+  res.json({
+    status: "OK",
+    memory: {
+      rss: `${Math.round(memUsage.rss / 1024 / 1024)}MB`,
+      heapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`,
+      heapUsed: `${Math.round(memUsage.heapUsed / 1024 / 1024)}MB`,
+      external: `${Math.round(memUsage.external / 1024 / 1024)}MB`,
+    },
+    uptime: process.uptime(),
+    connections: io.engine.clientsCount,
+  });
+});
+
+// 소켓 상태 엔드포인트
+app.get("/api/socket-stats", (req, res) => {
+  const connections = io.engine.clientsCount;
+  let namespaceNames = [];
+  try {
+    // 내부 속성 접근 (가용 시)
+    namespaceNames = Array.from(io._nsps?.keys?.() || []);
+  } catch (e) {
+    namespaceNames = ["/", "/notifications"];
+  }
+  const roomCount = io.of("/").adapter?.rooms?.size || 0;
+
+  res.json({
+    status: "OK",
+    connections,
+    namespaces: namespaceNames,
+    roomCount,
   });
 });
 
 // 에러 핸들링
 app.use((err, req, res, next) => {
-  console.error('서버 오류:', err);
-  
-  if (err.message && err.message.includes('heap')) {
-    console.error('💀 메모리 부족 에러 감지');
+  console.error("서버 오류:", err);
+
+  if (err.message && err.message.includes("heap")) {
+    console.error("💀 메모리 부족 에러 감지");
     if (global.gc) {
       global.gc();
     }
   }
-  
-  res.status(500).json({ error: 'Internal Server Error' });
+
+  res.status(500).json({ error: "Internal Server Error" });
 });
 
 // 404 처리
-app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Not Found' });
+app.use("*", (req, res) => {
+  res.status(404).json({ error: "Not Found" });
 });
 
 // 메모리 모니터링
@@ -308,82 +364,94 @@ const startMemoryMonitoring = () => {
   setInterval(() => {
     const memUsage = process.memoryUsage();
     const memUsedMB = Math.round(memUsage.heapUsed / 1024 / 1024);
-    
-    if (memUsedMB > MAX_MEMORY_MB) {
+    const memTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
+
+    // 메모리 사용량이 80%를 넘으면 경고
+    const memoryUsagePercent = (memUsedMB / MAX_MEMORY_MB) * 100;
+
+    if (memoryUsagePercent > 80) {
       memoryWarningCount++;
-      console.warn(`⚠️ 메모리 사용량 경고 #${memoryWarningCount}: ${memUsedMB}MB / ${MAX_MEMORY_MB}MB`);
-      
+      console.warn(
+        `⚠️ 메모리 사용량 경고 #${memoryWarningCount}: ${memUsedMB}MB / ${MAX_MEMORY_MB}MB (${memoryUsagePercent.toFixed(
+          1
+        )}%)`
+      );
+
+      // 3번 경고 후 가비지 컬렉션 실행
       if (memoryWarningCount >= 3 && global.gc) {
         global.gc();
         memoryWarningCount = 0;
-        console.log('🗑️ 강제 가비지 컬렉션 실행');
+        console.log("🗑️ 가비지 컬렉션 실행");
       }
     } else if (memoryWarningCount > 0) {
       memoryWarningCount = 0;
     }
-    
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('📊 메모리 사용량:', {
-        heap: `${memUsedMB}MB`,
-        connections: io.engine.clientsCount
+
+    // 개발 환경에서만 상세 로그 출력
+    if (process.env.NODE_ENV !== "production") {
+      console.log("📊 메모리 사용량:", {
+        heapUsed: `${memUsedMB}MB`,
+        heapTotal: `${memTotalMB}MB`,
+        connections: io.engine.clientsCount,
+        usagePercent: `${memoryUsagePercent.toFixed(1)}%`,
       });
     }
-  }, 30000);
+  }, 60000); // 1분마다 체크
 };
 
 // Graceful Shutdown
 const gracefulShutdown = async (signal) => {
   console.log(`\n🔄 ${signal} 신호 수신 - 서버 종료 시작...`);
-  
+
   try {
     server.close(() => {
-      console.log('✅ HTTP 서버 종료');
+      console.log("✅ HTTP 서버 종료");
     });
-    
-    if (chatSocketHandler && typeof chatSocketHandler.cleanup === 'function') {
+
+    if (chatSocketHandler && typeof chatSocketHandler.cleanup === "function") {
       chatSocketHandler.cleanup();
     }
-    
+
     io.close(() => {
-      console.log('✅ Socket.io 서버 종료');
+      console.log("✅ Socket.io 서버 종료");
     });
-    
+
     wsNotificationMap.clear();
-    
-    console.log('✅ 정리 작업 완료');
+
+    console.log("✅ 정리 작업 완료");
     process.exit(0);
   } catch (error) {
-    console.error('❌ 종료 중 오류:', error);
+    console.error("❌ 종료 중 오류:", error);
     process.exit(1);
   }
 };
 
 // 시그널 핸들러 등록
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
-process.on('uncaughtException', (error) => {
-  console.error('💀 처리되지 않은 예외:', error);
-  gracefulShutdown('uncaughtException');
+process.on("uncaughtException", (error) => {
+  console.error("💀 처리되지 않은 예외:", error);
+  gracefulShutdown("uncaughtException");
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('💀 처리되지 않은 Promise 거부:', reason);
-  gracefulShutdown('unhandledRejection');
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("💀 처리되지 않은 Promise 거부:", reason);
+  gracefulShutdown("unhandledRejection");
 });
 
 // 서버 시작
 server.listen(PORT, () => {
   console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
   console.log(`🔌 Socket.io 실행 중 - 채팅: /, 알림: /notifications`);
-  console.log('📋 허용된 도메인:', allowedOrigins);
+  console.log("📋 허용된 도메인:", allowedOrigins);
   console.log(`🧠 메모리 제한: ${MAX_MEMORY_MB}MB`);
-  console.log(`🌍 환경: ${process.env.NODE_ENV || 'development'}`);
-  console.log('📊 API 엔드포인트:');
-  console.log('   - GET /health (서버 상태 체크)');
-  console.log('   - /api/chat/* (채팅 관련)');
-  console.log('   - /api/ai/* (AI 기능)'); // AI 엔드포인트 추가
-  console.log('   - /api/users/* (사용자 관련)');
-  
+  console.log(`🌍 환경: ${process.env.NODE_ENV || "development"}`);
+  console.log("📊 API 엔드포인트:");
+  console.log("   - GET /health (서버 상태 체크)");
+  console.log("   - /api/chat/* (채팅 관련)");
+  console.log("   - /api/ai/* (AI 기능)"); // AI 엔드포인트 추가
+  console.log("   - /api/users/* (사용자 관련)");
+
   startMemoryMonitoring();
 });

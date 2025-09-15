@@ -1,5 +1,36 @@
 {
-  "dependencies": {
-    "lucide-react": "^0.532.0"
-  }
+  "name": "pattaku",
+  "version": "1.0.0",
+  "description": "Pattaku - 채팅 및 커뮤니티 플랫폼",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "build:production": "cd client && npm run build:production",
+    "start": "cd server && npm start",
+    "start:production": "cd server && npm run start:production",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "clean": "cd client && npm run clean",
+    "lint": "cd client && npm run lint"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "keywords": [
+    "chat",
+    "community",
+    "react",
+    "nodejs",
+    "socket.io",
+    "express"
+  ],
+  "author": "",
+  "license": "MIT"
 }

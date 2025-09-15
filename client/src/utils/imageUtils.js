@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../api/config';
+import { API_BASE_URL } from "../api/config";
 
 /**
  * 프로필 이미지 URL을 완전한 URL로 변환
@@ -7,58 +7,67 @@ import { API_BASE_URL } from '../api/config';
  */
 export const getProfileImageUrl = (imagePath) => {
   if (!imagePath) return null;
-  
-  // 개발 환경에서 디버깅
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🖼️ 이미지 URL 변환:', { 
-      원본: imagePath, 
-      API_BASE_URL: API_BASE_URL 
+
+  // 개발 환경에서만 디버깅
+  if (import.meta.env.DEV) {
+    console.log("🖼️ 이미지 URL 변환:", {
+      원본: imagePath,
+      API_BASE_URL: API_BASE_URL,
     });
   }
-  
+
   // 이미 완전한 URL인 경우 (http로 시작)
-  if (imagePath.startsWith('http')) {
+  if (imagePath.startsWith("http")) {
     return imagePath;
   }
-  
+
   // 상대 경로인 경우 (/uploads/profiles/filename.jpg)
-  if (imagePath.startsWith('/')) {
+  if (imagePath.startsWith("/")) {
     const fullUrl = `${API_BASE_URL}${imagePath}`;
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🖼️ 생성된 URL:', fullUrl);
+    if (import.meta.env.DEV) {
+      console.log("🖼️ 생성된 URL:", fullUrl);
     }
     return fullUrl;
   }
-  
+
   // 기타 경우 (uploads/profiles/filename.jpg)
   const fullUrl = `${API_BASE_URL}/${imagePath}`;
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🖼️ 생성된 URL:', fullUrl);
+  if (import.meta.env.DEV) {
+    console.log("🖼️ 생성된 URL:", fullUrl);
   }
   return fullUrl;
 };
 
 /**
  * 프로필 이미지 URL 유효성 검사 및 대체 처리
- * @param {string} imagePath - 원본 이미지 경로  
+ * @param {string} imagePath - 원본 이미지 경로
  * @returns {Promise<string|null>} - 유효한 이미지 URL 또는 null
  */
 export const validateProfileImageUrl = async (imagePath) => {
   if (!imagePath) return null;
-  
+
   const url = getProfileImageUrl(imagePath);
   if (!url) return null;
-  
+
   try {
-    const response = await fetch(url, { method: 'HEAD' });
+    const response = await fetch(url, { method: "HEAD" });
     if (response.ok) {
       return url;
     } else {
-      console.warn('⚠️ 프로필 이미지 접근 불가:', url, 'Status:', response.status);
+      if (import.meta.env.DEV) {
+        console.warn(
+          "⚠️ 프로필 이미지 접근 불가:",
+          url,
+          "Status:",
+          response.status
+        );
+      }
       return null;
     }
   } catch (error) {
-    console.warn('⚠️ 프로필 이미지 검증 실패:', url, error.message);
+    if (import.meta.env.DEV) {
+      console.warn("⚠️ 프로필 이미지 검증 실패:", url, error.message);
+    }
     return null;
   }
 };
@@ -79,24 +88,11 @@ export const getImageUrlWithFallback = (imagePath) => {
  * @returns {boolean} - 유효한 이미지 경로인지 여부
  */
 export const isValidImagePath = (imagePath) => {
-  if (!imagePath || typeof imagePath !== 'string') return false;
-  
-  // 허용되는 이미지 확장자
-  const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-  const lowerPath = imagePath.toLowerCase();
-  
-  return validExtensions.some(ext => lowerPath.includes(ext));
-};
+  if (!imagePath || typeof imagePath !== "string") return false;
 
-/**
- * 개발용 이미지 URL 디버깅 함수
- * @param {string} imagePath - 디버깅할 이미지 경로
- */
-export const debugImageUrl = (imagePath) => {
-  console.group('🖼️ 이미지 URL 디버깅');
-  console.log('원본 경로:', imagePath);
-  console.log('변환된 URL:', getProfileImageUrl(imagePath));
-  console.log('유효한 경로:', isValidImagePath(imagePath));
-  console.log('API_BASE_URL:', API_BASE_URL);
-  console.groupEnd();
+  // 허용되는 이미지 확장자
+  const validExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
+  const lowerPath = imagePath.toLowerCase();
+
+  return validExtensions.some((ext) => lowerPath.includes(ext));
 };

@@ -8,7 +8,7 @@ class NotificationSocketMap {
 
   set(userId, socket) {
     this.wsMap.set(userId.toString(), socket);
-    console.log('📢 알림 소켓 등록:', userId);
+    console.log("📢 알림 소켓 등록:", userId);
   }
 
   get(userId) {
@@ -18,7 +18,7 @@ class NotificationSocketMap {
   delete(userId) {
     const deleted = this.wsMap.delete(userId.toString());
     if (deleted) {
-      console.log('📢 알림 소켓 제거:', userId);
+      console.log("📢 알림 소켓 제거:", userId);
     }
     return deleted;
   }
@@ -31,11 +31,11 @@ class NotificationSocketMap {
   sendNotification(userId, notification) {
     const socket = this.get(userId);
     if (socket && socket.connected) {
-      socket.emit('notification', notification);
-      console.log('📢 알림 전송 성공:', userId, notification.title);
+      socket.emit("notification", notification);
+      console.log("📢 알림 전송 성공:", userId, notification.title);
       return true;
     }
-    console.log('📢 알림 전송 실패 (사용자 오프라인):', userId);
+    console.log("📢 알림 전송 실패 (사용자 오프라인):", userId);
     return false;
   }
 
@@ -49,19 +49,12 @@ class NotificationSocketMap {
     let sentCount = 0;
     for (const [userId, socket] of this.wsMap.entries()) {
       if (socket && socket.connected) {
-        socket.emit('notification', notification);
+        socket.emit("notification", notification);
         sentCount++;
       }
     }
     console.log(`📢 브로드캐스트 완료: ${sentCount}명에게 전송`);
     return sentCount;
-  }
-
-  // 모든 연결 정리 (graceful shutdown용)
-  clear() {
-    const count = this.wsMap.size;
-    this.wsMap.clear();
-    console.log(`📢 알림 소켓 맵 정리 완료: ${count}개 연결 제거`);
   }
 }
 

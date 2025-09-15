@@ -461,3 +461,28 @@
     outline-offset: 2px;
   }
 }
+
+/* Skip link for keyboard users */
+.skipLink {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+
+  &:focus {
+    position: fixed;
+    left: $space-md;
+    top: $space-sm;
+    width: auto;
+    height: auto;
+    padding: $space-sm $space-md;
+    background: $bg-primary;
+    color: $text-primary;
+    border: 2px solid $primary-500;
+    border-radius: $radius-md;
+    z-index: $z-tooltip;
+    box-shadow: $shadow-md;
+  }
+}
