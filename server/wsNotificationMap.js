@@ -44,6 +44,18 @@ class NotificationSocketMap {
     return this.wsMap.size;
   }
 
+  // 전체 초기화 (graceful shutdown용)
+  clear() {
+    try {
+      for (const [, socket] of this.wsMap.entries()) {
+        try {
+          socket.disconnect(true);
+        } catch (e) {}
+      }
+    } catch (e) {}
+    this.wsMap.clear();
+  }
+
   // 모든 온라인 사용자에게 브로드캐스트
   broadcast(notification) {
     let sentCount = 0;
