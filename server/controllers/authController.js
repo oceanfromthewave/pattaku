@@ -1,5 +1,5 @@
 const userModel = require("../models/userModel");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 exports.login = async (req, res) => {
@@ -12,16 +12,18 @@ exports.login = async (req, res) => {
     user = await userModel.findByUsernameAsync(username);
   } catch (e) {
     console.error("DB 오류:", e);
-    
+
     // 에러 타입별 처리
-    if (e.code === 'ECONNREFUSED' || e.code === 'ETIMEDOUT') {
+    if (e.code === "ECONNREFUSED" || e.code === "ETIMEDOUT") {
       return res.status(503).json({ error: "데이터베이스 연결 오류" });
     }
-    if (e.code === 'ER_ACCESS_DENIED_ERROR') {
+    if (e.code === "ER_ACCESS_DENIED_ERROR") {
       return res.status(503).json({ error: "데이터베이스 접근 권한 오류" });
     }
-    
-    return res.status(500).json({ error: "로그인 처리 중 오류가 발생했습니다." });
+
+    return res
+      .status(500)
+      .json({ error: "로그인 처리 중 오류가 발생했습니다." });
   }
   if (!user)
     // 401 → 400으로 변경
@@ -34,7 +36,7 @@ exports.login = async (req, res) => {
     console.error("비밀번호 검증 오류:", e);
     return res.status(500).json({ error: "인증 처리 중 오류가 발생했습니다." });
   }
-  
+
   if (!match)
     // 401 → 400으로 변경
     return res.status(400).json({ error: "비밀번호가 일치하지 않습니다." });
@@ -51,9 +53,9 @@ exports.login = async (req, res) => {
       jwtSecret,
       { expiresIn: "2h" }
     );
-    
+
     console.log(`✅ 로그인 성공: ${user.username} (ID: ${user.id})`);
-    
+
     res.json({
       token,
       userId: user.id,
