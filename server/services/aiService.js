@@ -1,11 +1,22 @@
-// server/services/aiService.js - AI 서비스 통합
-const axios = require('axios');
-const crypto = require('crypto');
+// server/services/aiService.js - AI 서비스 통합 (Gemini API 연동)
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const crypto = require("crypto");
+require("dotenv").config();
 
 class AIService {
   constructor() {
     this.rateLimits = new Map(); // 사용자별 요청 제한
     this.cache = new Map(); // 결과 캐싱
+    
+    // Gemini API 초기화
+    this.apiKey = process.env.GEMINI_API_KEY;
+    if (this.apiKey) {
+      this.genAI = new GoogleGenerativeAI(this.apiKey);
+      this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      console.log("✅ Gemini AI 서비스가 초기화되었습니다.");
+    } else {
+      console.warn("⚠️ GEMINI_API_KEY가 설정되지 않았습니다. Mock 모드로 동작합니다.");
+    }
   }
 
   // 요청 제한 확인
@@ -25,14 +36,13 @@ class AIService {
     }
     
     const maxRequests = {
-      'summary': 10,
-      'sentiment': 20,
-      'spam': 50,
-      'tags': 15,
-      'translate': 30
+      'summary': 20,
+      'sentiment': 30,
+      'spam': 100,
+      'tags': 30,
     };
     
-    if (limit.count >= (maxRequests[service] || 10)) {
+    if (limit.count >= (maxRequests[service] || 20)) {
       return false;
     }
     
@@ -43,7 +53,7 @@ class AIService {
   // 캐시 확인
   getFromCache(key) {
     const cached = this.cache.get(key);
-    if (cached && Date.now() - cached.timestamp < 3600000) { // 1시간 캐시
+    if (cached && Date.now() - cached.timestamp < 3600000 * 24) { // 24시간 캐시
       return cached.data;
     }
     return null;
@@ -55,6 +65,25 @@ class AIService {
       data,
       timestamp: Date.now()
     });
+    
+    // 캐시 크기 관리 (최대 1000개)
+    if (this.cache.size > 1000) {
+      const firstKey = this.cache.keys().next().value;
+      this.cache.delete(firstKey);
+    }
+  }
+
+  // Gemini 실행 공통 함수
+  async runGemini(prompt) {
+    if (!this.genAI) return null;
+    try {
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
+    } catch (error) {
+      console.error("Gemini API 호출 오류:", error);
+      return null;
+    }
   }
 
   // 게시글 자동 요약
@@ -67,15 +96,26 @@ class AIService {
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
+    // Gemini API 사용 시도
+    if (this.genAI) {
+      const prompt = `다음 커뮤니티 게시글 내용을 3문장 이내로 요약해줘. 한국어로 작성해줘.\n\n내용: ${content}`;
+      const summary = await this.runGemini(prompt);
+      if (summary) {
+        const cleanedSummary = summary.trim();
+        this.setCache(cacheKey, cleanedSummary);
+        return cleanedSummary;
+      }
+    }
+
+    // 폴백: 간단한 추출 요약 알고리즘
     try {
-      // 간단한 추출 요약 알고리즘
       const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
       const summary = sentences.slice(0, Math.min(3, sentences.length)).join('. ') + '.';
       
       this.setCache(cacheKey, summary);
       return summary;
     } catch (error) {
-      console.error('AI 요약 생성 오류:', error);
+      console.error('요약 생성 오류:', error);
       throw new Error('요약 생성 중 오류가 발생했습니다.');
     }
   }
@@ -90,6 +130,28 @@ class AIService {
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
+    if (this.genAI) {
+      const prompt = `다음 텍스트의 감정을 분석해서 JSON 형식으로만 응답해줘. 
+      형식: {"sentiment": "positive"|"negative"|"neutral", "confidence": 0.0~1.0, "explanation": "이유"}
+      텍스트: ${text}`;
+      
+      const response = await this.runGemini(prompt);
+      if (response) {
+        try {
+          // JSON 추출 (Markdown backticks 제거)
+          const jsonMatch = response.match(/\{.*\}/s);
+          if (jsonMatch) {
+            const result = JSON.parse(jsonMatch[0]);
+            this.setCache(cacheKey, result);
+            return result;
+          }
+        } catch (e) {
+          console.error("JSON 파싱 오류:", e);
+        }
+      }
+    }
+
+    // 폴백: 키워드 기반 분석
     try {
       const positiveWords = ['좋', '훌륭', '멋지', '완벽', '최고', '행복', '기쁘', '만족'];
       const negativeWords = ['나쁘', '싫', '최악', '화나', '슬프', '실망', '짜증', '불만'];
@@ -121,20 +183,13 @@ class AIService {
       const result = {
         sentiment,
         confidence,
-        emotions: sentiment === 'positive' ? ['happy'] : sentiment === 'negative' ? ['sad'] : [],
-        explanation: `긍정: ${positiveScore}, 부정: ${negativeScore}`
+        explanation: `키워드 기반 분석 (긍정: ${positiveScore}, 부정: ${negativeScore})`
       };
       
       this.setCache(cacheKey, result);
       return result;
     } catch (error) {
-      console.error('감정 분석 오류:', error);
-      return {
-        sentiment: 'neutral',
-        confidence: 0.5,
-        emotions: [],
-        explanation: '분석할 수 없음'
-      };
+      return { sentiment: 'neutral', confidence: 0.5, explanation: '분석 실패' };
     }
   }
 
@@ -148,53 +203,28 @@ class AIService {
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
-    try {
-      const spamPatterns = [
-        /\b(?:무료|공짜|100%|확실|보장)\b/gi,
-        /\b(?:클릭|방문|가입|다운로드)\s*(?:하세요|해주세요|하면)\b/gi,
-        /(?:http|www)\./gi,
-        /\b(?:돈|수익|벌기|투자|대출)\b/gi,
-        /(?:카카오톡|텔레그램|라인)\s*(?:추가|문의)/gi
-      ];
-
-      let spamScore = 0;
-      const reasons = [];
-
-      spamPatterns.forEach((pattern, index) => {
-        const matches = content.match(pattern);
-        if (matches) {
-          spamScore += matches.length * 0.2;
-          reasons.push(`의심스러운 패턴 감지: ${matches[0]}`);
-        }
-      });
-
-      const repeatedChars = content.match(/(.)\1{4,}/g);
-      if (repeatedChars) {
-        spamScore += 0.3;
-        reasons.push('반복 문자 감지');
+    if (this.genAI) {
+      const prompt = `다음 게시글이 스팸(광고, 도배, 부적절한 홍보)인지 판별해서 JSON으로 응답해줘.
+      형식: {"isSpam": true|false, "confidence": 0.0~1.0, "reason": "이유"}
+      내용: ${content}`;
+      
+      const response = await this.runGemini(prompt);
+      if (response) {
+        try {
+          const jsonMatch = response.match(/\{.*\}/s);
+          if (jsonMatch) {
+            const result = JSON.parse(jsonMatch[0]);
+            this.setCache(cacheKey, result);
+            return result;
+          }
+        } catch (e) {}
       }
-
-      const isSpam = spamScore > 0.6;
-
-      const result = {
-        isSpam,
-        confidence: Math.min(1, spamScore),
-        reason: isSpam ? '스팸으로 판단됨' : '정상 콘텐츠',
-        categories: isSpam ? ['advertisement'] : [],
-        patterns: reasons
-      };
-
-      this.setCache(cacheKey, result);
-      return result;
-
-    } catch (error) {
-      console.error('스팸 감지 오류:', error);
-      return {
-        isSpam: false,
-        confidence: 0,
-        reason: '분석 실패'
-      };
     }
+
+    // 폴백 logic
+    const spamPatterns = [/\b(?:무료|공짜|100%|확실|보장)\b/gi, /(?:http|www)\./gi];
+    let isSpam = spamPatterns.some(p => p.test(content));
+    return { isSpam, confidence: isSpam ? 0.8 : 0.2, reason: isSpam ? "패턴 기반 감지" : "정상" };
   }
 
   // 자동 태그 추천
@@ -207,53 +237,32 @@ class AIService {
     const cached = this.getFromCache(cacheKey);
     if (cached) return cached;
 
-    try {
-      const text = (title + ' ' + content).toLowerCase();
-      const keywords = [
-        { tag: 'JavaScript', patterns: ['javascript', 'js', '자바스크립트'] },
-        { tag: 'React', patterns: ['react', '리액트'] },
-        { tag: 'Node.js', patterns: ['node', 'nodejs', '노드'] },
-        { tag: '개발', patterns: ['개발', 'development', '코딩', 'programming'] },
-        { tag: '프론트엔드', patterns: ['frontend', 'front-end', '프론트엔드'] },
-        { tag: '백엔드', patterns: ['backend', 'back-end', '백엔드'] },
-        { tag: 'HTML', patterns: ['html'] },
-        { tag: 'CSS', patterns: ['css', '스타일'] },
-        { tag: '데이터베이스', patterns: ['database', 'db', 'mysql', 'mongodb'] },
-        { tag: '질문', patterns: ['질문', 'question', '도움', 'help'] }
-      ];
+    if (this.genAI) {
+      const prompt = `다음 게시글 제목과 내용에 어울리는 해시태그 5개를 추천해줘. JSON 배열로 응답해줘.
+      형식: {"tags": ["태그1", "태그2", ...]}
+      제목: ${title}
+      내용: ${content}`;
       
-      const suggestedTags = [];
-      keywords.forEach(keyword => {
-        const found = keyword.patterns.some(pattern => text.includes(pattern));
-        if (found) {
-          suggestedTags.push(keyword.tag);
-        }
-      });
-
-      const result = {
-        tags: suggestedTags.slice(0, 5),
-        categories: ['기술'],
-        confidence: suggestedTags.length > 0 ? 0.8 : 0.3
-      };
-      
-      this.setCache(cacheKey, result);
-      return result;
-    } catch (error) {
-      console.error('태그 추천 오류:', error);
-      return {
-        tags: [],
-        categories: [],
-        confidence: 0
-      };
+      const response = await this.runGemini(prompt);
+      if (response) {
+        try {
+          const jsonMatch = response.match(/\{.*\}/s);
+          if (jsonMatch) {
+            const result = JSON.parse(jsonMatch[0]);
+            this.setCache(cacheKey, result.tags);
+            return result.tags;
+          }
+        } catch (e) {}
+      }
     }
+
+    return ["커뮤니티", "게시글"];
   }
 
-  // 해시 생성
   generateHash(text) {
     return crypto.createHash('md5').update(text).digest('hex');
   }
 
-  // 사용량 통계
   getUsageStats(userId) {
     const stats = {};
     for (const [key, limit] of this.rateLimits.entries()) {

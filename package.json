@@ -11,7 +11,7 @@
     "build:production": "cd client && npm run build:production",
     "start": "cd server && npm start",
     "start:production": "cd server && npm run start:production",
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "install:all": "npm install && cd client && npm install",
     "clean": "cd client && npm run clean",
     "lint": "cd client && npm run lint"
   },
@@ -27,9 +27,9 @@
     "chat",
     "community",
     "react",
-    "nodejs",
-    "socket.io",
-    "express"
+    "mysql",
+    "node",
+    "socket.io"
   ],
   "author": "",
   "license": "MIT"

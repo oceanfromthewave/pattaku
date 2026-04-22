@@ -35,12 +35,22 @@ const allowedOrigins = [
   "http://pattaku.s3-website-ap-southeast-2.amazonaws.com",
   "https://pattaku.s3-website-ap-southeast-2.amazonaws.com",
   "https://pattaku.onrender.com",
+  /\.vercel\.app$/, // Vercel 도메인 허용
 ];
 
 // Socket.io 설정 (메모리 효율화)
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.some(pattern => {
+        if (pattern instanceof RegExp) return pattern.test(origin);
+        return pattern === origin;
+      })) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -53,6 +63,7 @@ const io = new Server(server, {
   upgradeTimeout: 30000,
   maxConnections: process.env.NODE_ENV === "production" ? 500 : 100,
 });
+
 
 // Socket 핸들러 초기화
 let socketHandler;

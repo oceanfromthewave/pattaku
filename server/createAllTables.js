@@ -1,9 +1,9 @@
-// 패타쿠 커뮤니티 데이터베이스 테이블 생성 스크립트
+// 패타쿠 커뮤니티 데이터베이스 테이블 통합 생성 스크립트
 const db = require('./config/db');
 
 async function createAllTables() {
   try {
-    console.log('🚀 패타쿠 데이터베이스 테이블 생성을 시작합니다...\n');
+    console.log('🚀 패타쿠 데이터베이스 테이블 통합 생성을 시작합니다...\n');
 
     // 1. 사용자 테이블
     console.log('1️⃣ users 테이블 생성 중...');
@@ -14,6 +14,7 @@ async function createAllTables() {
         password VARCHAR(255) NOT NULL,
         email VARCHAR(100) UNIQUE,
         nickname VARCHAR(50) NOT NULL UNIQUE,
+        profile_image VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX idx_username (username),
@@ -97,26 +98,100 @@ async function createAllTables() {
     `);
     console.log('✅ comments 테이블 생성 완료');
 
-    // 6. 댓글 좋아요/싫어요 테이블
-    console.log('6️⃣ comment_likes 테이블 생성 중...');
+    // 6. 알림 테이블 (notifications)
+    console.log('6️⃣ notifications 테이블 생성 중...');
     await db.query(`
-      CREATE TABLE IF NOT EXISTS comment_likes (
+      CREATE TABLE IF NOT EXISTS notifications (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        comment_id INT NOT NULL,
         user_id INT NOT NULL,
-        vote_type ENUM('like', 'dislike') NOT NULL,
+        sender_id INT,
+        type ENUM('comment', 'reply', 'like', 'dislike', 'post_comment') NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        post_id INT,
+        comment_id INT,
+        is_read BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_user_comment_vote (comment_id, user_id),
-        INDEX idx_comment_id (comment_id),
-        INDEX idx_user_id (user_id)
+        FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE SET NULL,
+        FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+        FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+        INDEX idx_user_id (user_id),
+        INDEX idx_created_at (created_at),
+        INDEX idx_is_read (is_read)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
-    console.log('✅ comment_likes 테이블 생성 완료');
+    console.log('✅ notifications 테이블 생성 완료');
 
-    // 7. 일정 테이블
-    console.log('7️⃣ schedules 테이블 생성 중...');
+    // 7. 채팅방 테이블 (chat_rooms)
+    console.log('7️⃣ chat_rooms 테이블 생성 중...');
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS chat_rooms (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        description TEXT,
+        type ENUM('public', 'topic', 'private') NOT NULL DEFAULT 'public',
+        topic VARCHAR(50),
+        created_by INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        is_active BOOLEAN DEFAULT TRUE,
+        max_users INT DEFAULT 50,
+        INDEX idx_type (type),
+        INDEX idx_topic (topic),
+        INDEX idx_created_by (created_by),
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log('✅ chat_rooms 테이블 생성 완료');
+
+    // 8. 채팅 메시지 테이블 (chat_messages)
+    console.log('8️⃣ chat_messages 테이블 생성 중...');
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS chat_messages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        room_id INT NOT NULL,
+        user_id INT NOT NULL,
+        message TEXT NOT NULL,
+        message_type ENUM('text', 'image', 'file') DEFAULT 'text',
+        file_url VARCHAR(500),
+        reply_to INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        is_deleted BOOLEAN DEFAULT FALSE,
+        INDEX idx_room_id (room_id),
+        INDEX idx_user_id (user_id),
+        INDEX idx_created_at (created_at),
+        INDEX idx_reply_to (reply_to),
+        FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (reply_to) REFERENCES chat_messages(id) ON DELETE SET NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log('✅ chat_messages 테이블 생성 완료');
+
+    // 9. 채팅방 참여자 테이블 (chat_participants)
+    console.log('9️⃣ chat_participants 테이블 생성 중...');
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS chat_participants (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        room_id INT NOT NULL,
+        user_id INT NOT NULL,
+        joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        last_read_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        is_admin BOOLEAN DEFAULT FALSE,
+        is_muted BOOLEAN DEFAULT FALSE,
+        UNIQUE KEY unique_room_user (room_id, user_id),
+        INDEX idx_room_id (room_id),
+        INDEX idx_user_id (user_id),
+        FOREIGN KEY (room_id) REFERENCES chat_rooms(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    `);
+    console.log('✅ chat_participants 테이블 생성 완료');
+
+    // 10. 일정 테이블 (schedules)
+    console.log('🔟 schedules 테이블 생성 중...');
     await db.query(`
       CREATE TABLE IF NOT EXISTS schedules (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -138,120 +213,38 @@ async function createAllTables() {
     `);
     console.log('✅ schedules 테이블 생성 완료');
 
-    // 8. 일정 투표 테이블
-    console.log('8️⃣ schedule_votes 테이블 생성 중...');
+    // 11. 일정 투표/댓글 관련 (간소화)
     await db.query(`
       CREATE TABLE IF NOT EXISTS schedule_votes (
         id INT AUTO_INCREMENT PRIMARY KEY,
         schedule_id INT NOT NULL,
         user_id INT NOT NULL,
         vote_type ENUM('going', 'not_going', 'maybe') NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (schedule_id) REFERENCES schedules(id) ON DELETE CASCADE,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_user_schedule_vote (schedule_id, user_id),
-        INDEX idx_schedule_id (schedule_id),
-        INDEX idx_user_id (user_id)
+        UNIQUE KEY unique_user_schedule_vote (schedule_id, user_id)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
-    console.log('✅ schedule_votes 테이블 생성 완료');
 
-    // 9. 일정 댓글 테이블
-    console.log('9️⃣ schedule_comments 테이블 생성 중...');
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS schedule_comments (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        schedule_id INT NOT NULL,
-        parent_id INT NULL,
-        user_id INT NOT NULL,
-        content TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (schedule_id) REFERENCES schedules(id) ON DELETE CASCADE,
-        FOREIGN KEY (parent_id) REFERENCES schedule_comments(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        INDEX idx_schedule_id (schedule_id),
-        INDEX idx_parent_id (parent_id),
-        INDEX idx_user_id (user_id),
-        INDEX idx_created_at (created_at)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-    console.log('✅ schedule_comments 테이블 생성 완료');
-
-    // 10. 일정 댓글 좋아요/싫어요 테이블
-    console.log('🔟 schedule_comment_likes 테이블 생성 중...');
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS schedule_comment_likes (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        comment_id INT NOT NULL,
-        user_id INT NOT NULL,
-        vote_type ENUM('like', 'dislike') NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (comment_id) REFERENCES schedule_comments(id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_user_comment_vote (comment_id, user_id),
-        INDEX idx_comment_id (comment_id),
-        INDEX idx_user_id (user_id)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    `);
-    console.log('✅ schedule_comment_likes 테이블 생성 완료');
-
-    // 성능 최적화를 위한 복합 인덱스 추가
-    console.log('\n🔧 성능 최적화 인덱스 추가 중...');
-    
-    try {
-      await db.query('ALTER TABLE posts ADD INDEX idx_user_created (user_id, created_at)');
-      console.log('✅ posts 복합 인덱스 추가 완료');
-    } catch (err) {
-      if (!err.message.includes('Duplicate key name')) {
-        console.log('⚠️ posts 복합 인덱스는 이미 존재합니다.');
-      }
-    }
-
-    try {
-      await db.query('ALTER TABLE comments ADD INDEX idx_post_created (post_id, created_at)');
-      console.log('✅ comments(post) 복합 인덱스 추가 완료');
-    } catch (err) {
-      if (!err.message.includes('Duplicate key name')) {
-        console.log('⚠️ comments(post) 복합 인덱스는 이미 존재합니다.');
-      }
-    }
-
-    try {
-      await db.query('ALTER TABLE comments ADD INDEX idx_user_created_comments (user_id, created_at)');
-      console.log('✅ comments(user) 복합 인덱스 추가 완료');
-    } catch (err) {
-      if (!err.message.includes('Duplicate key name')) {
-        console.log('⚠️ comments(user) 복합 인덱스는 이미 존재합니다.');
-      }
+    // 기본 채팅방 생성
+    const [existingRooms] = await db.execute("SELECT COUNT(*) as count FROM chat_rooms");
+    if (existingRooms[0].count === 0) {
+      await db.execute(`
+        INSERT INTO chat_rooms (name, description, type, topic) VALUES
+        ('전체 채팅', '모든 사용자가 참여할 수 있는 전체 채팅방입니다.', 'public', 'general'),
+        ('자유 주제', '자유롭게 이야기할 수 있는 공간입니다.', 'topic', 'free'),
+        ('질문과 답변', '궁금한 것이 있으면 언제든 물어보세요!', 'topic', 'qna'),
+        ('공지사항', '중요한 공지사항을 전달하는 채팅방입니다.', 'topic', 'notice')
+      `);
+      console.log('✅ 기본 채팅방 생성 완료');
     }
 
     console.log('\n🎉 모든 테이블이 성공적으로 생성되었습니다!');
-    console.log('\n📋 생성된 테이블 목록:');
-    console.log('   1. users - 사용자 정보');
-    console.log('   2. posts - 게시글');
-    console.log('   3. post_files - 게시글 첨부파일');
-    console.log('   4. post_likes - 게시글 좋아요/싫어요');
-    console.log('   5. comments - 댓글');
-    console.log('   6. comment_likes - 댓글 좋아요/싫어요');
-    console.log('   7. schedules - 일정');
-    console.log('   8. schedule_votes - 일정 투표');
-    console.log('   9. schedule_comments - 일정 댓글');
-    console.log('   10. schedule_comment_likes - 일정 댓글 좋아요/싫어요');
-    console.log('\n✨ 이제 패타쿠 커뮤니티를 사용할 준비가 완료되었습니다!');
-
   } catch (error) {
-    console.error('❌ 테이블 생성 중 오류가 발생했습니다:', error);
-    console.log('\n🔧 문제 해결 방법:');
-    console.log('1. MySQL/MariaDB 서버가 실행 중인지 확인');
-    console.log('2. .env 파일의 데이터베이스 연결 정보 확인');
-    console.log('3. 데이터베이스가 존재하는지 확인');
-    console.log('4. 사용자 권한이 충분한지 확인');
+    console.error('❌ 테이블 생성 중 오류 발생:', error);
   } finally {
     process.exit(0);
   }
 }
 
-// 스크립트 실행
 createAllTables();
