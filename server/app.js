@@ -112,7 +112,11 @@ const PORT = process.env.PORT || 5000;
 const corsOptions = {
   origin: function (origin, callback) {
     console.log("🌐 CORS 요청 origin:", origin);
-    if (!origin || allowedOrigins.includes(origin)) {
+    // origin이 없거나, allowedOrigins의 패턴(문자열 또는 정규식)과 일치하면 허용
+    if (!origin || allowedOrigins.some(pattern => {
+      if (pattern instanceof RegExp) return pattern.test(origin);
+      return pattern === origin;
+    })) {
       callback(null, true);
     } else {
       console.log("❌ CORS 차단된 도메인:", origin);
@@ -284,6 +288,20 @@ app.use("/api", (req, res, next) => {
     console.log(`   인증: 토큰 있음`);
   }
   next();
+});
+
+// 루트 경로 핸들러 추가
+app.get("/", (req, res) => {
+  res.send(`
+    <div style="font-family: sans-serif; text-align: center; padding: 50px;">
+      <h1>🚀 Pattaku API Server is Running!</h1>
+      <p>이곳은 백엔드 서버입니다. 실제 서비스는 Vercel 앱에서 확인해 주세요.</p>
+      <div style="margin-top: 20px; color: #666;">
+        <p>상태: <span style="color: #4caf50;">ONLINE</span></p>
+        <p>환경: ${process.env.NODE_ENV || 'development'}</p>
+      </div>
+    </div>
+  `);
 });
 
 // 라우터 등록
